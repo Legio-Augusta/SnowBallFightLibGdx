@@ -12,7 +12,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".android.AndroidLauncher"
+            android:name="de.swagner.sbf.android.AndroidLauncher"
             android:label="Pax Britannica" 
             android:configChanges="keyboard|keyboardHidden|orientation"
             android:screenOrientation="landscape" >
