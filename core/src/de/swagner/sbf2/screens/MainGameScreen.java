@@ -1,4 +1,4 @@
-package de.swagner.sbf2;
+package de.swagner.sbf2.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -17,7 +17,7 @@ public class MainGameScreen implements Screen {
     public MainGameScreen() {
         super();
         batch = new SpriteBatch();
-        ttrSplash = new Texture("background.png");
+        ttrSplash = new Texture("data/samsung-white/background.png");
     }
 
     public void render(float delta) {

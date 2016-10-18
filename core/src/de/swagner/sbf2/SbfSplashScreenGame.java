@@ -15,7 +15,8 @@ public class SbfSplashScreenGame extends Game {
     }
 
     public void create() {
-        setScreen(new MainGameScreen());
+//        setScreen(new de.swagner.sbf2.screens.MainGameScreen());
+        setScreen(new de.swagner.sbf2.screens.Screen1(new SnowBallFight()));
 
         final long splash_start_time = System.currentTimeMillis();
         new Thread(new Runnable() {
@@ -28,11 +29,11 @@ public class SbfSplashScreenGame extends Game {
                             Timer.schedule(
                                     new Timer.Task() {
                                         public void run() {
-                                            SbfSplashScreenGame.this.setScreen(new MainMenuScreen());
+                                            SbfSplashScreenGame.this.setScreen(new de.swagner.sbf2.screens.MainMenuScreen());
                                         }
                                     }, (float)(SbfSplashScreenGame.SPLASH_MINIMUM_MILLIS -splash_elapsed_time) / 1000f);
                         } else {
-                            SbfSplashScreenGame.this.setScreen(new MainMenuScreen());
+                            SbfSplashScreenGame.this.setScreen(new de.swagner.sbf2.screens.MainMenuScreen());
                         }
                     }
                 });
