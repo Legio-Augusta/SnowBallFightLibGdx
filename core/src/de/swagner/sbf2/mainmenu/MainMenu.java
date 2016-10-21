@@ -170,6 +170,7 @@ public class MainMenu extends DefaultScreen implements  InputProcessor {
 
         titleBatch.draw(title, 85f, 320f, 0, 0, 512, 64f, 1.24f, 1.24f, 0);
         p1.draw(titleBatch);
+        p2.draw(titleBatch);
 
         titleBatch.end();
 

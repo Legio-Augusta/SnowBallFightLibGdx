@@ -51,6 +51,7 @@ public class BackgroundFXRenderer {
         background.draw(backgroundBatch);
         backgroundBatch.end();
 
+        // TODO draw bg based on level or screen
         backgroundFXBatch.begin();
         for (Debris debris : debrises) {
             if (debris.alive) {
