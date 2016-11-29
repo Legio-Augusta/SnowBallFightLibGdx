@@ -26,7 +26,7 @@ public class BomberAI {
     //recylce
     Vector2 target_direction = new Vector2();
 
-    public de.swagner.sbf.Ship target;
+    public de.swagner.sbf2.Ship target;
 
     private Bomber bomber;
 
@@ -35,9 +35,9 @@ public class BomberAI {
     }
 
     public void retarget() {
-        target = de.swagner.sbf.Targeting.getNearestOfType(bomber, 2);
+        target = de.swagner.sbf2.Targeting.getNearestOfType(bomber, 2);
         if (target == null) {
-            target = de.swagner.sbf.Targeting.getNearestOfType(bomber, 3);
+            target = de.swagner.sbf2.Targeting.getNearestOfType(bomber, 3);
         }
         // if (target == null) {
         // target = Targeting.get_nearest_of_type(bomber, "bomber");
@@ -61,7 +61,7 @@ public class BomberAI {
         delta = Math.min(0.06f, Gdx.graphics.getDeltaTime());
 
         if (target == null || !target.alive || MathUtils.random() < 0.005f) {
-            de.swagner.sbf.Ship old_target = target;
+            de.swagner.sbf2.Ship old_target = target;
             retarget();
             if (old_target != null && target != null && old_target.id != target.id) {
                 reviseApproach();
@@ -73,7 +73,7 @@ public class BomberAI {
             target_direction.set(target.collisionCenter).sub(bomber.collisionCenter).nor();
 
             float unit_factor;
-            if (target instanceof de.swagner.sbf.frigate.Frigate) {
+            if (target instanceof de.swagner.sbf2.frigate.Frigate) {
                 unit_factor = 0.6f;
             } else {
                 unit_factor = 1;

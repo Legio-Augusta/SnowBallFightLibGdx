@@ -6,10 +6,10 @@ import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
-import de.swagner.sbf.bomber.Bomb;
-import de.swagner.sbf.frigate.Missile;
-import de.swagner.sbf.particlesystem.ExplosionParticleEmitter;
-import de.swagner.sbf.particlesystem.SparkParticleEmitter;
+import de.swagner.sbf2.bomber.Bomb;
+import de.swagner.sbf2.frigate.Missile;
+import de.swagner.sbf2.particlesystem.ExplosionParticleEmitter;
+import de.swagner.sbf2.particlesystem.SparkParticleEmitter;
 
 /**
  * Created by nickfarow on 21/10/2016.
@@ -23,10 +23,10 @@ public class GameInstance {
     public Array<Ship> bombers = new Array<Ship>();
     public Array<Ship> frigates = new Array<Ship>();
 
-    public Array<Bullet> bullets = new Array<Bullet>;
+    public Array<Bullet> bullets = new Array<Bullet>();
 
-    public de.swagner.sbf.particlesystem.BubbleParticleEmitter bubbleParticles = new de.swagner.sbf.particlesystem.BubbleParticleEmitter();
-    public de.swagner.sbf.particlesystem.BigBubbleParticleEmitter bigBubbleParticles = new de.swagner.sbf.particlesystem.BigBubbleParticleEmitter();
+    public de.swagner.sbf2.particlesystem.BubbleParticleEmitter bubbleParticles = new de.swagner.sbf2.particlesystem.BubbleParticleEmitter();
+    public de.swagner.sbf2.particlesystem.BigBubbleParticleEmitter bigBubbleParticles = new de.swagner.sbf2.particlesystem.BigBubbleParticleEmitter();
 
     public SparkParticleEmitter sparkParticles = new SparkParticleEmitter();
     public ExplosionParticleEmitter explosionParticles = new ExplosionParticleEmitter();
@@ -55,8 +55,8 @@ public class GameInstance {
         sparkParticles.dispose();
         explosionParticles.dispose();
 
-        bubbleParticles = new de.swagner.sbf.particlesystem.BubbleParticleEmitter();
-        bigBubbleParticles = new de.swagner.sbf.particlesystem.BigBubbleParticleEmitter();
+        bubbleParticles = new de.swagner.sbf2.particlesystem.BubbleParticleEmitter();
+        bigBubbleParticles = new de.swagner.sbf2.particlesystem.BigBubbleParticleEmitter();
 
         sparkParticles = new SparkParticleEmitter();
         explosionParticles = new ExplosionParticleEmitter();
@@ -70,10 +70,10 @@ public class GameInstance {
     public void bulletHit(Ship ship, Bullet bullet) {
         bullet.facing.nor();
         float offset = 0;
-        if(ship instanceof de.swagner.sbf.factory.FactoryProduction) offset = 50;
-        if(ship instanceof de.swagner.sbf.frigate.Frigate) offset = 20;
-        if(ship instanceof de.swagner.sbf.bomber.Bomber) offset = 10;
-        if(ship instanceof de.swagner.sbf.fighter.Fighter) offset = 10;
+        if(ship instanceof de.swagner.sbf2.factory.FactoryProduction) offset = 50;
+        if(ship instanceof de.swagner.sbf2.frigate.Frigate) offset = 20;
+        if(ship instanceof de.swagner.sbf2.bomber.Bomber) offset = 10;
+        if(ship instanceof de.swagner.sbf2.fighter.Fighter) offset = 10;
         Vector2 pos = new Vector2().set(bullet.collisionCenter.x + (offset * bullet.facing.x), bullet.collisionCenter.y + (offset * bullet.facing.y));
 
         // ugh . . .
@@ -87,11 +87,11 @@ public class GameInstance {
         }
         Vector2 vel = new Vector2(bullet_dir.x * 1.5f, bullet_dir.y * 1.5f);
 
-        if (bullet instanceof de.swagner.sbf.fighter.Laser) {
+        if (bullet instanceof de.swagner.sbf2.fighter.Laser) {
             laser_hit(pos, vel);
         } else if (bullet instanceof Bomb) {
             explosionParticles.addMediumExplosion(((Bomb) bullet).position);
-        } else if (bullet instanceof de.swagner.sbf.frigate.Missile) {
+        } else if (bullet instanceof de.swagner.sbf2.frigate.Missile) {
             explosionParticles.addTinyExplosion(((Missile) bullet).position);
         }
     }
@@ -106,11 +106,11 @@ public class GameInstance {
 
     public void explode(Ship ship, Vector2 pos) {
 
-        if (ship instanceof de.swagner.sbf.factory.FactoryProduction) {
+        if (ship instanceof de.swagner.sbf2.factory.FactoryProduction) {
             explosionParticles.addBigExplosion(pos);
-        } else if (ship instanceof de.swagner.sbf.bomber.Bomber) {
+        } else if (ship instanceof de.swagner.sbf2.bomber.Bomber) {
             explosionParticles.addMediumExplosion(pos);
-        } else if (ship instanceof de.swagner.sbf.frigate.Frigate) {
+        } else if (ship instanceof de.swagner.sbf2.frigate.Frigate) {
             explosionParticles.addMediumExplosion(pos);
         }else {
             explosionParticles.addSmallExplosion(pos);

@@ -4,12 +4,11 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
-import de.swagner.sbf.*;
-import de.swagner.sbf.GameInstance;
-import de.swagner.sbf.bomber.Bomber;
-import de.swagner.sbf.factory.FactoryProduction;
-import de.swagner.sbf.fighter.Fighter;
-import de.swagner.sbf.frigate.Frigate;
+import de.swagner.sbf2.GameInstance;
+import de.swagner.sbf2.bomber.Bomber;
+import de.swagner.sbf2.factory.FactoryProduction;
+import de.swagner.sbf2.fighter.Fighter;
+import de.swagner.sbf2.frigate.Frigate;
 
 /**
  * Created by nickfarow on 21/10/2016.
@@ -29,9 +28,9 @@ public class Targeting {
      */
     public static Ship getNearestOfType(Ship source, int shipType) {
         if (shipType == 0)
-            return getNearestOfType(source, de.swagner.sbf.GameInstance.getInstance().fighters);
+            return getNearestOfType(source, de.swagner.sbf2.GameInstance.getInstance().fighters);
         else if (shipType == 3)
-            return getFactoryWithHighestHealth(source, de.swagner.sbf.GameInstance.getInstance().factorys);
+            return getFactoryWithHighestHealth(source, de.swagner.sbf2.GameInstance.getInstance().factorys);
         else if (shipType == 1)
             return getNearestOfType(source, GameInstance.getInstance().bombers);
         else if (shipType == 2)
@@ -98,13 +97,13 @@ public class Targeting {
  */
     public static Ship getTypeInRange(Ship source, int shipType, float range) {
         if (shipType == 0)
-            return getTypeInRange(source, de.swagner.sbf.GameInstance.getInstance().fighters, range);
+            return getTypeInRange(source, de.swagner.sbf2.GameInstance.getInstance().fighters, range);
         else if (shipType == 3)
-            return getTypeInRange(source, de.swagner.sbf.GameInstance.getInstance().factorys, range);
+            return getTypeInRange(source, de.swagner.sbf2.GameInstance.getInstance().factorys, range);
         else if (shipType == 1)
-            return getTypeInRange(source, de.swagner.sbf.GameInstance.getInstance().bombers, range);
+            return getTypeInRange(source, de.swagner.sbf2.GameInstance.getInstance().bombers, range);
         else if (shipType == 2)
-            return getTypeInRange(source, de.swagner.sbf.GameInstance.getInstance().frigates, range);
+            return getTypeInRange(source, de.swagner.sbf2.GameInstance.getInstance().frigates, range);
         else
             return null;
     }

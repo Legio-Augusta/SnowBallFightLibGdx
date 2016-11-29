@@ -20,16 +20,16 @@ public class Bomber extends de.swagner.sbf2.Ship {
 
         switch (id) {
             case 1:
-                this.set(de.swagner.sbf.Resources.getInstance().bomberP1);
+                this.set(de.swagner.sbf2.Resources.getInstance().bomberP1);
                 break;
             case 2:
-                this.set(de.swagner.sbf.Resources.getInstance().bomberP2);
+                this.set(de.swagner.sbf2.Resources.getInstance().bomberP2);
                 break;
             case 3:
-                this.set(de.swagner.sbf.Resources.getInstance().bomberP3);
+                this.set(de.swagner.sbf2.Resources.getInstance().bomberP3);
                 break;
             default:
-                this.set(de.swagner.sbf.Resources.getInstance().bomberP4);
+                this.set(de.swagner.sbf2.Resources.getInstance().bomberP4);
                 break;
         }
         this.setOrigin(this.getWidth()/2, this.getHeight()/2);

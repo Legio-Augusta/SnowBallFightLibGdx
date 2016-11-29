@@ -79,7 +79,7 @@ public class Ship extends  Sprite {
         if (!(this instanceof Bullet) && hitPoints <= 0)
             destruct();
         if (MathUtils.random() < velocity.len() / 900.f) {
-            de.swagner.sbf.GameInstance.getInstance().bubbleParticles.addParticle(randomPointOnShip());
+            de.swagner.sbf2.GameInstance.getInstance().bubbleParticles.addParticle(randomPointOnShip());
         }
         super.draw(batch);
     }
@@ -88,6 +88,12 @@ public class Ship extends  Sprite {
         delta = Math.min(0.06f, Gdx.graphics.getDeltaTime());
 
         facing.rotate(direction * turnSpeed * delta).nor();
+    }
+
+    public void thrust() {
+        delta = Math.min(0.06f, Gdx.graphics.getDeltaTime());
+
+        velocity.add(facing.x * accel * delta, facing.y * accel * delta);
     }
 
     public void thrust(float amount) {
@@ -144,7 +150,7 @@ public class Ship extends  Sprite {
     }
 
     public void factoryDestruct() {
-        delta = Math.min(0.06f, Gdx.graphics.getDeltaTime()());
+        delta = Math.min(0.06f, Gdx.graphics.getDeltaTime());
 
         if (deathCounter > 0) {
             ((FactoryProduction) this).production.halt_production = true;
@@ -157,7 +163,7 @@ public class Ship extends  Sprite {
             deathCounter -= 10 * delta;
         } else {
             for (int i = 1; i <= 10; ++i) {
-                de.swagner.sbf.GameInstance.getInstance().explode(this, randomPointOnShip());
+                de.swagner.sbf2.GameInstance.getInstance().explode(this, randomPointOnShip());
             }
             alive = false;
         }

@@ -17,8 +17,8 @@ import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
 
 import de.swagner.sbf2.DefaultScreen;
-import de.swagner.sbf.GameInstance;
-import de.swagner.sbf.GameScreen;
+import de.swagner.sbf2.GameInstance;
+import de.swagner.sbf2.screens.GameScreen;
 import de.swagner.sbf2.Resources;
 import de.swagner.sbf.background.BackgroundFXRenderer;
 import de.swagner.sbf.help.Help;
