@@ -123,53 +123,53 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
 
         // Fade
-        blackFade = de.swagner.sbf.Resources.getInstance().blackFade;
+        blackFade = de.swagner.sbf2.Resources.getInstance().blackFade;
         fadeBatch = new SpriteBatch();
         fadeBatch.getProjectionMatrix().setToOrtho2D(0, 0, 2, 2);
 
-        stouchAreaP1 = de.swagner.sbf.Resources.getInstance().touchArea1;
-        stouchAreaP2 = de.swagner.sbf.Resources.getInstance().touchArea2;
-        stouchAreaP3 = de.swagner.sbf.Resources.getInstance().touchArea3;
-        stouchAreaP4 = de.swagner.sbf.Resources.getInstance().touchArea4;
+        stouchAreaP1 = de.swagner.sbf2.Resources.getInstance().touchArea1;
+        stouchAreaP2 = de.swagner.sbf2.Resources.getInstance().touchArea2;
+        stouchAreaP3 = de.swagner.sbf2.Resources.getInstance().touchArea3;
+        stouchAreaP4 = de.swagner.sbf2.Resources.getInstance().touchArea4;
 
         if(playerList.size>0 && playerList.get(0)==1) {
-            p1 = de.swagner.sbf.Resources.getInstance().factoryP1Small;
+            p1 = de.swagner.sbf2.Resources.getInstance().factoryP1Small;
         } else if(playerList.size>0 && playerList.get(0)==2) {
-            p1 = de.swagner.sbf.Resources.getInstance().factoryP2Small;
+            p1 = de.swagner.sbf2.Resources.getInstance().factoryP2Small;
         } else if(playerList.size>0 && playerList.get(0)==3) {
-            p1 = de.swagner.sbf.Resources.getInstance().factoryP3Small;
+            p1 = de.swagner.sbf2.Resources.getInstance().factoryP3Small;
         } else if(playerList.size>0 && playerList.get(0)==4) {
-            p1 = de.swagner.sbf.Resources.getInstance().factoryP4Small;
+            p1 = de.swagner.sbf2.Resources.getInstance().factoryP4Small;
         }
 
         if(playerList.size>1 && playerList.get(1)==1) {
-            p2 = de.swagner.sbf.Resources.getInstance().factoryP1Small;
+            p2 = de.swagner.sbf2.Resources.getInstance().factoryP1Small;
         } else if(playerList.size>1 && playerList.get(1)==2) {
-            p2 = de.swagner.sbf.Resources.getInstance().factoryP2Small;
+            p2 = de.swagner.sbf2.Resources.getInstance().factoryP2Small;
         } else if(playerList.size>1 && playerList.get(1)==3) {
-            p2 = de.swagner.sbf.Resources.getInstance().factoryP3Small;
+            p2 = de.swagner.sbf2.Resources.getInstance().factoryP3Small;
         } else if(playerList.size>1 && playerList.get(1)==4) {
-            p2 = de.swagner.sbf.Resources.getInstance().factoryP4Small;
+            p2 = de.swagner.sbf2.Resources.getInstance().factoryP4Small;
         }
 
         if(playerList.size>2 && playerList.get(2)==1) {
-            p3 = de.swagner.sbf.Resources.getInstance().factoryP1Small;
+            p3 = de.swagner.sbf2.Resources.getInstance().factoryP1Small;
         } else if(playerList.size>2 && playerList.get(2)==2) {
-            p3 = de.swagner.sbf.Resources.getInstance().factoryP2Small;
+            p3 = de.swagner.sbf2.Resources.getInstance().factoryP2Small;
         } else if(playerList.size>2 && playerList.get(2)==3) {
-            p3 = de.swagner.sbf.Resources.getInstance().factoryP3Small;
+            p3 = de.swagner.sbf2.Resources.getInstance().factoryP3Small;
         } else if(playerList.size>2 && playerList.get(2)==4) {
-            p3 = de.swagner.sbf.Resources.getInstance().factoryP4Small;
+            p3 = de.swagner.sbf2.Resources.getInstance().factoryP4Small;
         }
 
         if(playerList.size>3 && playerList.get(3)==1) {
-            p4 = de.swagner.sbf.Resources.getInstance().factoryP1Small;
+            p4 = de.swagner.sbf2.Resources.getInstance().factoryP1Small;
         } else if(playerList.size>3 && playerList.get(3)==2) {
-            p4 = de.swagner.sbf.Resources.getInstance().factoryP2Small;
+            p4 = de.swagner.sbf2.Resources.getInstance().factoryP2Small;
         } else if(playerList.size>3 && playerList.get(3)==3) {
-            p4 = de.swagner.sbf.Resources.getInstance().factoryP3Small;
+            p4 = de.swagner.sbf2.Resources.getInstance().factoryP3Small;
         } else if(playerList.size>3 && playerList.get(3)==4) {
-            p4 = de.swagner.sbf.Resources.getInstance().factoryP4Small;
+            p4 = de.swagner.sbf2.Resources.getInstance().factoryP4Small;
         }
 
         if(playerList.size>0) p1.setScale(.2f);
@@ -209,7 +209,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             Vector2 temp1 = new Vector2(POSITIONS.get(currentPos).x, POSITIONS.get(currentPos).y);
             Vector2 temp2 = new Vector2(POSITIONS.get(currentPos).x, POSITIONS.get(currentPos).y);
             Vector2 facing = new Vector2(-temp1.sub(CENTER).y, temp2.sub(CENTER).x).nor();
-            if(de.swagner.sbf.GameInstance.getInstance().difficultyConfig == 0) {
+            if(de.swagner.sbf2.GameInstance.getInstance().difficultyConfig == 0) {
                 enemyProduction = new de.swagner.sbf2.factory.EasyEnemyProduction(cpuList.get(i), POSITIONS.get(currentPos), facing);
             } else if(de.swagner.sbf2.GameInstance.getInstance().difficultyConfig == 1) {
                 enemyProduction = new de.swagner.sbf2.factory.MediumEnemyProduction(cpuList.get(i), POSITIONS.get(currentPos), facing);

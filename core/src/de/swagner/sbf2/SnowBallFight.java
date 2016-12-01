@@ -8,8 +8,8 @@ import com.badlogic.gdx.Game;
 public class SnowBallFight extends Game {
 
     public void create () {
-//        setScreen(new de.swagner.sbf2.screens.Screen1(new SnowBallFight()));
-        setScreen(new de.swagner.sbf2.mainmenu.MainMenu(this));
+        setScreen(new de.swagner.sbf2.screens.Screen1(new SnowBallFight()));
+//        setScreen(new de.swagner.sbf2.mainmenu.MainMenu(this));
     }
 
 }

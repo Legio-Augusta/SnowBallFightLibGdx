@@ -12,7 +12,7 @@ import com.badlogic.gdx.math.Vector2;
 public class Bob {
 
     public enum State {
-        IDLE, WALKING, JUMPING, DYING
+        IDLE, WALKING, JUMPING, DYING, FIRING, FREEZE, HANGING
     }
 
     static final float SPEED = 2f; // unit per second
