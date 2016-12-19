@@ -179,13 +179,13 @@ public class MapRenderer {
 			anim = dying;
 			loop = false;
 		}
-		batch.draw(anim.getKeyFrame(map.bob.stateTime, loop), map.bob.pos.x, map.bob.pos.y, 1, 1);
+//		batch.draw(anim.getKeyFrame(map.bob.stateTime, loop), map.bob.pos.x, map.bob.pos.y, 1, 1);
 	}
 
 	private void renderCube () {
 		if (map.cube.state == Cube.FOLLOW) batch.draw(cube, map.cube.pos.x, map.cube.pos.y, 1.5f, 1.5f);
 		if (map.cube.state == Cube.FIXED)
-			batch.draw(cubeFixed.getKeyFrame(map.cube.stateTime, false), map.cube.pos.x, map.cube.pos.y, 1.5f, 1.5f);
+//			batch.draw(cubeFixed.getKeyFrame(map.cube.stateTime, false), map.cube.pos.x, map.cube.pos.y, 1.5f, 1.5f);
 		if (map.cube.state == Cube.CONTROLLED) batch.draw(cubeControlled, map.cube.pos.x, map.cube.pos.y, 1.5f, 1.5f);
 	}
 
@@ -193,11 +193,12 @@ public class MapRenderer {
 		for (int i = 0; i < map.rockets.size; i++) {
 			Rocket rocket = map.rockets.get(i);
 			if (rocket.state == Rocket.FLYING) {
-				TextureRegion frame = this.rocket.getKeyFrame(rocket.stateTime, true);
-				batch.draw(frame, rocket.pos.x, rocket.pos.y, 0.5f, 0.5f, 1, 1, 1, 1, rocket.vel.angle());
+				// TODO restore comment after fix texture obj not match frame...
+//				TextureRegion frame = this.rocket.getKeyFrame(rocket.stateTime, true);
+//				batch.draw(frame, rocket.pos.x, rocket.pos.y, 0.5f, 0.5f, 1, 1, 1, 1, rocket.vel.angle());
 			} else {
-				TextureRegion frame = this.rocketExplosion.getKeyFrame(rocket.stateTime, false);
-				batch.draw(frame, rocket.pos.x, rocket.pos.y, 1, 1);
+//				TextureRegion frame = this.rocketExplosion.getKeyFrame(rocket.stateTime, false);
+//				batch.draw(frame, rocket.pos.x, rocket.pos.y, 1, 1);
 			}
 			batch.draw(rocketPad, rocket.startPos.x, rocket.startPos.y, 1, 1);
 		}

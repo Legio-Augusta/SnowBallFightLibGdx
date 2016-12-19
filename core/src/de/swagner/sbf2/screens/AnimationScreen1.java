@@ -68,7 +68,7 @@ public class AnimationScreen1 extends ApplicationAdapter{
         elapsed_time += Gdx.graphics.getDeltaTime();
 
         // Getting the frame which must be rendered
-        currentFrame = runningAnimation.getKeyFrame(elapsed_time);
+//        currentFrame = runningAnimation.getKeyFrame(elapsed_time);
 
         // Drawing the frame
         batch.begin();
