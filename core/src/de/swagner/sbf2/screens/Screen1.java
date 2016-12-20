@@ -21,6 +21,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
+import java.util.Random;
+
 /**
  * Created by nickfarow on 13/10/2016.
  */
@@ -37,6 +39,7 @@ public class Screen1 implements Screen{
 
     int farmerX;
     float heroSpeed = 10.0f; // 10 pixels per second.
+    float enemySpeed = 5.0f;
     float heroX;
     float heroY = 660; // TODO use ratio screen
 
@@ -65,11 +68,14 @@ public class Screen1 implements Screen{
 
     float stateTime;
 
+    // enemy move dir
+    private int dir1 = 0;
+    private int dir2 = 0;
+    private int dir3 = 0;
 
     // Enermy state
 
     // Game state
-
 
     // Hero state
 
@@ -99,7 +105,6 @@ public class Screen1 implements Screen{
 
 //        loadTextures();  // From demo animation Bob
         setEnermyTexture();
-        setHeroTexture();
         create();
     }
 
@@ -138,7 +143,7 @@ public class Screen1 implements Screen{
         blockTexture = new Texture(Gdx.files.internal("data/gui/block.png"));
         blockSprite = new Sprite(blockTexture);
 
-        bobSprite = new Sprite(heroTexture);
+        bobSprite = new Sprite(bobTexture);
         //Set position to centre of the screen
         blockSprite.setPosition(Gdx.graphics.getWidth()/2-blockSprite.getWidth()/2, Gdx.graphics.getHeight()/2-blockSprite.getHeight()/2);
         bobSprite.setPosition(Gdx.graphics.getWidth()/2-heroTexture.getWidth()/2, Gdx.graphics.getHeight()/5-heroTexture.getHeight()/2);
@@ -151,16 +156,12 @@ public class Screen1 implements Screen{
     }
 
     public void render(float delta) {
-//        renderTouchPad();
-
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         camera.update();
         generalUpdate();
 //        batch.setProjectionMatrix(camera.combined);
 
-
-        /**/
         drawSplashBatch();
 
         drawTouchPad();
@@ -168,14 +169,13 @@ public class Screen1 implements Screen{
         batch.begin();
 //        HeroAsset.hero1.draw(batch);
 
-        handleKeyMoveHero();
+//        handleKeyMoveHero();
         // renderManualTextureDraw()
-//        testDrawBob();
+        testDrawHero();
 
         testDrawInitPositionEnermy();
 //        drawBob();
         batch.end();
-/**/
     }
 
     public void setSize (int w, int h) {
@@ -270,7 +270,6 @@ public class Screen1 implements Screen{
     }
 
     protected void setEnermyTexture() {
-        bob = new Bob(new Vector2(480, 320));
         huey = new Bob(new Vector2(240, 1380));
         dewey = new Bob(new Vector2(480, 1380));
         boss = new Bob(new Vector2(320, 1300));
@@ -279,13 +278,13 @@ public class Screen1 implements Screen{
         boss.setBobTexture("data/samsung-white/boss2_0.png");
     }
 
-    protected void setHeroTexture() {
-        heroTexture = new Texture("data/samsung-white/hero3_1_113x150.png");
-    }
-
     protected void initSpriteBatchAndHeroTexture () {
         batch = new SpriteBatch();
         ttrSplash = new Texture("data/samsung-white/menu_bg.png");
+        heroTexture = new Texture("data/samsung-white/hero3_1.png");
+        bobTexture = new Texture("data/samsung-white/hero3_1_113x150.png");
+        bob = new Bob(new Sprite());
+        bob.setBobTexture("data/samsung-white/hero3_1.png");
     }
 
     protected void drawSplashBatch() {
@@ -306,7 +305,7 @@ public class Screen1 implements Screen{
             heroY -= Gdx.graphics.getDeltaTime() * heroSpeed;
     }
 
-    protected void testDrawBob() {
+    protected void testDrawHero() {
         batch.draw(heroTexture, (int)bob.position.x, (int)bob.position.y, 0, 0, 45, 60, 2, 2, 0, 0, 0, 45, 60, bob.facingLeft, false);
     }
 
@@ -349,32 +348,55 @@ public class Screen1 implements Screen{
     }
 
     protected void testEnermyMoving() {
-        int dir1 = (int)(Math.random() * 12);
-        dir1 = (dir1 > 6) ? 1 : -1;
+        float leftBound = 0;
+        float rightBoundHuey = Gdx.graphics.getWidth() - huey.getBobTexture().getWidth();
+        float rightBoundDewey = Gdx.graphics.getWidth() - dewey.getBobTexture().getWidth();
+        float rightBoundBoss = Gdx.graphics.getWidth() - boss.getBobTexture().getWidth();
 
-        int dir2 = (int)(Math.random() * 6);
-        dir2 = (dir2 > 3) ? 1 : -1;
-
-        int dir3 = (int)(Math.random() * 9);
-        dir3 = (dir3 > 4) ? 1 : -1;
-
-        if(huey.position.x > 1000) {
+        Random r = new Random();
+        // TODO random position when hit rightBound
+        if(huey.position.x >= rightBoundHuey) {
+//            huey.position.x = rightBoundHuey;
+            int i1 = r.nextInt(180) + Gdx.graphics.getWidth()/3;
+            huey.position.x = i1;
             dir1 = -1;
-        } else {
+        }
+        if(huey.position.x <= leftBound) {
+            huey.position.x = r.nextInt(180);
             dir1 = 1;
         }
-        if(dewey.position.x > 1000) {
+
+        if(dewey.position.x >= rightBoundDewey) {
+            dewey.position.x = rightBoundDewey;
             dir2 = -1;
-        } else {
+        }
+        if(dewey.position.x <= leftBound) {
+            dewey.position.x = r.nextInt(360);
             dir2 = 1;
         }
-        if(huey.position.x < 40) {
-            dir1 = 1;
+
+        if(boss.position.x >= rightBoundBoss) {
+            boss.position.x = rightBoundBoss;
+            dir3 = -1;
+        }
+        if(boss.position.x <= leftBound) {
+            boss.position.x = r.nextInt(320);
+            dir3 = 1;
         }
 
-        huey.position.x  += (2 + (int)(Math.random() * 12)) * dir1;
-        dewey.position.x += (2 + (int)(Math.random() * 6)) * dir2;
-        boss.position.x  += (2 + (int)(Math.random() * 9)) * dir3;
+        if((huey.position.x >= leftBound) && (huey.position.x <= rightBoundHuey)) {
+            int tmp = (dir1 != 0) ? dir1 : 1;
+            huey.position.x  += enemySpeed * tmp;
+        }
+        if((dewey.position.x >= leftBound) && (dewey.position.x <= rightBoundDewey)) {
+            int tmp = (dir2 != 0) ? dir2 : 1;
+            dewey.position.x += enemySpeed * tmp;
+        }
+        Gdx.app.log("INFO", " bot " + dewey.position.x + " right " + rightBoundDewey + " dir " + dir2);
+        if(boss.position.x >= leftBound && (boss.position.x <= rightBoundBoss)) {
+            int tmp = (dir3 != 0) ? dir3 : 1;
+            boss.position.x  += enemySpeed * tmp;
+        }
     }
 
     protected void attackHeroTowardEnermy() {
@@ -403,12 +425,12 @@ public class Screen1 implements Screen{
         camera.update();
 
         //Move blockSprite with TouchPad. TODO remove test code
-        blockSprite.setX(blockSprite.getX() + touchpad.getKnobPercentX()*blockSpeed);
-        blockSprite.setY(blockSprite.getY() + touchpad.getKnobPercentY()*blockSpeed);
+//        blockSprite.setX(blockSprite.getX() + touchpad.getKnobPercentX()*blockSpeed);
+//        blockSprite.setY(blockSprite.getY() + touchpad.getKnobPercentY()*blockSpeed);
         // TODO use bob.getSprite
         float leftBound = 0;
         float rightBound = Gdx.graphics.getWidth() - bobSprite.getWidth();
-        Gdx.app.log("INFO", "Left "+ leftBound + " right " + rightBound + " bob: " + bobSprite.getX());
+
         if(bobSprite.getX() < leftBound) {
             bobSprite.setX(leftBound);
         }
@@ -419,17 +441,15 @@ public class Screen1 implements Screen{
             bobSprite.setX(bobSprite.getX() + touchpad.getKnobPercentX()*heroSpeed);
         }
 
-        // TODO use object instead of global var, handle screen size
-        if( (bob.position.x < 1000) && (bob.position.x > 0) ) {
-//            bob.position.x += (blockSprite.getX() + touchpad.getKnobPercentX() * heroSpeed);
-        }
+        handleHeroMoveBound();
 
         //Draw
         batch.enableBlending();
         batch.begin();
 //        blockSprite.draw(batch);
-        // TODO handle bouni screen and animation player
+        // TODO handle bound screen and animation player
         bobSprite.draw(batch);
+//        batch.draw(bob.getBobTexture(), (int)bob.position.x, (int)bob.position.y, 0, 0, 45, 60, 2, 2, 0, 0, 0, 45, 60, bob.facingLeft, false);
         batch.end();
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
@@ -443,6 +463,25 @@ public class Screen1 implements Screen{
 
     }
 
-
+    protected void handleHeroMoveBound() {
+        float leftBound = 0;
+        float rightBound = Gdx.graphics.getWidth() - bobSprite.getWidth();
+//        Gdx.app.log("INFO", "Left "+ leftBound + " right " + rightBound + " bob: " + bobSprite.getX());
+        // TODO use object instead of global var, handle screen size
+        if(bob.position.x < leftBound) {
+            bob.position.x = leftBound;
+        }
+        if(bob.position.x > rightBound) {
+            bob.position.x = rightBound;
+        }
+        if((bob.position.x >= leftBound) && (bob.position.x <= rightBound) ) {
+            bob.position.x += (blockSprite.getX() + touchpad.getKnobPercentX() * heroSpeed);
+        }
+        if(touchpad.getKnobPercentX() < 0) {
+            bob.facingLeft = true;
+        } else {
+            bob.facingLeft = false;
+        }
+    }
 
 }

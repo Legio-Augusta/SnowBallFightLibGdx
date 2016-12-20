@@ -57,4 +57,8 @@ public class Bob {
     public Texture getBobTexture() {
         return bobTexture;
     }
+
+    public Sprite getSprite() {
+        return sprite;
+    }
 }
