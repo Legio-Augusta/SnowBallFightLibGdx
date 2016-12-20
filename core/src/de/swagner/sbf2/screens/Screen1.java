@@ -31,7 +31,7 @@ public class Screen1 implements Screen{
     OrthographicCamera camera;
     SpriteBatch batch;
     Texture ttrSplash;
-    Texture hero;
+    Texture heroTexture;
 
     private Sprite bobSprite;
 
@@ -49,6 +49,7 @@ public class Screen1 implements Screen{
     private float ppuY;	// pixels per unit on the Y axis
 
     private Bob bob;
+    // TODO loop create sprite
     private Bob huey;
     private Bob dewey;
     private Bob boss;
@@ -137,12 +138,16 @@ public class Screen1 implements Screen{
         blockTexture = new Texture(Gdx.files.internal("data/gui/block.png"));
         blockSprite = new Sprite(blockTexture);
 
-        bobSprite = new Sprite(bobTexture);
+        bobSprite = new Sprite(heroTexture);
         //Set position to centre of the screen
         blockSprite.setPosition(Gdx.graphics.getWidth()/2-blockSprite.getWidth()/2, Gdx.graphics.getHeight()/2-blockSprite.getHeight()/2);
-//        bobSprite.setPosition(Gdx.graphics.getWidth()/2-bobTexture.getWidth()/2, Gdx.graphics.getHeight()/4-bobTexture.getHeight()/2);
+        bobSprite.setPosition(Gdx.graphics.getWidth()/2-heroTexture.getWidth()/2, Gdx.graphics.getHeight()/5-heroTexture.getHeight()/2);
 
         blockSpeed = 5;
+    }
+
+    public void update() {
+
     }
 
     public void render(float delta) {
@@ -165,7 +170,7 @@ public class Screen1 implements Screen{
 
         handleKeyMoveHero();
         // renderManualTextureDraw()
-        testDrawBob();
+//        testDrawBob();
 
         testDrawInitPositionEnermy();
 //        drawBob();
@@ -212,7 +217,7 @@ public class Screen1 implements Screen{
 
         }
         else if(bob.state==bob.state.IDLE){
-            batch.draw(bobTexture, bob.position.x * ppuX, bob.position.y * ppuY, facex* Bob.SIZE * ppuX, Bob.SIZE * ppuY);
+            batch.draw(heroTexture, bob.position.x * ppuX, bob.position.y * ppuY, facex* Bob.SIZE * ppuX, Bob.SIZE * ppuY);
         }
     }
 
@@ -275,13 +280,12 @@ public class Screen1 implements Screen{
     }
 
     protected void setHeroTexture() {
-        bobTexture = new  Texture("data/samsung-white/hero3_1.png");
+        heroTexture = new Texture("data/samsung-white/hero3_1_113x150.png");
     }
 
     protected void initSpriteBatchAndHeroTexture () {
         batch = new SpriteBatch();
         ttrSplash = new Texture("data/samsung-white/menu_bg.png");
-        hero = new Texture("data/samsung-white/hero3_1.png");
     }
 
     protected void drawSplashBatch() {
@@ -303,7 +307,7 @@ public class Screen1 implements Screen{
     }
 
     protected void testDrawBob() {
-        batch.draw(bobTexture, (int)bob.position.x, (int)bob.position.y, 0, 0, 45, 60, 2, 2, 0, 0, 0, 45, 60, bob.facingLeft, false);
+        batch.draw(heroTexture, (int)bob.position.x, (int)bob.position.y, 0, 0, 45, 60, 2, 2, 0, 0, 0, 45, 60, bob.facingLeft, false);
     }
 
     protected void testDrawInitPositionEnermy() {
@@ -401,15 +405,30 @@ public class Screen1 implements Screen{
         //Move blockSprite with TouchPad. TODO remove test code
         blockSprite.setX(blockSprite.getX() + touchpad.getKnobPercentX()*blockSpeed);
         blockSprite.setY(blockSprite.getY() + touchpad.getKnobPercentY()*blockSpeed);
-        bobSprite.setX(bobSprite.getX() + touchpad.getKnobPercentX()*blockSpeed);
+        // TODO use bob.getSprite
+        float leftBound = 0;
+        float rightBound = Gdx.graphics.getWidth() - bobSprite.getWidth();
+        Gdx.app.log("INFO", "Left "+ leftBound + " right " + rightBound + " bob: " + bobSprite.getX());
+        if(bobSprite.getX() < leftBound) {
+            bobSprite.setX(leftBound);
+        }
+        if(bobSprite.getX() > rightBound) {
+            bobSprite.setX(rightBound);
+        }
+        if((bobSprite.getX() >= leftBound) && (bobSprite.getX() <= rightBound) ) {
+            bobSprite.setX(bobSprite.getX() + touchpad.getKnobPercentX()*heroSpeed);
+        }
 
-        // TODO use object instead of global var
-        bob.position.x -= (blockSprite.getX() + touchpad.getKnobPercentX()*heroSpeed);
+        // TODO use object instead of global var, handle screen size
+        if( (bob.position.x < 1000) && (bob.position.x > 0) ) {
+//            bob.position.x += (blockSprite.getX() + touchpad.getKnobPercentX() * heroSpeed);
+        }
 
         //Draw
         batch.enableBlending();
         batch.begin();
-        blockSprite.draw(batch);
+//        blockSprite.draw(batch);
+        // TODO handle bouni screen and animation player
         bobSprite.draw(batch);
         batch.end();
         stage.act(Gdx.graphics.getDeltaTime());

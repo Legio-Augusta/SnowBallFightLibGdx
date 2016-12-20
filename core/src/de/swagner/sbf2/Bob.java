@@ -5,6 +5,7 @@ package de.swagner.sbf2;
  */
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -27,6 +28,7 @@ public class Bob {
     public boolean  facingLeft = true;
 
     private Texture bobTexture;
+    private Sprite sprite;
 
     public Bob(Vector2 position) {
         this.position = position;
@@ -41,6 +43,9 @@ public class Bob {
         bobTexture = texture;
     }
 
+    public Bob(Sprite sprite) {
+        this.sprite = new Sprite(sprite);
+    }
     public void setBobTexture(Texture texture) {
         bobTexture = texture;
     }
