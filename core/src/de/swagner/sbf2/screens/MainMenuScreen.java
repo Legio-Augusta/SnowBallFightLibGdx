@@ -9,7 +9,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 /**
  * Created by nickfarow on 05/10/2016.
  */
-public class MainMenuScreen implements Screen {
+public class MainMenuScreen {
     private SpriteBatch batch;
     private Texture ttrSplash;
 
@@ -29,24 +29,4 @@ public class MainMenuScreen implements Screen {
 
     }
 
-    @Override
-    public void hide() { }
-
-    @Override
-    public void pause() { }
-
-    @Override
-    public void resume() { }
-
-    @Override
-    public void show() { }
-
-    @Override
-    public void resize(int width, int height) { }
-
-    @Override
-    public void dispose() {
-        ttrSplash.dispose();
-        batch.dispose();
-    }
 }

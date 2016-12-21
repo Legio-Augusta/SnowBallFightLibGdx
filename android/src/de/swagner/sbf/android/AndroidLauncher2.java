@@ -4,7 +4,6 @@ import android.os.Bundle;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
-import de.swagner.sbf2.SbfSplashScreenGame;
 import de.swagner.sbf2.screens.AnimationScreen1;
 import de.swagner.sbf2.SnowBallFight;
 

@@ -1,21 +1,21 @@
 package de.swagner.sbf2.screens;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.ApplicationListener;
 
 /**
  * Created by nickfarow on 30/09/2016.
  */
-public class MainGameScreen implements Screen {
+public class MainGameScreen extends DefaultScreen implements Screen {
     private SpriteBatch batch;
     private Texture ttrSplash;
 
-    public MainGameScreen() {
-        super();
+    public MainGameScreen(Game game) {
+        super(game);
         batch = new SpriteBatch();
         ttrSplash = new Texture("data/samsung-white/background.png");
     }

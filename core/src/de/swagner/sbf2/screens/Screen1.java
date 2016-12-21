@@ -4,6 +4,7 @@ import de.swagner.sbf2.Assets.HeroAsset;
 import de.swagner.sbf2.Bob;
 import de.swagner.sbf2.SnowBallFight;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.Screen;
@@ -14,7 +15,9 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
@@ -27,17 +30,15 @@ import java.util.Random;
  * Created by nickfarow on 13/10/2016.
  */
 
-public class Screen1 implements Screen{
-
-    SnowBallFight game;
+public class Screen1 extends DefaultScreen {
     OrthographicCamera camera;
     SpriteBatch batch;
     Texture ttrSplash;
     Texture heroTexture;
+    Texture fireBtnTexture;
 
     private Sprite bobSprite;
 
-    int farmerX;
     float heroSpeed = 10.0f; // 10 pixels per second.
     float enemySpeed = 5.0f;
     float heroX;
@@ -93,17 +94,13 @@ public class Screen1 implements Screen{
 
     public static final String TAG = "LOG";
 
-    public Screen1(SnowBallFight game1){
-        this.game = game1;
+    public Screen1(Game game) {
+        super(game);
 
         camera = newOrthographicCamera(1920, 1080);
-
         initSpriteBatchAndHeroTexture();
 
-        farmerX = 480-85;
         HeroAsset.load();
-
-//        loadTextures();  // From demo animation Bob
         setEnermyTexture();
         create();
     }
@@ -163,15 +160,15 @@ public class Screen1 implements Screen{
 //        batch.setProjectionMatrix(camera.combined);
 
         drawSplashBatch();
-
         drawTouchPad();
         batch.enableBlending();
         batch.begin();
 //        HeroAsset.hero1.draw(batch);
 
 //        handleKeyMoveHero();
-        // renderManualTextureDraw()
         testDrawHero();
+        drawFireBtn();
+        handleFireTouch();
 
         testDrawInitPositionEnermy();
 //        drawBob();
@@ -285,6 +282,7 @@ public class Screen1 implements Screen{
         bobTexture = new Texture("data/samsung-white/hero3_1_113x150.png");
         bob = new Bob(new Sprite());
         bob.setBobTexture("data/samsung-white/hero3_1.png");
+        fireBtnTexture = new Texture("data/samsung-white/fire.png");
     }
 
     protected void drawSplashBatch() {
@@ -392,19 +390,15 @@ public class Screen1 implements Screen{
             int tmp = (dir2 != 0) ? dir2 : 1;
             dewey.position.x += enemySpeed * tmp;
         }
-        Gdx.app.log("INFO", " bot " + dewey.position.x + " right " + rightBoundDewey + " dir " + dir2);
+//        Gdx.app.log("INFO", " bot " + dewey.position.x + " right " + rightBoundDewey + " dir " + dir2);
         if(boss.position.x >= leftBound && (boss.position.x <= rightBoundBoss)) {
             int tmp = (dir3 != 0) ? dir3 : 1;
             boss.position.x  += enemySpeed * tmp;
         }
     }
 
-    protected void attackHeroTowardEnermy() {
+    protected void heroAttack() {
 
-        // game mode on
-        // Hero fire shell
-        // snow gap ? ()
-        // handle key press,
         // disable another shell til this shell drop or hit enermy
         // power up snow ?
         // handle colidate enermy
@@ -412,11 +406,14 @@ public class Screen1 implements Screen{
         // update state of hero
 
         // TODO handle onTouch, gdx way
-
     }
 
     protected void drawHeroHp() {
 
+    }
+
+    protected void drawFireBtn() {
+        batch.draw(fireBtnTexture, Gdx.graphics.getWidth()-50-fireBtnTexture.getWidth(), 50, fireBtnTexture.getWidth(), fireBtnTexture.getHeight());
     }
 
     protected void drawTouchPad() {
@@ -453,6 +450,32 @@ public class Screen1 implements Screen{
         batch.end();
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
+    }
+
+    protected void handleFireTouch() {
+        if(Gdx.input.isTouched())
+        {
+            Vector3 touchPos=new Vector3(Gdx.input.getX(),Gdx.input.getY(), 0);
+            // TODO find out why unproject make position wrong. Unproject deal with zoom or similar variables in touch screen
+            // When zoom in/out ... the extract position may be difference. So the pointer pos after unproject may be reset to 0
+//            camera.unproject(touchPos);
+            Rectangle textureBounds=new Rectangle(Gdx.graphics.getWidth()-fireBtnTexture.getWidth()-50, Gdx.graphics.getHeight()-50-fireBtnTexture.getHeight(), fireBtnTexture.getWidth(),fireBtnTexture.getHeight());
+//            Gdx.app.log("INFO", "I like it " + touchPos.x + " " + touchPos.y + " " + textureBounds.toString());
+            if(textureBounds.contains(touchPos.x, touchPos.y))
+            {
+                Gdx.app.log("INFO", "I like it when I feel your touch");
+                // you are touching your texture
+            }
+        }
+    }
+
+    protected void heroFire() {
+
+    }
+
+    // TODO firePos, itemType, power, direction, angle (gap)
+    protected void fireItem() {
+
     }
 
     protected void heroHitTarget() {
