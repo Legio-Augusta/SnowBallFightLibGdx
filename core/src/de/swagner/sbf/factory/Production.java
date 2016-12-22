@@ -109,7 +109,7 @@ public class Production {
 	}
 
 	/**
-	 * Span new Ship
+	 * Span new Item
 	 * 
 	 * 1 = Fighter
 	 * 2 = Bomber
@@ -119,13 +119,13 @@ public class Production {
 	 */
 	public void spawn(int unitType) {
 //		factory.ownShips = 0;
-//		for (Ship fighter : GameInstance.getInstance().fighters) {
+//		for (Item fighter : GameInstance.getInstance().fighters) {
 //			if(fighter.id == factory.id) factory.ownShips++;
 //		}		
-//		for (Ship bomber : GameInstance.getInstance().bombers) {
+//		for (Item bomber : GameInstance.getInstance().bombers) {
 //			if(bomber.id != factory.id) factory.ownShips++;
 //		}		
-//		for (Ship frigate : GameInstance.getInstance().frigates) {
+//		for (Item frigate : GameInstance.getInstance().frigates) {
 //			if(frigate.id != factory.id) factory.ownShips++;
 //		}
 //		if(factory.ownShips>MAXSHIPS) {

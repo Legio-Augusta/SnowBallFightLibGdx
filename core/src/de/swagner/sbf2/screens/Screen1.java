@@ -1,6 +1,5 @@
 package de.swagner.sbf2.screens;
 
-import de.swagner.sbf2.Assets.HeroAsset;
 import de.swagner.sbf2.Bob;
 import de.swagner.sbf2.SnowBallFight;
 
@@ -36,6 +35,8 @@ public class Screen1 extends DefaultScreen {
     Texture ttrSplash;
     Texture heroTexture;
     Texture fireBtnTexture;
+    Texture snowTexture;
+    Texture snowShadowTexture;
 
     private Sprite bobSprite;
 
@@ -100,7 +101,6 @@ public class Screen1 extends DefaultScreen {
         camera = newOrthographicCamera(1920, 1080);
         initSpriteBatchAndHeroTexture();
 
-        HeroAsset.load();
         setEnermyTexture();
         create();
     }
