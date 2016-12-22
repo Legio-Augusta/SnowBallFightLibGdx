@@ -1,6 +1,7 @@
 package de.swagner.sbf2.screens;
 
 import de.swagner.sbf2.Bob;
+import de.swagner.sbf2.Item;
 import de.swagner.sbf2.SnowBallFight;
 
 import com.badlogic.gdx.Game;
@@ -101,6 +102,8 @@ public class Screen1 extends DefaultScreen {
         camera = newOrthographicCamera(1920, 1080);
         initSpriteBatchAndHeroTexture();
 
+        // init item for character, enemy bot
+        initBobItem();
         setEnermyTexture();
         create();
     }
@@ -140,11 +143,10 @@ public class Screen1 extends DefaultScreen {
         blockTexture = new Texture(Gdx.files.internal("data/gui/block.png"));
         blockSprite = new Sprite(blockTexture);
 
-        bobSprite = new Sprite(bobTexture);
         //Set position to centre of the screen
         blockSprite.setPosition(Gdx.graphics.getWidth()/2-blockSprite.getWidth()/2, Gdx.graphics.getHeight()/2-blockSprite.getHeight()/2);
-        bobSprite.setPosition(Gdx.graphics.getWidth()/2-heroTexture.getWidth()/2, Gdx.graphics.getHeight()/5-heroTexture.getHeight()/2);
-
+//        bob.position.x = Gdx.graphics.getWidth()/2;
+        bob.position.y = Gdx.graphics.getHeight()*4/5;
         blockSpeed = 5;
     }
 
@@ -167,6 +169,7 @@ public class Screen1 extends DefaultScreen {
 
 //        handleKeyMoveHero();
         testDrawHero();
+
         drawFireBtn();
         handleFireTouch();
 
@@ -199,19 +202,12 @@ public class Screen1 extends DefaultScreen {
     }
 
     private void drawBob() {
-//        Bob bob = new Bob(new Vector2(7, 2));    // Bob related to map not re-create when draw ?
-        int facex=1;
+        int facex = 1;
         if(bob.facingLeft){
-            facex=-1;
         }
-
-        Gdx.app.debug(TAG, bob.position.x + " x ");
         if (bob.state==bob.state.WALKING){
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
             stateTime += Gdx.graphics.getDeltaTime();
-//            currentFrame = walkAnimation.getKeyFrame(stateTime, true);
-            batch.draw(currentFrame, bob.position.x * ppuX, bob.position.y * ppuY, facex*Bob.SIZE * ppuX, Bob.SIZE * ppuY);
-
         }
         else if(bob.state==bob.state.IDLE){
             batch.draw(heroTexture, bob.position.x * ppuX, bob.position.y * ppuY, facex* Bob.SIZE * ppuX, Bob.SIZE * ppuY);
@@ -275,14 +271,28 @@ public class Screen1 extends DefaultScreen {
         boss.setBobTexture("data/samsung-white/boss2_0.png");
     }
 
+    protected void initBobItem() {
+        bob.setBobTexture("data/samsung-white/hero3_1.png");
+        Vector2 facing = new Vector2(bob.position.x, Gdx.graphics.getHeight()/5);
+        Item item = new Item(0, bob.position, facing);
+        item.setTexture(new Texture("data/samsung-white/item3_0.png"));
+        bob.setItem(item);
+
+        Gdx.app.log("INFO", "Blondie ~~~~~~~~~ " + bob.position.x + " :) ------" + bob.position.y);
+    }
+
     protected void initSpriteBatchAndHeroTexture () {
         batch = new SpriteBatch();
         ttrSplash = new Texture("data/samsung-white/menu_bg.png");
         heroTexture = new Texture("data/samsung-white/hero3_1.png");
-        bobTexture = new Texture("data/samsung-white/hero3_1_113x150.png");
         bob = new Bob(new Sprite());
-        bob.setBobTexture("data/samsung-white/hero3_1.png");
+        bob.position.x = Gdx.graphics.getWidth()/2;
+        bob.position.y = Gdx.graphics.getHeight()*4/5;
+
+//        bob.setBobTexture("data/samsung-white/hero3_1.png");
         fireBtnTexture = new Texture("data/samsung-white/fire.png");
+
+        Gdx.app.log("INFO", "Angel Eye :( " + bob.position.x + " :) ------" + bob.position.y);
     }
 
     protected void drawSplashBatch() {
@@ -304,7 +314,7 @@ public class Screen1 extends DefaultScreen {
     }
 
     protected void testDrawHero() {
-        batch.draw(heroTexture, (int)bob.position.x, (int)bob.position.y, 0, 0, 45, 60, 2, 2, 0, 0, 0, 45, 60, bob.facingLeft, false);
+        batch.draw(bob.getBobTexture(), (int)bob.position.x, (int)bob.position.y, 0, 0, 45, 60, 2, 2, 0, 0, 0, 45, 60, bob.facingLeft, false);
     }
 
     protected void testDrawInitPositionEnermy() {
@@ -426,17 +436,17 @@ public class Screen1 extends DefaultScreen {
 //        blockSprite.setY(blockSprite.getY() + touchpad.getKnobPercentY()*blockSpeed);
         // TODO use bob.getSprite
         float leftBound = 0;
-        float rightBound = Gdx.graphics.getWidth() - bobSprite.getWidth();
+        float rightBound = Gdx.graphics.getWidth() - bob.getBobTexture().getWidth();
 
-        if(bobSprite.getX() < leftBound) {
-            bobSprite.setX(leftBound);
-        }
-        if(bobSprite.getX() > rightBound) {
-            bobSprite.setX(rightBound);
-        }
-        if((bobSprite.getX() >= leftBound) && (bobSprite.getX() <= rightBound) ) {
-            bobSprite.setX(bobSprite.getX() + touchpad.getKnobPercentX()*heroSpeed);
-        }
+//        if(bob.position.x < leftBound) {
+//            bob.position.x = leftBound;
+//        }
+//        if(bob.position.x > rightBound) {
+//            bob.position.x = rightBound;
+//        }
+//        if((bob.position.x >= leftBound) && (bob.position.x <= rightBound) ) {
+//            bob.position.x = (bob.position.x + touchpad.getKnobPercentX()*heroSpeed);
+//        }
 
         handleHeroMoveBound();
 
@@ -445,8 +455,6 @@ public class Screen1 extends DefaultScreen {
         batch.begin();
 //        blockSprite.draw(batch);
         // TODO handle bound screen and animation player
-        bobSprite.draw(batch);
-//        batch.draw(bob.getBobTexture(), (int)bob.position.x, (int)bob.position.y, 0, 0, 45, 60, 2, 2, 0, 0, 0, 45, 60, bob.facingLeft, false);
         batch.end();
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
@@ -463,14 +471,21 @@ public class Screen1 extends DefaultScreen {
 //            Gdx.app.log("INFO", "I like it " + touchPos.x + " " + touchPos.y + " " + textureBounds.toString());
             if(textureBounds.contains(touchPos.x, touchPos.y))
             {
-                Gdx.app.log("INFO", "I like it when I feel your touch");
+//                Gdx.app.log("INFO", "I like it when I feel your touch");
                 // you are touching your texture
+                heroFire();
             }
         }
     }
 
     protected void heroFire() {
-
+        Vector2 facing = new Vector2(bob.position.x, Gdx.graphics.getHeight()/5);
+        bob.setItem(new Item(0, bob.position, facing));
+        Item bobItem = bob.getItem();
+        bobItem.setTexture(new Texture("data/samsung-white/item3_0_36x.png"));
+        Gdx.app.log("INFO", bobItem.position.toString() + " hero ani " + bob.facingLeft);
+        bobItem.acting();
+        batch.draw(bobItem.getItemTexture(), bobItem.position.x, bobItem.position.y);
     }
 
     // TODO firePos, itemType, power, direction, angle (gap)
@@ -487,24 +502,26 @@ public class Screen1 extends DefaultScreen {
     }
 
     protected void handleHeroMoveBound() {
+        bobTexture = bob.getBobTexture();
         float leftBound = 0;
-        float rightBound = Gdx.graphics.getWidth() - bobSprite.getWidth();
-//        Gdx.app.log("INFO", "Left "+ leftBound + " right " + rightBound + " bob: " + bobSprite.getX());
+        float rightBound = Gdx.graphics.getWidth() - bobTexture.getWidth();
         // TODO use object instead of global var, handle screen size
         if(bob.position.x < leftBound) {
-            bob.position.x = leftBound;
+//            bob.position.x = leftBound;
+            bob.position.x = Gdx.graphics.getWidth()/2;
         }
         if(bob.position.x > rightBound) {
             bob.position.x = rightBound;
         }
         if((bob.position.x >= leftBound) && (bob.position.x <= rightBound) ) {
-            bob.position.x += (blockSprite.getX() + touchpad.getKnobPercentX() * heroSpeed);
+            bob.position.x += (bob.position.x + touchpad.getKnobPercentX() * heroSpeed);
         }
         if(touchpad.getKnobPercentX() < 0) {
             bob.facingLeft = true;
         } else {
             bob.facingLeft = false;
         }
+        Gdx.app.log("INFO", "Left "+ leftBound + " right " + rightBound + " bob: " + bob.position.x + " y "+ bob.position.y);
     }
 
 }

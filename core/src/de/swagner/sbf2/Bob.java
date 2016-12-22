@@ -29,6 +29,8 @@ public class Bob {
 
     private Texture bobTexture;
     private Sprite sprite;
+    // snow or stone item used in firing
+    private Item item;
 
     public Bob(Vector2 position) {
         this.position = position;
@@ -51,7 +53,7 @@ public class Bob {
     }
 
     public void setBobTexture(String image) {
-        bobTexture = new Texture(image);;
+        bobTexture = new Texture(image);
     }
 
     public Texture getBobTexture() {
@@ -61,4 +63,12 @@ public class Bob {
     public Sprite getSprite() {
         return sprite;
     }
+
+    public void setItem(Item item) {
+        this.item = item;
+    }
+    public Item getItem() {
+        return this.item;
+    }
+
 }

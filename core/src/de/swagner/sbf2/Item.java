@@ -1,6 +1,7 @@
 package de.swagner.sbf2;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
@@ -8,7 +9,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 public class Item extends Sprite {
-
 	protected float amount = 1.0f;
 
 	protected float turnSpeed = 1.0f;
@@ -20,6 +20,7 @@ public class Item extends Sprite {
 	private float delta = 0.0f;
 
 	public float aliveTime = 0.0f;
+	public int id = 0;
 
 	public Vector2 position = new Vector2();
 	public Vector2 velocity = new Vector2();
@@ -33,8 +34,7 @@ public class Item extends Sprite {
 	private float deathCounter = 50f;
 	private float nextExplosion = 10f;
 	private float opacity = 5.0f;
-
-	public int id = 0;
+	private Texture itemTexture;
 
 	public Item(int id, Vector2 position, Vector2 facing) {
 		super();
@@ -72,6 +72,25 @@ public class Item extends Sprite {
 		this.setPosition(position.x, position.y);
 
 		super.draw(batch);
+	}
+
+	// Item acting
+	public void acting() {
+		delta = Math.min(0.06f, Gdx.graphics.getDeltaTime());
+
+		aliveTime += delta;
+		collisionPoints.get(0).set( this.getVertices()[0], this.getVertices()[1]);
+		collisionPoints.get(1).set( this.getVertices()[5], this.getVertices()[6]);
+		collisionPoints.get(2).set( this.getVertices()[10], this.getVertices()[11]);
+		collisionPoints.get(3).set( this.getVertices()[15], this.getVertices()[16]);
+
+		collisionCenter.set(collisionPoints.get(0)).add(collisionPoints.get(2)).scl(0.5f);
+
+		velocity.scl( (float) Math.pow(0.97f, delta * 30.f));
+		position.add(velocity.x * delta, velocity.y * delta);
+
+		this.setRotation(facing.angle());
+		this.setPosition(position.x, position.y);
 	}
 
 	public void turn(float direction) {
@@ -141,6 +160,13 @@ public class Item extends Sprite {
 
 	public void goAway(Vector2 targetPos, boolean forceThrust) {
 		goTowardsOrAway(targetPos, forceThrust, true);
+	}
+
+	public void setTexture(Texture texture) {
+		this.itemTexture = texture;
+	}
+	public Texture getItemTexture() {
+		return this.itemTexture;
 	}
 
 }
