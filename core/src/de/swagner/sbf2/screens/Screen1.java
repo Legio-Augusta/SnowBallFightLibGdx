@@ -248,6 +248,8 @@ public class Screen1 extends DefaultScreen {
         bob.position.y = Gdx.graphics.getHeight()/5-bob.getBobTexture().getHeight();
 
         fireBtnTexture = new Texture("data/samsung-white/fire.png");
+        Vector2 facing = new Vector2(bob.position.x, Gdx.graphics.getHeight()*4/5);
+        bob.setItem(new Item(0, bob.position, facing));
     }
 
     protected void drawSplashBatch() {
@@ -391,30 +393,33 @@ public class Screen1 extends DefaultScreen {
 //                Gdx.app.log("INFO", "I like it when I feel your touch");
                 heroFireState = true;
             }
+            Item bobItem = bob.getItem();
             if(heroFireState) {
-                heroFire();
+                bobItem.setVelocity(new Vector2(0, 12));
+                bobItem.velocity.scl(2);
+                if(bobItem.position.y <= Gdx.graphics.getHeight()*4/5) {
+                    bobItem.position.add(bobItem.velocity.x * bobItem.getDelta(), bobItem.velocity.y * 2);
+                    heroFire();
+                } else {
+                    heroFireState = false;
+                    bobItem.setPosition(bob.position.x, bob.position.y);
+                }
+            }
+            if(bobItem.position.y > Gdx.graphics.getHeight()*4/5) {
+                heroFireState = false;
+                bobItem.setPosition(bob.position.x, bob.position.y);
             }
         }
     }
 
     protected void heroFire() {
-        Vector2 facing = new Vector2(bob.position.x, Gdx.graphics.getHeight()/5);
-        bob.setItem(new Item(0, bob.position, facing));
         Item bobItem = bob.getItem();
-        bobItem.setVelocity(new Vector2(0, 12));
-        bobItem.setTexture(new Texture("data/samsung-white/item3_0_36x.png"));
-        Gdx.app.log("INFO", "snow x "+ bobItem.position.toString() + " delta "+ bobItem.getDelta());
-        Gdx.app.log("INFO", "vel x "+ bobItem.velocity.toString());
-        bobItem.acting();
-        // 10 space between player and snow
-        Gdx.app.log("INFO", "snow after "+ bobItem.position.toString() + " delta "+ bobItem.getDelta());
-        Gdx.app.log("INFO", "vel after "+ bobItem.velocity.toString());
-        batch.draw(bobItem.getItemTexture(), bobItem.position.x+(bob.getBobTexture().getWidth()*2-10), bobItem.position.y+bob.getBobTexture().getHeight()/2, 0, 0, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight(), (float)1.3, (float)1.3, 0, 0, 0, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight(), false, false);
-        batch.draw(bob.getBobTexture(), bob.position.x, bob.position.y, 0, 0, heroTexture.getWidth(), heroTexture.getHeight(), 2, 2, 0, 0, 0, heroTexture.getWidth(), heroTexture.getHeight(), bob.facingLeft, false);
 
-        if(bobItem.position.y < Gdx.graphics.getHeight()/5) {
-            heroFireState = false;
-        }
+        bobItem.setTexture(new Texture("data/samsung-white/item3_0_36x.png"));
+        Gdx.app.log("INFO", "snow x "+ bobItem.position.toString() + " delta "+ bobItem.getDelta() + " state " + heroFireState);
+//        bobItem.acting();
+        // 10 space between player and snow
+        batch.draw(bobItem.getItemTexture(), bobItem.position.x+(bob.getBobTexture().getWidth()*2-10), bobItem.position.y+bob.getBobTexture().getHeight()/2, 0, 0, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight(), (float)1.3, (float)1.3, 0, 0, 0, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight(), false, false);
     }
 
     // TODO firePos, itemType, power, direction, angle (gap)
