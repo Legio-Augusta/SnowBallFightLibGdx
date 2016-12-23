@@ -55,23 +55,7 @@ public class Item extends Sprite {
 
 	@Override
 	public void draw(Batch batch) {
-		delta = Math.min(0.06f, Gdx.graphics.getDeltaTime());
-		
-		aliveTime += delta;
-		collisionPoints.get(0).set( this.getVertices()[0], this.getVertices()[1]);
-		collisionPoints.get(1).set( this.getVertices()[5], this.getVertices()[6]);
-		collisionPoints.get(2).set( this.getVertices()[10], this.getVertices()[11]);
-		collisionPoints.get(3).set( this.getVertices()[15], this.getVertices()[16]);
-		
-		collisionCenter.set(collisionPoints.get(0)).add(collisionPoints.get(2)).scl(0.5f);
 
-		velocity.scl( (float) Math.pow(0.97f, delta * 30.f));
-		position.add(velocity.x * delta, velocity.y * delta);
-		
-		this.setRotation(facing.angle());
-		this.setPosition(position.x, position.y);
-
-		super.draw(batch);
 	}
 
 	// Item acting
@@ -86,8 +70,9 @@ public class Item extends Sprite {
 
 		collisionCenter.set(collisionPoints.get(0)).add(collisionPoints.get(2)).scl(0.5f);
 
-		velocity.scl( (float) Math.pow(0.97f, delta * 30.f));
-		position.add(velocity.x * delta, velocity.y * delta);
+//		velocity.scl( (float) Math.pow(0.97f, delta * 30.f));
+		velocity.scl(2);
+		position.add(velocity.x * delta, velocity.y * 2);
 
 		this.setRotation(facing.angle());
 		this.setPosition(position.x, position.y);
@@ -167,6 +152,17 @@ public class Item extends Sprite {
 	}
 	public Texture getItemTexture() {
 		return this.itemTexture;
+	}
+
+	public void setVelocity(Vector2 velocity) {
+		this.velocity = velocity;
+	}
+	public Vector2 getVelocity() {
+		return this.velocity;
+	}
+
+	public float getDelta() {
+		return this.delta;
 	}
 
 }

@@ -2,12 +2,9 @@ package de.swagner.sbf2.screens;
 
 import de.swagner.sbf2.Bob;
 import de.swagner.sbf2.Item;
-import de.swagner.sbf2.SnowBallFight;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -36,19 +33,13 @@ public class Screen1 extends DefaultScreen {
     Texture ttrSplash;
     Texture heroTexture;
     Texture fireBtnTexture;
-    Texture snowTexture;
     Texture snowShadowTexture;
-
-    private Sprite bobSprite;
 
     float heroSpeed = 10.0f; // 10 pixels per second.
     float enemySpeed = 5.0f;
-    float heroX;
-    float heroY = 660; // TODO use ratio screen
 
-    private static final float CAMERA_WIDTH = 10f;
-    private static final float CAMERA_HEIGHT = 7f;
-    private boolean debug = false;
+    private boolean heroFireState = false;
+
     private int width;
     private int height;
     private float ppuX;	// pixels per unit on the X axis
@@ -61,13 +52,6 @@ public class Screen1 extends DefaultScreen {
     private Bob boss;
 
     private Texture bobTexture;
-
-    private static final int        FRAME_COLS = 3;
-    private static final int        FRAME_ROWS = 2;
-    Animation walkAnimation;
-    Texture                         walkSheet;
-    TextureRegion[]                 walkFrames;
-    TextureRegion                   currentFrame;
 
     float stateTime;
 
@@ -99,10 +83,8 @@ public class Screen1 extends DefaultScreen {
     public Screen1(Game game) {
         super(game);
 
-        camera = newOrthographicCamera(1920, 1080);
+        camera = newOrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         initSpriteBatchAndHeroTexture();
-
-        // init item for character, enemy bot
         initBobItem();
         setEnermyTexture();
         create();
@@ -145,8 +127,6 @@ public class Screen1 extends DefaultScreen {
 
         //Set position to centre of the screen
         blockSprite.setPosition(Gdx.graphics.getWidth()/2-blockSprite.getWidth()/2, Gdx.graphics.getHeight()/2-blockSprite.getHeight()/2);
-//        bob.position.x = Gdx.graphics.getWidth()/2;
-        bob.position.y = Gdx.graphics.getHeight()*4/5;
         blockSpeed = 5;
     }
 
@@ -168,7 +148,7 @@ public class Screen1 extends DefaultScreen {
 //        HeroAsset.hero1.draw(batch);
 
 //        handleKeyMoveHero();
-        testDrawHero();
+//        testDrawHero();
 
         drawFireBtn();
         handleFireTouch();
@@ -181,24 +161,9 @@ public class Screen1 extends DefaultScreen {
     public void setSize (int w, int h) {
         this.width = w;
         this.height = h;
-        ppuX = (float)width / CAMERA_WIDTH;
-        ppuY = (float)height / CAMERA_HEIGHT;
     }
 
     private void loadTextures() {
-        walkSheet = new  Texture("data/samsung-white/animation_sheet.png");
-        TextureRegion[][] tmp = TextureRegion.split(walkSheet, walkSheet.getWidth() /
-                FRAME_COLS, walkSheet.getHeight() / FRAME_ROWS);
-        walkFrames = new TextureRegion[FRAME_COLS * FRAME_ROWS];
-        int index = 0;
-        for (int i = 0; i < FRAME_ROWS; i++) {
-            for (int j = 0; j < FRAME_COLS; j++) {
-                walkFrames[index++] = tmp[i][j];
-            }
-        }
-        walkAnimation = new Animation(0.025f, walkFrames);
-
-        stateTime = 0f;
     }
 
     private void drawBob() {
@@ -215,13 +180,6 @@ public class Screen1 extends DefaultScreen {
     }
 
     public void generalUpdate() {
-        if(Gdx.input.isKeyPressed(Keys.A)||Gdx.input.isKeyPressed(Keys.LEFT)){
-            handleHeroMoveLeft();
-        }
-        else if(Gdx.input.isKeyPressed(Keys.D)||Gdx.input.isKeyPressed(Keys.RIGHT)){
-            handleHeroMoveRight();
-        }
-
         testEnermyMoving();
     }
 
@@ -263,36 +221,33 @@ public class Screen1 extends DefaultScreen {
     }
 
     protected void setEnermyTexture() {
-        huey = new Bob(new Vector2(240, 1380));
-        dewey = new Bob(new Vector2(480, 1380));
-        boss = new Bob(new Vector2(320, 1300));
-        huey.setBobTexture("data/samsung-white/enemy0_0.png");
-        dewey.setBobTexture("data/samsung-white/enemy1_0.png");
-        boss.setBobTexture("data/samsung-white/boss2_0.png");
+        int enemyPosY = Gdx.graphics.getHeight()*3/4;
+        int enemyStepY = 60;
+        huey = new Bob(new Vector2(240, enemyPosY-enemyStepY));
+        dewey = new Bob(new Vector2(480, enemyPosY));
+        boss = new Bob(new Vector2(320, enemyPosY-(3*enemyStepY) ));
+        huey.setBobTexture("data/samsung-white/enemy0_0_53x.png");
+        dewey.setBobTexture("data/samsung-white/enemy1_1_53x.png");
+        boss.setBobTexture("data/samsung-white/boss2_0_53x73.png");
     }
 
     protected void initBobItem() {
-        bob.setBobTexture("data/samsung-white/hero3_1.png");
         Vector2 facing = new Vector2(bob.position.x, Gdx.graphics.getHeight()/5);
         Item item = new Item(0, bob.position, facing);
         item.setTexture(new Texture("data/samsung-white/item3_0.png"));
         bob.setItem(item);
-
-        Gdx.app.log("INFO", "Blondie ~~~~~~~~~ " + bob.position.x + " :) ------" + bob.position.y);
     }
 
     protected void initSpriteBatchAndHeroTexture () {
         batch = new SpriteBatch();
         ttrSplash = new Texture("data/samsung-white/menu_bg.png");
-        heroTexture = new Texture("data/samsung-white/hero3_1.png");
+        heroTexture = new Texture("data/samsung-white/hero3_1_60x80.png");
         bob = new Bob(new Sprite());
         bob.position.x = Gdx.graphics.getWidth()/2;
-        bob.position.y = Gdx.graphics.getHeight()*4/5;
+        bob.setBobTexture(new Texture("data/samsung-white/hero3_1_60x80.png"));
+        bob.position.y = Gdx.graphics.getHeight()/5-bob.getBobTexture().getHeight();
 
-//        bob.setBobTexture("data/samsung-white/hero3_1.png");
         fireBtnTexture = new Texture("data/samsung-white/fire.png");
-
-        Gdx.app.log("INFO", "Angel Eye :( " + bob.position.x + " :) ------" + bob.position.y);
     }
 
     protected void drawSplashBatch() {
@@ -303,24 +258,19 @@ public class Screen1 extends DefaultScreen {
     }
 
     protected void handleKeyMoveHero() {
-        if(Gdx.input.isKeyPressed(Keys.DPAD_LEFT))
-            heroX -= Gdx.graphics.getDeltaTime() * heroSpeed;
-        if(Gdx.input.isKeyPressed(Keys.DPAD_RIGHT))
-            heroX += Gdx.graphics.getDeltaTime() * heroSpeed;
-        if(Gdx.input.isKeyPressed(Keys.DPAD_UP))
-            heroY += Gdx.graphics.getDeltaTime() * heroSpeed;
-        if(Gdx.input.isKeyPressed(Keys.DPAD_DOWN))
-            heroY -= Gdx.graphics.getDeltaTime() * heroSpeed;
     }
 
     protected void testDrawHero() {
-        batch.draw(bob.getBobTexture(), (int)bob.position.x, (int)bob.position.y, 0, 0, 45, 60, 2, 2, 0, 0, 0, 45, 60, bob.facingLeft, false);
+        batch.draw(bob.getBobTexture(), (int)bob.position.x, (int)bob.position.y, 0, 0, 45, 60, 5/2, 5/2, 0, 0, 0, 45, 60, bob.facingLeft, false);
     }
 
     protected void testDrawInitPositionEnermy() {
-        batch.draw(huey.getBobTexture(), (int)huey.position.x, (int)huey.position.y, 0, 0, 40, 40, 2, 2, 0, 0, 0, 40, 40, huey.facingLeft, false);
-        batch.draw(dewey.getBobTexture(), (int)dewey.position.x, (int)dewey.position.y, 0, 0, 35, 40, 2, 2, 0, 0, 0, 35, 40, dewey.facingLeft, false);
-        batch.draw(boss.getBobTexture(), (int)boss.position.x, (int)boss.position.y, 0, 0, 40, 55, 2, 2, 0, 0, 0, 40, 55, boss.facingLeft, false);
+        batch.draw(huey.getBobTexture(), (int)huey.position.x, (int)huey.position.y, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), 2, 2, 0, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), huey.facingLeft, false);
+        batch.draw(dewey.getBobTexture(), (int)dewey.position.x, (int)dewey.position.y, 0, 0, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight(), 2, 2, 0, 0, 0, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight(), dewey.facingLeft, false);
+        batch.draw(boss.getBobTexture(), (int)boss.position.x, (int)boss.position.y, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), 2, 2, 0, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), boss.facingLeft, false);
+        huey.facingLeft = !huey.facingLeft;
+        dewey.facingLeft = !dewey.facingLeft;
+        boss.facingLeft = !boss.facingLeft;
     }
 
     protected void displayManualTextureDraw() {
@@ -329,30 +279,9 @@ public class Screen1 extends DefaultScreen {
     }
 
     protected void handleHeroMoveLeft() {
-        // TODO add bounce to sprite margin
-        if(heroX > 5) {
-            heroX -= 5;
-        }
-
-        bob.state = Bob.State.WALKING;
-        bob.facingLeft = true;
-
-        if(bob.position.x > 5) {
-            bob.position.x -= 8;
-        }
     }
 
     protected void handleHeroMoveRight() {
-        // TODO def constant
-        if(heroX < 1000) {
-            heroX += 5;
-        }
-        bob.state = Bob.State.WALKING;
-        bob.facingLeft = false;
-
-        if(bob.position.x < 1000) {
-            bob.position.x += 8;
-        }
     }
 
     protected void testEnermyMoving() {
@@ -362,7 +291,7 @@ public class Screen1 extends DefaultScreen {
         float rightBoundBoss = Gdx.graphics.getWidth() - boss.getBobTexture().getWidth();
 
         Random r = new Random();
-        // TODO random position when hit rightBound
+        // TODO random position when hit rightBound, Horizontal front line enemy move by step up/down
         if(huey.position.x >= rightBoundHuey) {
 //            huey.position.x = rightBoundHuey;
             int i1 = r.nextInt(180) + Gdx.graphics.getWidth()/3;
@@ -370,7 +299,7 @@ public class Screen1 extends DefaultScreen {
             dir1 = -1;
         }
         if(huey.position.x <= leftBound) {
-            huey.position.x = r.nextInt(180);
+            huey.position.x = r.nextInt(180) + bob.position.x;
             dir1 = 1;
         }
 
@@ -379,7 +308,7 @@ public class Screen1 extends DefaultScreen {
             dir2 = -1;
         }
         if(dewey.position.x <= leftBound) {
-            dewey.position.x = r.nextInt(360);
+            dewey.position.x = r.nextInt(60) + bob.position.x;
             dir2 = 1;
         }
 
@@ -388,7 +317,7 @@ public class Screen1 extends DefaultScreen {
             dir3 = -1;
         }
         if(boss.position.x <= leftBound) {
-            boss.position.x = r.nextInt(320);
+            boss.position.x = r.nextInt(30) + bob.position.x;
             dir3 = 1;
         }
 
@@ -433,20 +362,6 @@ public class Screen1 extends DefaultScreen {
 
         //Move blockSprite with TouchPad. TODO remove test code
 //        blockSprite.setX(blockSprite.getX() + touchpad.getKnobPercentX()*blockSpeed);
-//        blockSprite.setY(blockSprite.getY() + touchpad.getKnobPercentY()*blockSpeed);
-        // TODO use bob.getSprite
-        float leftBound = 0;
-        float rightBound = Gdx.graphics.getWidth() - bob.getBobTexture().getWidth();
-
-//        if(bob.position.x < leftBound) {
-//            bob.position.x = leftBound;
-//        }
-//        if(bob.position.x > rightBound) {
-//            bob.position.x = rightBound;
-//        }
-//        if((bob.position.x >= leftBound) && (bob.position.x <= rightBound) ) {
-//            bob.position.x = (bob.position.x + touchpad.getKnobPercentX()*heroSpeed);
-//        }
 
         handleHeroMoveBound();
 
@@ -454,7 +369,10 @@ public class Screen1 extends DefaultScreen {
         batch.enableBlending();
         batch.begin();
 //        blockSprite.draw(batch);
-        // TODO handle bound screen and animation player
+
+        batch.draw(bob.getBobTexture(), bob.position.x, bob.position.y, 0, 0, heroTexture.getWidth(), heroTexture.getHeight(), 2, 2, 0, 0, 0, heroTexture.getWidth(), heroTexture.getHeight(), bob.facingLeft, false);
+        bob.facingLeft = !bob.facingLeft;
+
         batch.end();
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
@@ -468,11 +386,12 @@ public class Screen1 extends DefaultScreen {
             // When zoom in/out ... the extract position may be difference. So the pointer pos after unproject may be reset to 0
 //            camera.unproject(touchPos);
             Rectangle textureBounds=new Rectangle(Gdx.graphics.getWidth()-fireBtnTexture.getWidth()-50, Gdx.graphics.getHeight()-50-fireBtnTexture.getHeight(), fireBtnTexture.getWidth(),fireBtnTexture.getHeight());
-//            Gdx.app.log("INFO", "I like it " + touchPos.x + " " + touchPos.y + " " + textureBounds.toString());
-            if(textureBounds.contains(touchPos.x, touchPos.y))
+            if(textureBounds.contains(touchPos.x, touchPos.y) && (heroFireState == false))
             {
 //                Gdx.app.log("INFO", "I like it when I feel your touch");
-                // you are touching your texture
+                heroFireState = true;
+            }
+            if(heroFireState) {
                 heroFire();
             }
         }
@@ -482,10 +401,20 @@ public class Screen1 extends DefaultScreen {
         Vector2 facing = new Vector2(bob.position.x, Gdx.graphics.getHeight()/5);
         bob.setItem(new Item(0, bob.position, facing));
         Item bobItem = bob.getItem();
+        bobItem.setVelocity(new Vector2(0, 12));
         bobItem.setTexture(new Texture("data/samsung-white/item3_0_36x.png"));
-        Gdx.app.log("INFO", bobItem.position.toString() + " hero ani " + bob.facingLeft);
+        Gdx.app.log("INFO", "snow x "+ bobItem.position.toString() + " delta "+ bobItem.getDelta());
+        Gdx.app.log("INFO", "vel x "+ bobItem.velocity.toString());
         bobItem.acting();
-        batch.draw(bobItem.getItemTexture(), bobItem.position.x, bobItem.position.y);
+        // 10 space between player and snow
+        Gdx.app.log("INFO", "snow after "+ bobItem.position.toString() + " delta "+ bobItem.getDelta());
+        Gdx.app.log("INFO", "vel after "+ bobItem.velocity.toString());
+        batch.draw(bobItem.getItemTexture(), bobItem.position.x+(bob.getBobTexture().getWidth()*2-10), bobItem.position.y+bob.getBobTexture().getHeight()/2, 0, 0, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight(), (float)1.3, (float)1.3, 0, 0, 0, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight(), false, false);
+        batch.draw(bob.getBobTexture(), bob.position.x, bob.position.y, 0, 0, heroTexture.getWidth(), heroTexture.getHeight(), 2, 2, 0, 0, 0, heroTexture.getWidth(), heroTexture.getHeight(), bob.facingLeft, false);
+
+        if(bobItem.position.y < Gdx.graphics.getHeight()/5) {
+            heroFireState = false;
+        }
     }
 
     // TODO firePos, itemType, power, direction, angle (gap)
@@ -514,14 +443,15 @@ public class Screen1 extends DefaultScreen {
             bob.position.x = rightBound;
         }
         if((bob.position.x >= leftBound) && (bob.position.x <= rightBound) ) {
-            bob.position.x += (bob.position.x + touchpad.getKnobPercentX() * heroSpeed);
+            bob.position.x = (bob.position.x + touchpad.getKnobPercentX() * heroSpeed);
         }
-        if(touchpad.getKnobPercentX() < 0) {
-            bob.facingLeft = true;
-        } else {
-            bob.facingLeft = false;
-        }
-        Gdx.app.log("INFO", "Left "+ leftBound + " right " + rightBound + " bob: " + bob.position.x + " y "+ bob.position.y);
+//        if(touchpad.getKnobPercentX() < 0) {
+//            bob.facingLeft = true;
+//        } else {
+//            bob.facingLeft = false;
+//        }
+
+//        Gdx.app.log("INFO", "Left "+ leftBound + " right " + rightBound + " bob: " + bob.position.x + " y "+ bob.position.y);
     }
 
 }
