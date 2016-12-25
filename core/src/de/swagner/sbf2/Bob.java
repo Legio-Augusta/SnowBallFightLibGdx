@@ -23,10 +23,11 @@ public class Bob {
     public Vector2  position = new Vector2();
     Vector2  acceleration = new Vector2();
     Vector2  velocity = new Vector2();
-    Rectangle  bounds = new Rectangle();
+    private Rectangle  bounds = new Rectangle();
     public State  state = State.IDLE;
     public boolean  facingLeft = true;
 
+    private int hp = 12; // 120
     private Texture bobTexture;
     private Sprite sprite;
     // snow or stone item used in firing
@@ -35,7 +36,7 @@ public class Bob {
     public Bob(Vector2 position) {
         this.position = position;
         this.bounds.height = SIZE;
-        this.bounds.width = SIZE;
+        bounds = new Rectangle(0, 0, 0, 0);
     }
     public void update(Matrix3 delta) {
         position.add(velocity.cpy().mul(delta));
@@ -69,6 +70,28 @@ public class Bob {
     }
     public Item getItem() {
         return this.item;
+    }
+
+    public void setBound(Rectangle rect) {
+        this.bounds = rect;
+    }
+    public Rectangle getBound() {
+        return this.bounds;
+    }
+
+    public void setHp(int hp) {
+        this.hp = hp;
+    }
+    public int getHp() {
+        return this.hp;
+    }
+
+    public void loseHp(int damage) {
+        this.hp -= damage;
+    }
+
+    public boolean isDead() {
+        return (this.hp <= 0) ? true : false;
     }
 
 }

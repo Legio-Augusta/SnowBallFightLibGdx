@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
@@ -13,7 +14,8 @@ public class Item extends Sprite {
 
 	protected float turnSpeed = 1.0f;
 	protected float accel = 0.0f;
-	protected float hitPoints = 0;
+	protected float hitPoints = 12;
+	protected int damage = 12;
 
 	protected float maxHitPoints = 0;
 
@@ -31,9 +33,7 @@ public class Item extends Sprite {
 
 	public boolean alive = true;
 
-	private float deathCounter = 50f;
-	private float nextExplosion = 10f;
-	private float opacity = 5.0f;
+	private Rectangle bounds;
 	private Texture itemTexture;
 
 	public Item(int id, Vector2 position, Vector2 facing) {
@@ -51,6 +51,7 @@ public class Item extends Sprite {
 		collisionPoints.add(new Vector2());
 
 		this.setOrigin(this.getWidth() / 2.f, this.getHeight() / 2.f);
+		bounds = new Rectangle(0, 0, 0, 0);
 	}
 
 	@Override
@@ -163,6 +164,20 @@ public class Item extends Sprite {
 
 	public float getDelta() {
 		return this.delta;
+	}
+
+	public void setBound(Rectangle rect) {
+		this.bounds = rect;
+	}
+	public Rectangle getBound() {
+		return this.bounds;
+	}
+
+	public void setDamage(int damage) {
+		this.damage = damage;
+	}
+	public int getDamage() {
+		return this.damage;
 	}
 
 }
