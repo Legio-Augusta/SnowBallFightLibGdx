@@ -15,6 +15,7 @@ android {
 
         instrumentTest.setRoot('tests')
     }
+    buildToolsVersion '25.0.0'
 }
 
 // called every time gradle gets executed, takes the native dependencies of
