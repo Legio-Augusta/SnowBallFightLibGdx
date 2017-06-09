@@ -3,15 +3,11 @@ package de.swagner.sbf2.sgh_900;
 /**
  * Created by nickfarow on 21/10/2016.
  */
-public class SnowBallFight {
-}
 
-/*
-import javax.microedition.lcdui.Display;
-        import javax.microedition.midlet.MIDlet;
+import de.swagner.sbf2.sgh_900.microedition.lcdui.Display;
+import de.swagner.sbf2.sgh_900.microedition.midlet.MIDlet;
 
-public class SnowBallFight
-        extends MIDlet
+public class SnowBallFight extends MIDlet
 {
     public void startApp()
     {
@@ -23,4 +19,3 @@ public class SnowBallFight
 
     public void pauseApp() {}
 }
-*/

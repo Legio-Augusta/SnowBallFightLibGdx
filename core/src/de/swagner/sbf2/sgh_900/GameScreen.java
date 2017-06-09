@@ -4,27 +4,19 @@ package de.swagner.sbf2.sgh_900;
  * Created by nickfarow on 21/10/2016.
  */
 
-//import com.samsung.util.AudioClip;
-//import com.samsung.util.Vibration;
+import de.swagner.sbf2.sgh_900.samsung.util.AudioClip;
+import de.swagner.sbf2.sgh_900.samsung.util.Vibration;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.util.Random;
-//import javax.microedition.lcdui.Canvas;
-//import javax.microedition.lcdui.Graphics;
-//import javax.microedition.lcdui.Image;
-//import javax.microedition.midlet.MIDlet;
-//import javax.microedition.rms.RecordStore;
+import de.swagner.sbf2.sgh_900.microedition.lcdui.*;
+/*import de.swagner.sbf2.sgh_900.microedition.lcdui.Graphics;
+import de.swagner.sbf2.sgh_900.microedition.lcdui.Image;*/
+import de.swagner.sbf2.sgh_900.microedition.rms.RecordStore;
 
-class GameScreen {
-
-}
-
-/*
-class GameScreen
-        extends Canvas
-        implements Runnable
+class GameScreen extends Canvas implements Runnable
 {
     private static final int DEFAULT_DEM = 12;
     RecordStore recordStore = null;
@@ -3371,4 +3363,3 @@ class GameScreen
         this.d_gauge = 2;
     }
 }
-*/
