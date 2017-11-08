@@ -28,6 +28,8 @@ public class Bob {
     public boolean  facingLeft = true;
 
     private int hp = 12; // 120
+    // TODO private e_move_dir
+    public int e_move_dir = 1; // Default e_move_dir = 1 to avoid init() and/or e_move_ai() call in original J2ME.
     private Texture bobTexture;
     private Sprite sprite;
     // snow or stone item used in firing

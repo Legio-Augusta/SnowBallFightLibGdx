@@ -230,7 +230,9 @@ public class Screen1 extends DefaultScreen {
     protected void setEnermyTexture() {
         int enemyPosY = Gdx.graphics.getHeight()*3/4;
         int enemyStepY = 60;
-        huey = new Bob(new Vector2(240, enemyPosY-enemyStepY));
+//        huey = new Bob(new Vector2(240, enemyPosY-enemyStepY));
+        // Try J2ME original: 5px is old cell in map (120px = 24 * 5) In 1080 = 120 * 9. But because of sprite scale we try 4.5 instead of 9.
+        huey = new Bob(new Vector2((int)240/(5*9/2), (enemyPosY-enemyStepY)/(5*9/2) ));
         dewey = new Bob(new Vector2(480, enemyPosY));
         boss = new Bob(new Vector2(320, enemyPosY-(3*enemyStepY) ));
         huey.setBobTexture("data/samsung-white/enemy0_0_53x.png");
@@ -277,9 +279,27 @@ public class Screen1 extends DefaultScreen {
         batch.draw(bob.getBobTexture(), (int)bob.position.x, (int)bob.position.y, 0, 0, 45, 60, 5/2, 5/2, 0, 0, 0, 45, 60, bob.facingLeft, false);
     }
 
-    protected void testDrawInitPositionEnermy() {
+    protected void oldTestDrawInitPositionEnermy() {
         if(!huey.isDead()) {
             batch.draw(huey.getBobTexture(), (int)huey.position.x, (int)huey.position.y, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), 2, 2, 0, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), huey.facingLeft, false);
+            huey.facingLeft = !huey.facingLeft;
+        }
+        if(!dewey.isDead()) {
+            batch.draw(dewey.getBobTexture(), (int)dewey.position.x, (int)dewey.position.y, 0, 0, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight(), 2, 2, 0, 0, 0, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight(), dewey.facingLeft, false);
+            dewey.facingLeft = !dewey.facingLeft;
+        }
+        if(!boss.isDead()) {
+            batch.draw(boss.getBobTexture(), (int)boss.position.x, (int)boss.position.y, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), 2, 2, 0, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), boss.facingLeft, false);
+            boss.facingLeft = !boss.facingLeft;
+        }
+    }
+
+    /*
+    * Try use old J2ME logic to render position of enemy
+    * */
+    protected void testDrawInitPositionEnermy() {
+        if(!huey.isDead()) {
+            batch.draw(huey.getBobTexture(), (int)huey.position.x*(5*9/2), (int)huey.position.y*(5*9/2), 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), 2, 2, 0, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), huey.facingLeft, false);
             huey.facingLeft = !huey.facingLeft;
         }
         if(!dewey.isDead()) {
@@ -303,7 +323,99 @@ public class Screen1 extends DefaultScreen {
     protected void handleHeroMoveRight() {
     }
 
+    /*
+    * Update 8-Nov-2017.
+    * Try use original e_move() from J2ME.
+    * */
     protected void testEnermyMoving() {
+        int i = huey.e_move_dir;
+        if ((i >= 1) && (i < 8))
+        {
+            i++;
+            if (i == 8) {
+                i = 100;
+            }
+        }
+        else if ((i >= 21) && (i < 31))
+        {
+            i++;
+            if ((huey.position.x != 2) && (i % 3 == 0)) {
+                huey.position.x -= 1;
+            }
+            if (i == 31) {
+                i = 100;
+            }
+        }
+        else if ((i > -31) && (i <= -21))
+        {
+            i--;
+            if ((huey.position.x != 22) && (i % 3 == 0)) {
+                huey.position.x += 1;
+            }
+            if (i == -31) {
+                i = 100;
+            }
+        }
+        else if ((i >= 11) && (i < 14))
+        {
+            i++;
+            if ((huey.position.y != 1) && (i % 2 == 0)) {
+                huey.position.y -= 1;
+            }
+            if (i == 14) {
+                i = 100;
+            }
+        }
+        else if ((i > -14) && (i <= -11))
+        {
+            i--;
+            if ((huey.position.y != 7) && (i % 2 == 0)) {
+                huey.position.y += 1;
+            }
+            if (i == -14) {
+                i = 100;
+            }
+        }
+        huey.e_move_dir = i;
+
+        float leftBound = 0;
+        float rightBoundHuey = Gdx.graphics.getWidth() - huey.getBobTexture().getWidth();
+        float rightBoundDewey = Gdx.graphics.getWidth() - dewey.getBobTexture().getWidth();
+        float rightBoundBoss = Gdx.graphics.getWidth() - boss.getBobTexture().getWidth();
+
+        Random r = new Random();
+        // TODO random position when hit rightBound, Horizontal front line enemy move by step up/down
+
+        if(dewey.position.x >= rightBoundDewey) {
+            dewey.position.x = rightBoundDewey;
+            dir2 = -1;
+        }
+        if(dewey.position.x <= leftBound) {
+            dewey.position.x = r.nextInt(60) + bob.position.x;
+            dir2 = 1;
+        }
+
+        if(boss.position.x >= rightBoundBoss) {
+            boss.position.x = rightBoundBoss;
+            dir3 = -1;
+        }
+        if(boss.position.x <= leftBound) {
+            boss.position.x = r.nextInt(30) + bob.position.x;
+            dir3 = 1;
+        }
+
+        if((dewey.position.x >= leftBound) && (dewey.position.x <= rightBoundDewey)) {
+            int tmp = (dir2 != 0) ? dir2 : 1;
+            dewey.position.x += enemySpeed * tmp;
+        }
+//        Gdx.app.log("INFO", " bot " + dewey.position.x + " right " + rightBoundDewey + " dir " + dir2);
+        if(boss.position.x >= leftBound && (boss.position.x <= rightBoundBoss)) {
+            int tmp = (dir3 != 0) ? dir3 : 1;
+            boss.position.x  += enemySpeed * tmp;
+        }
+    }
+
+    protected void oldTestEnermyMoving() {
         float leftBound = 0;
         float rightBoundHuey = Gdx.graphics.getWidth() - huey.getBobTexture().getWidth();
         float rightBoundDewey = Gdx.graphics.getWidth() - dewey.getBobTexture().getWidth();
