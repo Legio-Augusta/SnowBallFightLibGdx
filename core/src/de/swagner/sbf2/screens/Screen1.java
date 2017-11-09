@@ -66,6 +66,7 @@ public class Screen1 extends DefaultScreen {
 
     // Hero state
 
+    private Random rnd = new Random();
 
     // Test touchpad
     private Stage stage;
@@ -83,6 +84,7 @@ public class Screen1 extends DefaultScreen {
     public static int GAMESTATE_WIN = 1;
     public static int GAMESTATE_LOSE = 2;
     public static int GAMESTATE_PLAYING = 0;
+    public static float sgh_120_1080_screen_ratio = (5*9/2);
 
     public Screen1(Game game) {
         super(game);
@@ -144,6 +146,46 @@ public class Screen1 extends DefaultScreen {
         camera.update();
         generalUpdate();
 //        batch.setProjectionMatrix(camera.combined);
+
+        if (huey.e_move_dir >= 100)
+        {
+            Gdx.app.log("INFO", "E move dir > 100:" + huey.e_move_dir + " --x-- "+ huey.position.x + " "
+                    + huey.position.y);
+            huey.e_move_dir += 1;
+            if (huey.e_move_dir == 120) {
+                huey.e_move_dir = 0;
+            }
+        }
+        else if ((huey.e_move_dir == 0) && (!huey.isDead()))
+        {
+            Gdx.app.log("INFO", "E move dir = 0 AI :"+ huey.e_move_dir + " --x--" + huey.position.x + " " + huey.position.y);
+            e_move_ai();
+        }
+        else if ((huey.e_move_dir < 100) && (huey.e_move_dir != 0) && (!huey.isDead()))
+        {
+            Gdx.app.log("INFO", "E move dir = 0 AI :"+ huey.e_move_dir + " --x--" + huey.position.x + " " + huey.position.y);
+            e_move();
+        }
+
+        if (dewey.e_move_dir >= 100)
+        {
+            Gdx.app.log("INFO", "E move dir > 100:" + dewey.e_move_dir + " --x-- "+ dewey.position.x + " "
+                    + dewey.position.y);
+            dewey.e_move_dir += 1;
+            if (dewey.e_move_dir == 120) {
+                dewey.e_move_dir = 0;
+            }
+        }
+        else if ((dewey.e_move_dir == 0) && (!dewey.isDead()))
+        {
+            Gdx.app.log("INFO", "E move dir = 0 AI :"+ dewey.e_move_dir + " --x--" + dewey.position.x + " " + dewey.position.y);
+            e_move_ai2();
+        }
+        else if ((dewey.e_move_dir < 100) && (dewey.e_move_dir != 0) && (!dewey.isDead()))
+        {
+            Gdx.app.log("INFO", "E move dir = 0 AI :"+ dewey.e_move_dir + " --x--" + dewey.position.x + " " + dewey.position.y);
+            e_move2();
+        }
 
         drawSplashBatch();
         drawTouchPad();
@@ -232,14 +274,14 @@ public class Screen1 extends DefaultScreen {
         int enemyStepY = 60;
 //        huey = new Bob(new Vector2(240, enemyPosY-enemyStepY));
         // Try J2ME original: 5px is old cell in map (120px = 24 * 5) In 1080 = 120 * 9. But because of sprite scale we try 4.5 instead of 9.
-        huey = new Bob(new Vector2((int)240/(5*9/2), (enemyPosY-enemyStepY)/(5*9/2) ));
-        dewey = new Bob(new Vector2(480, enemyPosY));
+        huey = new Bob(new Vector2(240/sgh_120_1080_screen_ratio, (enemyPosY-enemyStepY)/sgh_120_1080_screen_ratio ));
+        dewey = new Bob(new Vector2(480/sgh_120_1080_screen_ratio, enemyPosY/sgh_120_1080_screen_ratio));
         boss = new Bob(new Vector2(320, enemyPosY-(3*enemyStepY) ));
-        huey.setBobTexture("data/samsung-white/enemy0_0_53x.png");
+        huey.setBobTexture("data/samsung-white/enemy0_0_60x.png");
         dewey.setBobTexture("data/samsung-white/enemy1_1_53x.png");
         boss.setBobTexture("data/samsung-white/boss2_0_53x73.png");
 
-        huey.setBound(new Rectangle(huey.position.x, huey.position.y, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight()));
+        huey.setBound(new Rectangle(huey.position.x*sgh_120_1080_screen_ratio, huey.position.y*sgh_120_1080_screen_ratio, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight()));
         dewey.setBound(new Rectangle(dewey.position.x, dewey.position.y, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight()));
         boss.setBound(new Rectangle(boss.position.x, boss.position.y, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight()));
     }
@@ -299,17 +341,25 @@ public class Screen1 extends DefaultScreen {
     * */
     protected void testDrawInitPositionEnermy() {
         if(!huey.isDead()) {
-            batch.draw(huey.getBobTexture(), (int)huey.position.x*(5*9/2), (int)huey.position.y*(5*9/2), 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), 2, 2, 0, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), huey.facingLeft, false);
+            batch.draw(huey.getBobTexture(), (int)huey.position.x*sgh_120_1080_screen_ratio, (int)huey.position.y*sgh_120_1080_screen_ratio, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), 2, 2, 0, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), huey.facingLeft, false);
             huey.facingLeft = !huey.facingLeft;
         }
         if(!dewey.isDead()) {
-            batch.draw(dewey.getBobTexture(), (int)dewey.position.x, (int)dewey.position.y, 0, 0, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight(), 2, 2, 0, 0, 0, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight(), dewey.facingLeft, false);
+            batch.draw(dewey.getBobTexture(), (int)dewey.position.x*sgh_120_1080_screen_ratio, (int)dewey.position.y*sgh_120_1080_screen_ratio, 0, 0, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight(), 2, 2, 0, 0, 0, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight(), dewey.facingLeft, false);
             dewey.facingLeft = !dewey.facingLeft;
         }
         if(!boss.isDead()) {
             batch.draw(boss.getBobTexture(), (int)boss.position.x, (int)boss.position.y, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), 2, 2, 0, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), boss.facingLeft, false);
             boss.facingLeft = !boss.facingLeft;
         }
+    }
+
+    /*
+    * J2ME original
+    * */
+    public void draw_enemy()
+    {
+
     }
 
     protected void displayManualTextureDraw() {
@@ -324,10 +374,9 @@ public class Screen1 extends DefaultScreen {
     }
 
     /*
-    * Update 8-Nov-2017.
-    * Try use original e_move() from J2ME.
+    * Try ony huey instead of array
     * */
-    protected void testEnermyMoving() {
+    protected void e_move() {
         int i = huey.e_move_dir;
         if ((i >= 1) && (i < 8))
         {
@@ -378,6 +427,189 @@ public class Screen1 extends DefaultScreen {
         }
         huey.e_move_dir = i;
 
+    }
+
+    protected void e_move2() {
+        // Dewey
+        int i2 = dewey.e_move_dir;
+        if ((i2 >= 1) && (i2 < 8))
+        {
+            i2++;
+            if (i2 == 8) {
+                i2 = 100;
+            }
+        }
+        else if ((i2 >= 21) && (i2 < 31))
+        {
+            i2++;
+            if ((dewey.position.x != 2) && (i2 % 3 == 0)) {
+                dewey.position.x -= 1;
+            }
+            if (i2 == 31) {
+                i2 = 100;
+            }
+        }
+        else if ((i2 > -31) && (i2 <= -21))
+        {
+            i2--;
+            if ((dewey.position.x != 22) && (i2 % 3 == 0)) {
+                dewey.position.x += 1;
+            }
+            if (i2 == -31) {
+                i2 = 100;
+            }
+        }
+        else if ((i2 >= 11) && (i2 < 14))
+        {
+            i2++;
+            if ((dewey.position.y != 1) && (i2 % 2 == 0)) {
+                dewey.position.y -= 1;
+            }
+            if (i2 == 14) {
+                i2 = 100;
+            }
+        }
+        else if ((i2 > -14) && (i2 <= -11))
+        {
+            i2--;
+            if ((dewey.position.y != 7) && (i2 % 2 == 0)) {
+                dewey.position.y += 1;
+            }
+            if (i2 == -14) {
+                i2 = 100;
+            }
+        }
+        dewey.e_move_dir = i2;
+    }
+
+    protected void e_move_ai() {
+        int i;
+        if (((int)huey.position.x == 2))
+        {
+            i = get_random(4);
+            if ((i == 0) || (i == 1)) {
+                huey.e_move_dir = -21;
+            } else if (i == 2) {
+                huey.e_move_dir = -11;
+            } else if (i == 3) {
+                huey.e_move_dir = 11;
+            }
+        }
+        else if (((int)huey.position.x == 22) || (((int)huey.position.x >= 14)))
+        {
+            i = get_random(4);
+            if ((i == 0) || (i == 1)) {
+                huey.e_move_dir = 21;
+            } else if (i == 2) {
+                huey.e_move_dir = -11;
+            } else if (i == 3) {
+                huey.e_move_dir = 11;
+            }
+        }
+        else if (((int)huey.position.y == 6) || ((int)huey.position.y == 7))
+        {
+            i = get_random(4);
+            if ((i == 1) || (i == 2)) {
+                huey.e_move_dir = 11;
+            } else if (i == 0) {
+                huey.e_move_dir = 21;
+            } else if (i == 1) {
+                huey.e_move_dir = -21;
+            }
+        }
+        else
+        {
+            i = get_random(8);
+            if ((i == 0) || (i == 1)) {
+                huey.e_move_dir = 21;
+            } else if ((i == 2) || (i == 3)) {
+                huey.e_move_dir = -21;
+            } else if (i == 4) {
+                huey.e_move_dir = 11;
+            } else if (i == 5) {
+                huey.e_move_dir = -11;
+            } else {
+                huey.e_move_dir = 1;
+            }
+        }
+    }
+
+    protected void e_move_ai2() {
+        int i;
+        if (((int)dewey.position.x == 2))
+        {
+            i = get_random(4);
+            if ((i == 0) || (i == 1)) {
+                dewey.e_move_dir = -21;
+            } else if (i == 2) {
+                dewey.e_move_dir = -11;
+            } else if (i == 3) {
+                dewey.e_move_dir = 11;
+            }
+        }
+        else if (((int)dewey.position.x == 22) || (((int)dewey.position.x >= 14)))
+        {
+            i = get_random(4);
+            if ((i == 0) || (i == 1)) {
+                dewey.e_move_dir = 21;
+            } else if (i == 2) {
+                dewey.e_move_dir = -11;
+            } else if (i == 3) {
+                dewey.e_move_dir = 11;
+            }
+        }
+        else if (((int)dewey.position.y == 6) || ((int)dewey.position.y == 7))
+        {
+            i = get_random(4);
+            if ((i == 1) || (i == 2)) {
+                dewey.e_move_dir = 11;
+            } else if (i == 0) {
+                dewey.e_move_dir = 21;
+            } else if (i == 1) {
+                dewey.e_move_dir = -21;
+            }
+        }
+        else
+        {
+            i = get_random(8);
+            if ((i == 0) || (i == 1)) {
+                dewey.e_move_dir = 21;
+            } else if ((i == 2) || (i == 3)) {
+                dewey.e_move_dir = -21;
+            } else if (i == 4) {
+                dewey.e_move_dir = 11;
+            } else if (i == 5) {
+                dewey.e_move_dir = -11;
+            } else {
+                dewey.e_move_dir = 1;
+            }
+        }
+    }
+
+    public int get_random(int paramInt)
+    {
+        int i = this.rnd.nextInt() % paramInt;
+        if (i < 0) {
+            i = -i;
+        }
+        return i;
+    }
+
+    public int get_random1(int paramInt)
+    {
+        int i = this.rnd.nextInt() % paramInt;
+        if (i == 0) {
+            i = -5;
+        }
+        return i;
+    }
+
+    /*
+    * Update 8-Nov-2017.
+    * Try use original e_move() from J2ME.
+    * */
+    protected void testEnermyMoving() {
+
         float leftBound = 0;
         float rightBoundHuey = Gdx.graphics.getWidth() - huey.getBobTexture().getWidth();
         float rightBoundDewey = Gdx.graphics.getWidth() - dewey.getBobTexture().getWidth();
@@ -386,12 +618,20 @@ public class Screen1 extends DefaultScreen {
         Random r = new Random();
         // TODO random position when hit rightBound, Horizontal front line enemy move by step up/down
 
+        if(huey.position.x >= rightBoundHuey) {
+            int i1 = r.nextInt(180) + Gdx.graphics.getWidth()/3;
+            huey.position.x = i1/sgh_120_1080_screen_ratio;
+        }
+        if(huey.position.x <= leftBound) {
+            huey.position.x = (r.nextInt(180) + bob.position.x)/sgh_120_1080_screen_ratio;
+        }
+
         if(dewey.position.x >= rightBoundDewey) {
-            dewey.position.x = rightBoundDewey;
+            dewey.position.x = rightBoundDewey/sgh_120_1080_screen_ratio;
             dir2 = -1;
         }
         if(dewey.position.x <= leftBound) {
-            dewey.position.x = r.nextInt(60) + bob.position.x;
+            dewey.position.x = (r.nextInt(60) + bob.position.x)/sgh_120_1080_screen_ratio;
             dir2 = 1;
         }
 
@@ -404,10 +644,10 @@ public class Screen1 extends DefaultScreen {
             dir3 = 1;
         }
 
-        if((dewey.position.x >= leftBound) && (dewey.position.x <= rightBoundDewey)) {
+/*        if((dewey.position.x >= leftBound) && (dewey.position.x <= rightBoundDewey)) {
             int tmp = (dir2 != 0) ? dir2 : 1;
             dewey.position.x += enemySpeed * tmp;
-        }
+        }*/
 //        Gdx.app.log("INFO", " bot " + dewey.position.x + " right " + rightBoundDewey + " dir " + dir2);
         if(boss.position.x >= leftBound && (boss.position.x <= rightBoundBoss)) {
             int tmp = (dir3 != 0) ? dir3 : 1;
