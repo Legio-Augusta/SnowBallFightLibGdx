@@ -1,6 +1,7 @@
 package de.swagner.sbf2.screens;
 
 import de.swagner.sbf2.Bob;
+import de.swagner.sbf2.Boss;
 import de.swagner.sbf2.Item;
 
 import com.badlogic.gdx.Game;
@@ -49,16 +50,13 @@ public class Screen1 extends DefaultScreen {
     // TODO loop create sprite
     private Bob huey;
     private Bob dewey;
-    private Bob boss;
+    private Boss boss;
 
     private Texture bobTexture;
 
     float stateTime;
 
     // enemy move dir
-    private int dir1 = 0;
-    private int dir2 = 0;
-    private int dir3 = 0;
 
     // Enermy state
 
@@ -84,7 +82,7 @@ public class Screen1 extends DefaultScreen {
     public static int GAMESTATE_WIN = 1;
     public static int GAMESTATE_LOSE = 2;
     public static int GAMESTATE_PLAYING = 0;
-    public static float sgh_120_1080_screen_ratio = (5*9/2);
+    public static float sgh_120_1080_screen_ratio = (5*9); // (5*9/2)
 
     public Screen1(Game game) {
         super(game);
@@ -149,7 +147,7 @@ public class Screen1 extends DefaultScreen {
 
         if (huey.e_move_dir >= 100)
         {
-            Gdx.app.log("INFO", "E move dir > 100:" + huey.e_move_dir + " --x-- "+ huey.position.x + " "
+            Gdx.app.log("INFO", "Huey move dir > 100:" + huey.e_move_dir + " --x-- "+ huey.position.x + " y "
                     + huey.position.y);
             huey.e_move_dir += 1;
             if (huey.e_move_dir == 120) {
@@ -158,18 +156,18 @@ public class Screen1 extends DefaultScreen {
         }
         else if ((huey.e_move_dir == 0) && (!huey.isDead()))
         {
-            Gdx.app.log("INFO", "E move dir = 0 AI :"+ huey.e_move_dir + " --x--" + huey.position.x + " " + huey.position.y);
+            Gdx.app.log("INFO", "Huey move dir = 0 AI :"+ huey.e_move_dir + " --x--" + huey.position.x + " y " + huey.position.y);
             e_move_ai();
         }
         else if ((huey.e_move_dir < 100) && (huey.e_move_dir != 0) && (!huey.isDead()))
         {
-            Gdx.app.log("INFO", "E move dir = 0 AI :"+ huey.e_move_dir + " --x--" + huey.position.x + " " + huey.position.y);
+            Gdx.app.log("INFO", "Huey move dir = 0 AI :"+ huey.e_move_dir + " --x--" + huey.position.x + " y " + huey.position.y);
             e_move();
         }
 
         if (dewey.e_move_dir >= 100)
         {
-            Gdx.app.log("INFO", "E move dir > 100:" + dewey.e_move_dir + " --x-- "+ dewey.position.x + " "
+            Gdx.app.log("INFO", "Dewey move dir > 100:" + dewey.e_move_dir + " --x-- "+ dewey.position.x + " y "
                     + dewey.position.y);
             dewey.e_move_dir += 1;
             if (dewey.e_move_dir == 120) {
@@ -178,13 +176,29 @@ public class Screen1 extends DefaultScreen {
         }
         else if ((dewey.e_move_dir == 0) && (!dewey.isDead()))
         {
-            Gdx.app.log("INFO", "E move dir = 0 AI :"+ dewey.e_move_dir + " --x--" + dewey.position.x + " " + dewey.position.y);
-            e_move_ai2();
+            Gdx.app.log("INFO", "Dewey move dir = 0 AI : "+ dewey.e_move_dir + " --x--" + dewey.position.x + " y " + dewey.position.y);
+            dewey.e_move_ai2();
         }
         else if ((dewey.e_move_dir < 100) && (dewey.e_move_dir != 0) && (!dewey.isDead()))
         {
-            Gdx.app.log("INFO", "E move dir = 0 AI :"+ dewey.e_move_dir + " --x--" + dewey.position.x + " " + dewey.position.y);
-            e_move2();
+            Gdx.app.log("INFO", "Dewey move dir = 0 AI : "+ dewey.e_move_dir + " --x--" + dewey.position.x + " y " + dewey.position.y);
+            dewey.e_move2();
+        }
+
+        if (boss.e_boss_move_dir >= 100)
+        {
+            boss.e_boss_move_dir += 1;
+            if (boss.e_boss_move_dir == 115) {
+                boss.e_boss_move_dir = 0;
+            }
+        }
+        else if ((boss.e_boss_move_dir == 0) && (!boss.isDead()))
+        {
+            boss.boss_move_ai();
+        }
+        else if ((boss.e_boss_move_dir != 0) && (!boss.isDead()))
+        {
+            boss.boss_move();
         }
 
         drawSplashBatch();
@@ -270,20 +284,25 @@ public class Screen1 extends DefaultScreen {
     }
 
     protected void setEnermyTexture() {
-        int enemyPosY = Gdx.graphics.getHeight()*3/4;
-        int enemyStepY = 60;
+        // With ratio 4:3 on SGH X550 or X357 120x160, SGH 930 (S7) 1080x1920, to keep ratio 4:3 we need crop 1920 to use only 1440.
+        // On 380px space, place 180 or 200px for fire, move btn. 200px on top is space.
+        // So on J2ME original enemy seem to move on 1/4 of screen height (3 cell +1 /32 cell 5px).
+        // That mean enemy should move on 1080 to 1440 on 360px vertical distance.
+        // TODO handle screen size ratio multi screen.
+        int enemyPosY = Gdx.graphics.getHeight()*3/4-180;
+        int enemyStepY = 45; // 5 * 9 (5px from orig J2ME), 9 on scale up resolution.
 //        huey = new Bob(new Vector2(240, enemyPosY-enemyStepY));
         // Try J2ME original: 5px is old cell in map (120px = 24 * 5) In 1080 = 120 * 9. But because of sprite scale we try 4.5 instead of 9.
         huey = new Bob(new Vector2(240/sgh_120_1080_screen_ratio, (enemyPosY-enemyStepY)/sgh_120_1080_screen_ratio ));
         dewey = new Bob(new Vector2(480/sgh_120_1080_screen_ratio, enemyPosY/sgh_120_1080_screen_ratio));
-        boss = new Bob(new Vector2(320, enemyPosY-(3*enemyStepY) ));
+        boss = new Boss(new Vector2(320/sgh_120_1080_screen_ratio, (enemyPosY-(3*enemyStepY))/sgh_120_1080_screen_ratio ));
         huey.setBobTexture("data/samsung-white/enemy0_0_60x.png");
-        dewey.setBobTexture("data/samsung-white/enemy1_1_53x.png");
-        boss.setBobTexture("data/samsung-white/boss2_0_53x73.png");
+        dewey.setBobTexture("data/samsung-white/enemy1_1_60x.png");
+        boss.setBobTexture("data/samsung-white/boss2_0_60x.png");
 
         huey.setBound(new Rectangle(huey.position.x*sgh_120_1080_screen_ratio, huey.position.y*sgh_120_1080_screen_ratio, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight()));
-        dewey.setBound(new Rectangle(dewey.position.x, dewey.position.y, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight()));
-        boss.setBound(new Rectangle(boss.position.x, boss.position.y, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight()));
+        dewey.setBound(new Rectangle(dewey.position.x*sgh_120_1080_screen_ratio, dewey.position.y*sgh_120_1080_screen_ratio, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight()));
+        boss.setBound(new Rectangle(boss.position.x*sgh_120_1080_screen_ratio, boss.position.y*sgh_120_1080_screen_ratio, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight()));
     }
 
     protected void initBobItem() {
@@ -349,7 +368,7 @@ public class Screen1 extends DefaultScreen {
             dewey.facingLeft = !dewey.facingLeft;
         }
         if(!boss.isDead()) {
-            batch.draw(boss.getBobTexture(), (int)boss.position.x, (int)boss.position.y, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), 2, 2, 0, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), boss.facingLeft, false);
+            batch.draw(boss.getBobTexture(), (int)boss.position.x*sgh_120_1080_screen_ratio, (int)boss.position.y*sgh_120_1080_screen_ratio, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), 2, 2, 0, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), boss.facingLeft, false);
             boss.facingLeft = !boss.facingLeft;
         }
     }
@@ -429,59 +448,6 @@ public class Screen1 extends DefaultScreen {
 
     }
 
-    protected void e_move2() {
-        // Dewey
-        int i2 = dewey.e_move_dir;
-        if ((i2 >= 1) && (i2 < 8))
-        {
-            i2++;
-            if (i2 == 8) {
-                i2 = 100;
-            }
-        }
-        else if ((i2 >= 21) && (i2 < 31))
-        {
-            i2++;
-            if ((dewey.position.x != 2) && (i2 % 3 == 0)) {
-                dewey.position.x -= 1;
-            }
-            if (i2 == 31) {
-                i2 = 100;
-            }
-        }
-        else if ((i2 > -31) && (i2 <= -21))
-        {
-            i2--;
-            if ((dewey.position.x != 22) && (i2 % 3 == 0)) {
-                dewey.position.x += 1;
-            }
-            if (i2 == -31) {
-                i2 = 100;
-            }
-        }
-        else if ((i2 >= 11) && (i2 < 14))
-        {
-            i2++;
-            if ((dewey.position.y != 1) && (i2 % 2 == 0)) {
-                dewey.position.y -= 1;
-            }
-            if (i2 == 14) {
-                i2 = 100;
-            }
-        }
-        else if ((i2 > -14) && (i2 <= -11))
-        {
-            i2--;
-            if ((dewey.position.y != 7) && (i2 % 2 == 0)) {
-                dewey.position.y += 1;
-            }
-            if (i2 == -14) {
-                i2 = 100;
-            }
-        }
-        dewey.e_move_dir = i2;
-    }
-
     protected void e_move_ai() {
         int i;
         if (((int)huey.position.x == 2))
@@ -534,58 +500,6 @@ public class Screen1 extends DefaultScreen {
         }
     }
 
-    protected void e_move_ai2() {
-        int i;
-        if (((int)dewey.position.x == 2))
-        {
-            i = get_random(4);
-            if ((i == 0) || (i == 1)) {
-                dewey.e_move_dir = -21;
-            } else if (i == 2) {
-                dewey.e_move_dir = -11;
-            } else if (i == 3) {
-                dewey.e_move_dir = 11;
-            }
-        }
-        else if (((int)dewey.position.x == 22) || (((int)dewey.position.x >= 14)))
-        {
-            i = get_random(4);
-            if ((i == 0) || (i == 1)) {
-                dewey.e_move_dir = 21;
-            } else if (i == 2) {
-                dewey.e_move_dir = -11;
-            } else if (i == 3) {
-                dewey.e_move_dir = 11;
-            }
-        }
-        else if (((int)dewey.position.y == 6) || ((int)dewey.position.y == 7))
-        {
-            i = get_random(4);
-            if ((i == 1) || (i == 2)) {
-                dewey.e_move_dir = 11;
-            } else if (i == 0) {
-                dewey.e_move_dir = 21;
-            } else if (i == 1) {
-                dewey.e_move_dir = -21;
-            }
-        }
-        else
-        {
-            i = get_random(8);
-            if ((i == 0) || (i == 1)) {
-                dewey.e_move_dir = 21;
-            } else if ((i == 2) || (i == 3)) {
-                dewey.e_move_dir = -21;
-            } else if (i == 4) {
-                dewey.e_move_dir = 11;
-            } else if (i == 5) {
-                dewey.e_move_dir = -11;
-            } else {
-                dewey.e_move_dir = 1;
-            }
-        }
-    }
-
     public int get_random(int paramInt)
     {
         int i = this.rnd.nextInt() % paramInt;
@@ -611,9 +525,16 @@ public class Screen1 extends DefaultScreen {
     protected void testEnermyMoving() {
 
         float leftBound = 0;
-        float rightBoundHuey = Gdx.graphics.getWidth() - huey.getBobTexture().getWidth();
-        float rightBoundDewey = Gdx.graphics.getWidth() - dewey.getBobTexture().getWidth();
-        float rightBoundBoss = Gdx.graphics.getWidth() - boss.getBobTexture().getWidth();
+        float rightBoundHuey = (Gdx.graphics.getWidth() - huey.getBobTexture().getWidth())/sgh_120_1080_screen_ratio;
+        int rightBoundDewey = (int) ((Gdx.graphics.getWidth() - dewey.getBobTexture().getWidth())/sgh_120_1080_screen_ratio);
+        int rightBoundBoss = (int)((Gdx.graphics.getWidth() - boss.getBobTexture().getWidth())/sgh_120_1080_screen_ratio);
+
+        // Ratio 3:4 ~ 9:12 So with ratio 9:16 we lost (not use) 4/16 = 1/4 of height.
+        // Ie. 1920 we will cut 1/4 = 480px to keep ratio 3:4 1080:1440.
+        // Bottom space used for fireBtn, so top should space only 240px
+        int topBound =  (int)Gdx.graphics.getHeight()*3/4 + 240;
+        int topBoundInCell = (int) (topBound / sgh_120_1080_screen_ratio);
+        int bottomBoundInCell = topBoundInCell - 8; // We draw map of 24x32 cell
 
         Random r = new Random();
         // TODO random position when hit rightBound, Horizontal front line enemy move by step up/down
@@ -626,33 +547,17 @@ public class Screen1 extends DefaultScreen {
             huey.position.x = (r.nextInt(180) + bob.position.x)/sgh_120_1080_screen_ratio;
         }
 
-        if(dewey.position.x >= rightBoundDewey) {
-            dewey.position.x = rightBoundDewey/sgh_120_1080_screen_ratio;
-            dir2 = -1;
+        // Top bound
+        if(huey.position.y >= topBoundInCell) {
+            huey.position.y = r.nextInt(90)/sgh_120_1080_screen_ratio + bottomBoundInCell;
         }
-        if(dewey.position.x <= leftBound) {
-            dewey.position.x = (r.nextInt(60) + bob.position.x)/sgh_120_1080_screen_ratio;
-            dir2 = 1;
-        }
-
-        if(boss.position.x >= rightBoundBoss) {
-            boss.position.x = rightBoundBoss;
-            dir3 = -1;
-        }
-        if(boss.position.x <= leftBound) {
-            boss.position.x = r.nextInt(30) + bob.position.x;
-            dir3 = 1;
+        if(huey.position.y <= bottomBoundInCell) {
+            huey.position.y = r.nextInt(180)/sgh_120_1080_screen_ratio + bottomBoundInCell;
         }
 
-/*        if((dewey.position.x >= leftBound) && (dewey.position.x <= rightBoundDewey)) {
-            int tmp = (dir2 != 0) ? dir2 : 1;
-            dewey.position.x += enemySpeed * tmp;
-        }*/
-//        Gdx.app.log("INFO", " bot " + dewey.position.x + " right " + rightBoundDewey + " dir " + dir2);
-        if(boss.position.x >= leftBound && (boss.position.x <= rightBoundBoss)) {
-            int tmp = (dir3 != 0) ? dir3 : 1;
-            boss.position.x  += enemySpeed * tmp;
-        }
+        dewey.check_move_outof_bound(0, rightBoundDewey, bottomBoundInCell, topBoundInCell);
+
+        boss.check_move_outof_bound(0, rightBoundBoss, bottomBoundInCell-7, topBoundInCell);
     }
 
     protected void oldTestEnermyMoving() {
@@ -663,48 +568,6 @@ public class Screen1 extends DefaultScreen {
 
         Random r = new Random();
         // TODO random position when hit rightBound, Horizontal front line enemy move by step up/down
-        if(huey.position.x >= rightBoundHuey) {
-//            huey.position.x = rightBoundHuey;
-            int i1 = r.nextInt(180) + Gdx.graphics.getWidth()/3;
-            huey.position.x = i1;
-            dir1 = -1;
-        }
-        if(huey.position.x <= leftBound) {
-            huey.position.x = r.nextInt(180) + bob.position.x;
-            dir1 = 1;
-        }
-
-        if(dewey.position.x >= rightBoundDewey) {
-            dewey.position.x = rightBoundDewey;
-            dir2 = -1;
-        }
-        if(dewey.position.x <= leftBound) {
-            dewey.position.x = r.nextInt(60) + bob.position.x;
-            dir2 = 1;
-        }
-
-        if(boss.position.x >= rightBoundBoss) {
-            boss.position.x = rightBoundBoss;
-            dir3 = -1;
-        }
-        if(boss.position.x <= leftBound) {
-            boss.position.x = r.nextInt(30) + bob.position.x;
-            dir3 = 1;
-        }
-
-        if((huey.position.x >= leftBound) && (huey.position.x <= rightBoundHuey)) {
-            int tmp = (dir1 != 0) ? dir1 : 1;
-            huey.position.x  += enemySpeed * tmp;
-        }
-        if((dewey.position.x >= leftBound) && (dewey.position.x <= rightBoundDewey)) {
-            int tmp = (dir2 != 0) ? dir2 : 1;
-            dewey.position.x += enemySpeed * tmp;
-        }
-//        Gdx.app.log("INFO", " bot " + dewey.position.x + " right " + rightBoundDewey + " dir " + dir2);
-        if(boss.position.x >= leftBound && (boss.position.x <= rightBoundBoss)) {
-            int tmp = (dir3 != 0) ? dir3 : 1;
-            boss.position.x  += enemySpeed * tmp;
-        }
     }
 
     protected void heroAttack() {

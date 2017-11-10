@@ -1,20 +1,15 @@
-libgdx-demo-pax britannica
+libgdx migrate J2ME SnowBallFight
 ====================
 
-  Libgdx demo - Pax Britannica
+  Libgdx SnowBallFight - Samsung Funclub
 
-![pax-britannica](http://i.imgur.com/evYlHaf.png)
 
-Pax Britannica is a one-button [RTS game by nofundsgames](http://paxbritannica.henk.ca/), which was ported to libgdx by [Stefan Wagner](http://bompoblog.tumblr.com/).
+SnowBallFight is a Samsung J2ME [arcade game by MCookie n Wait4U, NeoMnT](http://www.samsung.com/be/funclub/), which was ported to libgdx by [Dzung Ng](http://cheatortrick.blogspot.com/).
 
 ### Try it here 
-  * [WebGL/Browser](http://libgdx.badlogicgames.com/demos/paxbritannica)
-  * [Desktop](http://libgdx.badlogicgames.com/demos/paxbritannica/paxbritannica.jar)
-  * Desktop self-contained native bundles created with
-    [Excelsior JET](http://www.excelsiorjet.com) [Gradle Plugin](https://github.com/excelsior-oss/excelsior-jet-gradle-plugin):
-    - [Windows](http://www.excelsior-usa.com/download/jet/gradle/pax-britannica-windows-x86.exe)
-    - [macOS](http://www.excelsior-usa.com/download/jet/gradle/pax-britannica-osx-amd64.pkg)
-    - [Linux](http://www.excelsior-usa.com/download/jet/gradle/pax-britannica-linux-amd64.bin)
+  * [Desktop/KEmulator](https://drive.google.com/file/d/0B9XwFe7bHCQ0OEJhVm1sNDFCRlk/view?usp=sharing)
+  * [Desktop/J2ME](https://github.com/dungnv53/SnowBallFight)
+  * Project contain many code sample from LibGDX ie. Pax Britannica. Source code J2ME from Samsung Funclub.
   * [Android](http://libgdx.badlogicgames.com/demos/paxbritannica/paxbritannica.apk)
 
 ### Running
@@ -26,3 +21,7 @@ Pax Britannica is a one-button [RTS game by nofundsgames](http://paxbritannica.h
   * [NetBeans](https://github.com/libgdx/libgdx/wiki/Gradle-and-NetBeans)
   * [Commandline|Gradle on the Commandline](https://github.com/libgdx/libgdx/wiki/Gradle-on-the-Commandline)
 # SnowBallFightLibGdx
+
+# TODO
+ * Apply design pattern, libGDX best practice to implement AI, Sprite batch, etc.
+ * Object oriented approach to refactor old J2ME source.

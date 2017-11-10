@@ -1,7 +1,8 @@
 package de.swagner.sbf2;
 
 /**
- * Created by nickfarow on 17/10/2016.
+ * Created by Admin on 11/10/2017.
+ * TODO inherite Bob or refactoring for best practice.
  */
 
 import com.badlogic.gdx.graphics.Texture;
@@ -12,7 +13,8 @@ import com.badlogic.gdx.math.Vector2;
 
 import java.util.Random;
 
-public class Bob {
+
+public class Boss {
 
     public enum State {
         IDLE, WALKING, JUMPING, DYING, FIRING, FREEZE, HANGING
@@ -22,22 +24,22 @@ public class Bob {
     static final float JUMP_VELOCITY = 1f;
     public static final float SIZE = 0.5f; // half a unit
 
-    public Vector2  position = new Vector2();
+    public Vector2 position = new Vector2();
     Vector2  acceleration = new Vector2();
     Vector2  velocity = new Vector2();
-    private Rectangle  bounds = new Rectangle();
+    private Rectangle bounds = new Rectangle();
     public State  state = State.IDLE;
     public boolean  facingLeft = true;
 
     private int hp = 12; // 120
     // TODO private e_move_dir
-    public int e_move_dir = 1; // Default e_move_dir = 1 to avoid init() and/or e_move_ai() call in original J2ME.
+    public int e_boss_move_dir = 1; // Default e_move_dir = 1 to avoid init() and/or e_move_ai() call in original J2ME.
     private Texture bobTexture;
     private Sprite sprite;
     // snow or stone item used in firing
     private Item item;
 
-    public Bob(Vector2 position) {
+    public Boss(Vector2 position) {
         this.position = position;
         this.bounds.height = SIZE;
         bounds = new Rectangle(0, 0, 0, 0);
@@ -46,11 +48,11 @@ public class Bob {
         position.add(velocity.cpy().mul(delta));
     }
 
-    public Bob(Texture texture) {
+    public Boss(Texture texture) {
         bobTexture = texture;
     }
 
-    public Bob(Sprite sprite) {
+    public Boss(Sprite sprite) {
         this.sprite = new Sprite(sprite);
     }
     public void setBobTexture(Texture texture) {
@@ -108,6 +110,8 @@ public class Bob {
     * Try reset/update enemy position when it hit bound. TODO use vector or another better solution.
     * */
     public void check_move_outof_bound(int leftBound, int rightBound, int bottomBound, int topBound) {
+        Random r = new Random();
+
         if(this.position.x >= rightBound) {
             this.position.x = 12 + get_random(12);
         }
@@ -122,97 +126,58 @@ public class Bob {
         }
     }
 
-    public void e_move_ai2() {
-        int i;
-        if (((int)this.position.x == 2))
+    public void boss_move()
+    {
+        if ((this.e_boss_move_dir >= 1) && (this.e_boss_move_dir < 8))
         {
-            i = get_random(4);
-            if ((i == 0) || (i == 1)) {
-                this.e_move_dir = -21;
-            } else if (i == 2) {
-                this.e_move_dir = -11;
-            } else if (i == 3) {
-                this.e_move_dir = 11;
+            this.e_boss_move_dir += 1;
+            if (this.e_boss_move_dir == 8) {
+                this.e_boss_move_dir = 100;
             }
         }
-        else if (((int)this.position.y == 6) || ((int)this.position.y == 7))
+        else if ((this.e_boss_move_dir >= 21) && (this.e_boss_move_dir < 31))
         {
-            i = get_random(4);
-            if ((i == 1) || (i == 2)) {
-                this.e_move_dir = 11;
-            } else if (i == 0) {
-                this.e_move_dir = 21;
-            } else if (i == 1) {
-                this.e_move_dir = -21;
+            this.e_boss_move_dir += 1;
+            if (((int)this.position.x != 2) && (this.e_boss_move_dir % 2 == 0)) {
+                this.position.x -= 1;
+            }
+            if (this.e_boss_move_dir == 31) {
+                this.e_boss_move_dir = 100;
             }
         }
-        else
+        else if ((this.e_boss_move_dir > -31) && (this.e_boss_move_dir <= -21))
         {
-            i = get_random(8);
-            if ((i == 0) || (i == 1)) {
-                this.e_move_dir = 21;
-            } else if ((i == 2) || (i == 3)) {
-                this.e_move_dir = -21;
-            } else if (i == 4) {
-                this.e_move_dir = 11;
-            } else if (i == 5) {
-                this.e_move_dir = -11;
-            } else {
-                this.e_move_dir = 1;
+            this.e_boss_move_dir -= 1;
+            if (((int)this.position.x != 22) && (this.e_boss_move_dir % 2 == 0)) {
+                this.position.x += 1;
+            }
+            if (this.e_boss_move_dir == -31) {
+                this.e_boss_move_dir = 100;
             }
         }
     }
-    public void e_move2() {
-        // Dewey
-        int i2 = this.e_move_dir;
-        if ((i2 >= 1) && (i2 < 8))
+
+    public void boss_move_ai()
+    {
+        if ((int)this.position.x == 2)
         {
-            i2++;
-            if (i2 == 8) {
-                i2 = 100;
+            this.e_boss_move_dir = -21;
+        }
+        else if ((int)this.position.x == 22)
+        {
+            this.e_boss_move_dir = 21;
+        }
+        else
+        {
+            int i = get_random(6);
+            if ((i == 0) || (i == 1)) {
+                this.e_boss_move_dir = 21;
+            } else if ((i == 2) || (i == 3)) {
+                this.e_boss_move_dir = -21;
+            } else {
+                this.e_boss_move_dir = 1;
             }
         }
-        else if ((i2 >= 21) && (i2 < 31))
-        {
-            i2++;
-            if ((this.position.x != 2) && (i2 % 3 == 0)) {
-                this.position.x -= 1;
-            }
-            if (i2 == 31) {
-                i2 = 100;
-            }
-        }
-        else if ((i2 > -31) && (i2 <= -21))
-        {
-            i2--;
-            if ((this.position.x != 22) && (i2 % 3 == 0)) {
-                this.position.x += 1;
-            }
-            if (i2 == -31) {
-                i2 = 100;
-            }
-        }
-        else if ((i2 >= 11) && (i2 < 14))
-        {
-            i2++;
-            if ((this.position.y != 1) && (i2 % 2 == 0)) {
-                this.position.y -= 1;
-            }
-            if (i2 == 14) {
-                i2 = 100;
-            }
-        }
-        else if ((i2 > -14) && (i2 <= -11))
-        {
-            i2--;
-            if ((this.position.y != 7) && (i2 % 2 == 0)) {
-                this.position.y += 1;
-            }
-            if (i2 == -14) {
-                i2 = 100;
-            }
-        }
-        this.e_move_dir = i2;
     }
 
     public int get_random(int paramInt)
@@ -234,6 +199,5 @@ public class Bob {
         }
         return i;
     }
-
 
 }
