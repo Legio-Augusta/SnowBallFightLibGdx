@@ -21,6 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.badlogic.gdx.Preferences;
 
 import java.util.Random;
 
@@ -84,6 +85,14 @@ public class Screen1 extends DefaultScreen {
     public static int GAMESTATE_PLAYING = 0;
     public static float sgh_120_1080_screen_ratio = (5*9); // (5*9/2)
 
+    private static final String PREF_VIBRATION = "vibration";
+    private static final String PREF_SOUND_ENABLED = "soundenabled";
+    private static final String PREF_SPEED = "gamespeed";
+    private static final String PREF_LEVEL = "level";
+    private static final String PREF_SAVEDGOLD = "saved_gold";
+    private static final String PREF_MANA= "mana";
+    Preferences prefs = Gdx.app.getPreferences("gamestate");
+
     public Screen1(Game game) {
         super(game);
 
@@ -136,6 +145,49 @@ public class Screen1 extends DefaultScreen {
 
     public void update() {
 
+    }
+
+    protected Preferences getPrefs() {
+        if(prefs==null){
+            prefs = Gdx.app.getPreferences("gamestate");
+        }
+        return prefs;
+    }
+
+    public boolean isSoundEffectsEnabled() {
+        return getPrefs().getBoolean(PREF_SOUND_ENABLED, true);
+    }
+
+    public void setSoundEffectsEnabled(boolean soundEffectsEnabled) {
+        getPrefs().putBoolean(PREF_SOUND_ENABLED, soundEffectsEnabled);
+        getPrefs().flush();
+    }
+
+    public boolean getVibraEnabled() {
+        return getPrefs().getBoolean(PREF_VIBRATION, true);
+    }
+
+    public void setVibraEnabled(boolean vibra) {
+        getPrefs().putBoolean(PREF_VIBRATION, vibra);
+        getPrefs().flush();
+    }
+
+    public int getLevel() {
+        return getPrefs().getInteger(PREF_LEVEL, 11);
+    }
+
+    public void setLevel(int level) {
+        getPrefs().putInteger(PREF_LEVEL, level);
+        getPrefs().flush();
+
+    }
+    public int getSavedgold() {
+        return getPrefs().getInteger(PREF_SAVEDGOLD, 64);
+    }
+
+    public void setSavedGold(int saved_gold) {
+        getPrefs().putInteger(PREF_SAVEDGOLD, saved_gold);
+        getPrefs().flush();
     }
 
     public void render(float delta) {
@@ -523,6 +575,9 @@ public class Screen1 extends DefaultScreen {
     * Try use original e_move() from J2ME.
     * */
     protected void testEnermyMoving() {
+//        setSavedGold(32);
+        Gdx.app.log("INFO", "Test recordStore " + getSavedgold());
+
 
         float leftBound = 0;
         float rightBoundHuey = (Gdx.graphics.getWidth() - huey.getBobTexture().getWidth())/sgh_120_1080_screen_ratio;
