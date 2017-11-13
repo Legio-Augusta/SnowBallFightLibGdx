@@ -1,8 +1,7 @@
 package de.swagner.sbf2;
 
 /**
- * Created by Admin on 11/10/2017.
- * TODO inherite Enemy or refactoring for best practice.
+ * Created by Admin on 11/13/2017.
  */
 
 import com.badlogic.gdx.graphics.Texture;
@@ -13,8 +12,7 @@ import com.badlogic.gdx.math.Vector2;
 
 import java.util.Random;
 
-
-public class Boss {
+public class Hero {
 
     public enum State {
         IDLE, WALKING, JUMPING, DYING, FIRING, FREEZE, HANGING
@@ -33,13 +31,13 @@ public class Boss {
 
     private int hp = 12; // 120
     // TODO private e_move_dir
-    public int e_boss_move_dir = 1; // Default e_move_dir = 1 to avoid init() and/or e_move_ai() call in original J2ME.
+    public int e_move_dir = 1; // Default e_move_dir = 1 to avoid init() and/or e_move_ai() call in original J2ME.
     private Texture bobTexture;
     private Sprite sprite;
     // snow or stone item used in firing
     private Item item;
 
-    public Boss(Vector2 position) {
+    public Hero(Vector2 position) {
         this.position = position;
         this.bounds.height = SIZE;
         bounds = new Rectangle(0, 0, 0, 0);
@@ -48,11 +46,11 @@ public class Boss {
         position.add(velocity.cpy().mul(delta));
     }
 
-    public Boss(Texture texture) {
+    public Hero(Texture texture) {
         bobTexture = texture;
     }
 
-    public Boss(Sprite sprite) {
+    public Hero(Sprite sprite) {
         this.sprite = new Sprite(sprite);
     }
     public void setBobTexture(Texture texture) {
@@ -100,18 +98,10 @@ public class Boss {
         return (this.hp <= 0) ? true : false;
     }
 
-    public void e_move() {
-
-    }
-    public void e_move_ai() {
-
-    }
     /*
     * Try reset/update enemy position when it hit bound. TODO use vector or another better solution.
     * */
     public void check_move_outof_bound(int leftBound, int rightBound, int bottomBound, int topBound) {
-        Random r = new Random();
-
         if(this.position.x >= rightBound) {
             this.position.x = 12 + get_random(12);
         }
@@ -123,60 +113,6 @@ public class Boss {
         }
         if(this.position.y <= bottomBound) {
             this.position.y = get_random(4) + bottomBound;
-        }
-    }
-
-    public void boss_move()
-    {
-        if ((this.e_boss_move_dir >= 1) && (this.e_boss_move_dir < 8))
-        {
-            this.e_boss_move_dir += 1;
-            if (this.e_boss_move_dir == 8) {
-                this.e_boss_move_dir = 100;
-            }
-        }
-        else if ((this.e_boss_move_dir >= 21) && (this.e_boss_move_dir < 31))
-        {
-            this.e_boss_move_dir += 1;
-            if (((int)this.position.x != 2) && (this.e_boss_move_dir % 2 == 0)) {
-                this.position.x -= 1;
-            }
-            if (this.e_boss_move_dir == 31) {
-                this.e_boss_move_dir = 100;
-            }
-        }
-        else if ((this.e_boss_move_dir > -31) && (this.e_boss_move_dir <= -21))
-        {
-            this.e_boss_move_dir -= 1;
-            if (((int)this.position.x != 22) && (this.e_boss_move_dir % 2 == 0)) {
-                this.position.x += 1;
-            }
-            if (this.e_boss_move_dir == -31) {
-                this.e_boss_move_dir = 100;
-            }
-        }
-    }
-
-    public void boss_move_ai()
-    {
-        if ((int)this.position.x == 2)
-        {
-            this.e_boss_move_dir = -21;
-        }
-        else if ((int)this.position.x == 22)
-        {
-            this.e_boss_move_dir = 21;
-        }
-        else
-        {
-            int i = get_random(6);
-            if ((i == 0) || (i == 1)) {
-                this.e_boss_move_dir = 21;
-            } else if ((i == 2) || (i == 3)) {
-                this.e_boss_move_dir = -21;
-            } else {
-                this.e_boss_move_dir = 1;
-            }
         }
     }
 

@@ -1,7 +1,8 @@
 package de.swagner.sbf2.screens;
 
-import de.swagner.sbf2.Bob;
+import de.swagner.sbf2.Enemy;
 import de.swagner.sbf2.Boss;
+import de.swagner.sbf2.Hero;
 import de.swagner.sbf2.Item;
 
 import com.badlogic.gdx.Game;
@@ -9,10 +10,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -47,23 +46,15 @@ public class Screen1 extends DefaultScreen {
     private float ppuX;	// pixels per unit on the X axis
     private float ppuY;	// pixels per unit on the Y axis
 
-    private Bob bob;
+    private Hero hero;
     // TODO loop create sprite
-    private Bob huey;
-    private Bob dewey;
+    private Enemy huey;
+    private Enemy dewey;
     private Boss boss;
 
     private Texture bobTexture;
 
     float stateTime;
-
-    // enemy move dir
-
-    // Enermy state
-
-    // Game state
-
-    // Hero state
 
     private Random rnd = new Random();
 
@@ -209,12 +200,12 @@ public class Screen1 extends DefaultScreen {
         else if ((huey.e_move_dir == 0) && (!huey.isDead()))
         {
             Gdx.app.log("INFO", "Huey move dir = 0 AI :"+ huey.e_move_dir + " --x--" + huey.position.x + " y " + huey.position.y);
-            e_move_ai();
+            huey.e_move_ai();
         }
         else if ((huey.e_move_dir < 100) && (huey.e_move_dir != 0) && (!huey.isDead()))
         {
             Gdx.app.log("INFO", "Huey move dir = 0 AI :"+ huey.e_move_dir + " --x--" + huey.position.x + " y " + huey.position.y);
-            e_move();
+            huey.e_move();
         }
 
         if (dewey.e_move_dir >= 100)
@@ -282,14 +273,14 @@ public class Screen1 extends DefaultScreen {
 
     private void drawBob() {
         int facex = 1;
-        if(bob.facingLeft){
+        if(hero.facingLeft){
         }
-        if (bob.state==bob.state.WALKING){
+        if (hero.state==hero.state.WALKING){
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
             stateTime += Gdx.graphics.getDeltaTime();
         }
-        else if(bob.state==bob.state.IDLE){
-            batch.draw(heroTexture, bob.position.x * ppuX, bob.position.y * ppuY, facex* Bob.SIZE * ppuX, Bob.SIZE * ppuY);
+        else if(hero.state==hero.state.IDLE){
+            batch.draw(heroTexture, hero.position.x * ppuX, hero.position.y * ppuY, facex* Enemy.SIZE * ppuX, Enemy.SIZE * ppuY);
         }
     }
 
@@ -343,10 +334,10 @@ public class Screen1 extends DefaultScreen {
         // TODO handle screen size ratio multi screen.
         int enemyPosY = Gdx.graphics.getHeight()*3/4-180;
         int enemyStepY = 45; // 5 * 9 (5px from orig J2ME), 9 on scale up resolution.
-//        huey = new Bob(new Vector2(240, enemyPosY-enemyStepY));
+//        huey = new Enemy(new Vector2(240, enemyPosY-enemyStepY));
         // Try J2ME original: 5px is old cell in map (120px = 24 * 5) In 1080 = 120 * 9. But because of sprite scale we try 4.5 instead of 9.
-        huey = new Bob(new Vector2(240/sgh_120_1080_screen_ratio, (enemyPosY-enemyStepY)/sgh_120_1080_screen_ratio ));
-        dewey = new Bob(new Vector2(480/sgh_120_1080_screen_ratio, enemyPosY/sgh_120_1080_screen_ratio));
+        huey = new Enemy(new Vector2(240/sgh_120_1080_screen_ratio, (enemyPosY-enemyStepY)/sgh_120_1080_screen_ratio ));
+        dewey = new Enemy(new Vector2(480/sgh_120_1080_screen_ratio, enemyPosY/sgh_120_1080_screen_ratio));
         boss = new Boss(new Vector2(320/sgh_120_1080_screen_ratio, (enemyPosY-(3*enemyStepY))/sgh_120_1080_screen_ratio ));
         huey.setBobTexture("data/samsung-white/enemy0_0_60x.png");
         dewey.setBobTexture("data/samsung-white/enemy1_1_60x.png");
@@ -358,21 +349,21 @@ public class Screen1 extends DefaultScreen {
     }
 
     protected void initBobItem() {
-        Vector2 facing = new Vector2(bob.position.x, Gdx.graphics.getHeight()*4/5);
-        Item item = new Item(0, bob.position, facing);
+        Vector2 facing = new Vector2(hero.position.x, Gdx.graphics.getHeight()*4/5);
+        Item item = new Item(0, hero.position, facing);
         item.setTexture(new Texture("data/samsung-white/item3_0_36x.png"));
-        bob.setItem(item);
-        bob.getItem().setBound(new Rectangle(item.getX(), item.getY(), item.getWidth(), item.getHeight()) );
+        hero.setItem(item);
+        hero.getItem().setBound(new Rectangle(item.getX(), item.getY(), item.getWidth(), item.getHeight()) );
     }
 
     protected void initSpriteBatchAndHeroTexture () {
         batch = new SpriteBatch();
         ttrSplash = new Texture("data/samsung-white/menu_bg.png");
         heroTexture = new Texture("data/samsung-white/hero3_1_60x80.png");
-        bob = new Bob(new Sprite());
-        bob.position.x = Gdx.graphics.getWidth()/2;
-        bob.setBobTexture(new Texture("data/samsung-white/hero3_1_60x80.png"));
-        bob.position.y = Gdx.graphics.getHeight()/5-bob.getBobTexture().getHeight();
+        hero = new Hero(new Sprite());
+        hero.position.x = Gdx.graphics.getWidth()/2;
+        hero.setBobTexture(new Texture("data/samsung-white/hero3_1_60x80.png"));
+        hero.position.y = Gdx.graphics.getHeight()/5-hero.getBobTexture().getHeight();
 
         fireBtnTexture = new Texture("data/samsung-white/fire.png");
         initBobItem();
@@ -389,7 +380,7 @@ public class Screen1 extends DefaultScreen {
     }
 
     protected void testDrawHero() {
-        batch.draw(bob.getBobTexture(), (int)bob.position.x, (int)bob.position.y, 0, 0, 45, 60, 5/2, 5/2, 0, 0, 0, 45, 60, bob.facingLeft, false);
+        batch.draw(hero.getBobTexture(), (int)hero.position.x, (int)hero.position.y, 0, 0, 45, 60, 5/2, 5/2, 0, 0, 0, 45, 60, hero.facingLeft, false);
     }
 
     protected void oldTestDrawInitPositionEnermy() {
@@ -434,140 +425,8 @@ public class Screen1 extends DefaultScreen {
     }
 
     protected void displayManualTextureDraw() {
-        //        batch.draw(hero, (int)heroX, (int)heroY, 0, 0, 45, 60, 2, 2, 0, 0, 0, 45, 60, false, false);
-        //      (Texture texture, float x, float y, float originX, float originY, float width, float height, float scaleX, float scaleY, float rotation, int srcX, int srcY, int srcWidth, int srcHeight, boolean flipX, boolean flipY)
-    }
-
-    protected void handleHeroMoveLeft() {
-    }
-
-    protected void handleHeroMoveRight() {
-    }
-
-    /*
-    * Try ony huey instead of array
-    * */
-    protected void e_move() {
-        int i = huey.e_move_dir;
-        if ((i >= 1) && (i < 8))
-        {
-            i++;
-            if (i == 8) {
-                i = 100;
-            }
-        }
-        else if ((i >= 21) && (i < 31))
-        {
-            i++;
-            if ((huey.position.x != 2) && (i % 3 == 0)) {
-                huey.position.x -= 1;
-            }
-            if (i == 31) {
-                i = 100;
-            }
-        }
-        else if ((i > -31) && (i <= -21))
-        {
-            i--;
-            if ((huey.position.x != 22) && (i % 3 == 0)) {
-                huey.position.x += 1;
-            }
-            if (i == -31) {
-                i = 100;
-            }
-        }
-        else if ((i >= 11) && (i < 14))
-        {
-            i++;
-            if ((huey.position.y != 1) && (i % 2 == 0)) {
-                huey.position.y -= 1;
-            }
-            if (i == 14) {
-                i = 100;
-            }
-        }
-        else if ((i > -14) && (i <= -11))
-        {
-            i--;
-            if ((huey.position.y != 7) && (i % 2 == 0)) {
-                huey.position.y += 1;
-            }
-            if (i == -14) {
-                i = 100;
-            }
-        }
-        huey.e_move_dir = i;
-
-    }
-
-    protected void e_move_ai() {
-        int i;
-        if (((int)huey.position.x == 2))
-        {
-            i = get_random(4);
-            if ((i == 0) || (i == 1)) {
-                huey.e_move_dir = -21;
-            } else if (i == 2) {
-                huey.e_move_dir = -11;
-            } else if (i == 3) {
-                huey.e_move_dir = 11;
-            }
-        }
-        else if (((int)huey.position.x == 22) || (((int)huey.position.x >= 14)))
-        {
-            i = get_random(4);
-            if ((i == 0) || (i == 1)) {
-                huey.e_move_dir = 21;
-            } else if (i == 2) {
-                huey.e_move_dir = -11;
-            } else if (i == 3) {
-                huey.e_move_dir = 11;
-            }
-        }
-        else if (((int)huey.position.y == 6) || ((int)huey.position.y == 7))
-        {
-            i = get_random(4);
-            if ((i == 1) || (i == 2)) {
-                huey.e_move_dir = 11;
-            } else if (i == 0) {
-                huey.e_move_dir = 21;
-            } else if (i == 1) {
-                huey.e_move_dir = -21;
-            }
-        }
-        else
-        {
-            i = get_random(8);
-            if ((i == 0) || (i == 1)) {
-                huey.e_move_dir = 21;
-            } else if ((i == 2) || (i == 3)) {
-                huey.e_move_dir = -21;
-            } else if (i == 4) {
-                huey.e_move_dir = 11;
-            } else if (i == 5) {
-                huey.e_move_dir = -11;
-            } else {
-                huey.e_move_dir = 1;
-            }
-        }
-    }
-
-    public int get_random(int paramInt)
-    {
-        int i = this.rnd.nextInt() % paramInt;
-        if (i < 0) {
-            i = -i;
-        }
-        return i;
-    }
-
-    public int get_random1(int paramInt)
-    {
-        int i = this.rnd.nextInt() % paramInt;
-        if (i == 0) {
-            i = -5;
-        }
-        return i;
+        //  batch.draw(hero, (int)heroX, (int)heroY, 0, 0, 45, 60, 2, 2, 0, 0, 0, 45, 60, false, false);
+        //  (Texture texture, float x, float y, float originX, float originY, float width, float height, float scaleX, float scaleY, float rotation, int srcX, int srcY, int srcWidth, int srcHeight, boolean flipX, boolean flipY)
     }
 
     /*
@@ -577,7 +436,6 @@ public class Screen1 extends DefaultScreen {
     protected void testEnermyMoving() {
 //        setSavedGold(32);
         Gdx.app.log("INFO", "Test recordStore " + getSavedgold());
-
 
         float leftBound = 0;
         float rightBoundHuey = (Gdx.graphics.getWidth() - huey.getBobTexture().getWidth())/sgh_120_1080_screen_ratio;
@@ -599,7 +457,7 @@ public class Screen1 extends DefaultScreen {
             huey.position.x = i1/sgh_120_1080_screen_ratio;
         }
         if(huey.position.x <= leftBound) {
-            huey.position.x = (r.nextInt(180) + bob.position.x)/sgh_120_1080_screen_ratio;
+            huey.position.x = (r.nextInt(180) + hero.position.x)/sgh_120_1080_screen_ratio;
         }
 
         // Top bound
@@ -613,31 +471,6 @@ public class Screen1 extends DefaultScreen {
         dewey.check_move_outof_bound(0, rightBoundDewey, bottomBoundInCell, topBoundInCell);
 
         boss.check_move_outof_bound(0, rightBoundBoss, bottomBoundInCell-7, topBoundInCell);
-    }
-
-    protected void oldTestEnermyMoving() {
-        float leftBound = 0;
-        float rightBoundHuey = Gdx.graphics.getWidth() - huey.getBobTexture().getWidth();
-        float rightBoundDewey = Gdx.graphics.getWidth() - dewey.getBobTexture().getWidth();
-        float rightBoundBoss = Gdx.graphics.getWidth() - boss.getBobTexture().getWidth();
-
-        Random r = new Random();
-        // TODO random position when hit rightBound, Horizontal front line enemy move by step up/down
-    }
-
-    protected void heroAttack() {
-
-        // disable another shell til this shell drop or hit enermy
-        // power up snow ?
-        // handle colidate enermy
-        // handle health enermy
-        // update state of hero
-
-        // TODO handle onTouch, gdx way
-    }
-
-    protected void drawHeroHp() {
-
     }
 
     protected void drawFireBtn() {
@@ -660,8 +493,8 @@ public class Screen1 extends DefaultScreen {
         batch.begin();
 //        blockSprite.draw(batch);
 
-        batch.draw(bob.getBobTexture(), bob.position.x, bob.position.y, 0, 0, heroTexture.getWidth(), heroTexture.getHeight(), 2, 2, 0, 0, 0, heroTexture.getWidth(), heroTexture.getHeight(), bob.facingLeft, false);
-        bob.facingLeft = !bob.facingLeft;
+        batch.draw(hero.getBobTexture(), hero.position.x, hero.position.y, 0, 0, heroTexture.getWidth(), heroTexture.getHeight(), 2, 2, 0, 0, 0, heroTexture.getWidth(), heroTexture.getHeight(), hero.facingLeft, false);
+        hero.facingLeft = !hero.facingLeft;
 
         batch.end();
         stage.act(Gdx.graphics.getDeltaTime());
@@ -677,14 +510,14 @@ public class Screen1 extends DefaultScreen {
 //            camera.unproject(touchPos);
             Rectangle textureBounds=new Rectangle(Gdx.graphics.getWidth()-fireBtnTexture.getWidth()-50, Gdx.graphics.getHeight()-50-fireBtnTexture.getHeight(), fireBtnTexture.getWidth(),fireBtnTexture.getHeight());
 
-            Item bobItem = bob.getItem();
+            Item bobItem = hero.getItem();
             if(textureBounds.contains(touchPos.x, touchPos.y) && (heroFireState == false))
             {
 //                Gdx.app.log("INFO", "I like it when I feel your touch");
                 if(bobItem.position.y <= Gdx.graphics.getHeight()*4/5) {
                     heroFireState = true;
                 } else {
-                    bobItem.position.y = bob.position.y;
+                    bobItem.position.y = hero.position.y;
                 }
             }
             if(heroFireState) {
@@ -694,13 +527,13 @@ public class Screen1 extends DefaultScreen {
                 if(bobItem.position.y <= Gdx.graphics.getHeight()*4/5) {
                     bobItem.position.add(bobItem.velocity.x * bobItem.getDelta(), bobItem.velocity.y * 2);
                     // Update snow bound. TODO handle messing between hero.x and snow.x
-                    bobItem.setBound(new Rectangle(bob.position.x, bobItem.position.y, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight()));
+                    bobItem.setBound(new Rectangle(hero.position.x, bobItem.position.y, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight()));
                     heroFire();
                     // collision
                     checkCollisionHeroToEnemy();
                 } else {
                     heroFireState = false;
-                    bobItem.setPosition(bob.position.x, bob.position.y);
+                    bobItem.setPosition(hero.position.x, hero.position.y);
                     // TODO handle smooth (fire one, impact one) instead of steped fire.
                     // Snow do not fire direct from player to enemy, it fly a distance then wait until next event like touch. So it is a bug.
                     Gdx.app.log("INFO", "Over rooftop " + bobItem.position.toString());
@@ -709,17 +542,17 @@ public class Screen1 extends DefaultScreen {
             Gdx.app.log("INFO", "Snow "+ bobItem.getBound().toString()+ "huey "+ huey.getBound().toString() + " dewey "+ dewey.getBound().toString() + " boss " + boss.getHp() + " screen ");
             if(bobItem.position.y > Gdx.graphics.getHeight()*4/5) {
                 heroFireState = false;
-                bobItem.setPosition(bob.position.x, bob.position.y);
+                bobItem.setPosition(hero.position.x, hero.position.y);
             }
         }
     }
 
     protected void heroFire() {
-        Item bobItem = bob.getItem();
+        Item bobItem = hero.getItem();
 //        bobItem.acting();
         // 10 space between player and snow
-//        batch.draw(bobItem.getItemTexture(), bobItem.position.x+(bob.getBobTexture().getWidth()*2-10), bobItem.position.y+bob.getBobTexture().getHeight()/2, 0, 0, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight(), (float)1.3, (float)1.3, 0, 0, 0, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight(), false, false);
-        batch.draw(bobItem.getItemTexture(), bob.position.x+(bob.getBobTexture().getWidth()*2-10), bobItem.position.y+bob.getBobTexture().getHeight()/2, 0, 0, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight(), (float)1.3, (float)1.3, 0, 0, 0, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight(), false, false);
+//        batch.draw(bobItem.getItemTexture(), bobItem.position.x+(hero.getBobTexture().getWidth()*2-10), bobItem.position.y+hero.getBobTexture().getHeight()/2, 0, 0, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight(), (float)1.3, (float)1.3, 0, 0, 0, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight(), false, false);
+        batch.draw(bobItem.getItemTexture(), hero.position.x+(hero.getBobTexture().getWidth()*2-10), bobItem.position.y+hero.getBobTexture().getHeight()/2, 0, 0, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight(), (float)1.3, (float)1.3, 0, 0, 0, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight(), false, false);
     }
 
     // TODO firePos, itemType, power, direction, angle (gap)
@@ -736,41 +569,34 @@ public class Screen1 extends DefaultScreen {
     }
 
     protected void handleHeroMoveBound() {
-        bobTexture = bob.getBobTexture();
+        bobTexture = hero.getBobTexture();
         float leftBound = 0;
         float rightBound = Gdx.graphics.getWidth() - bobTexture.getWidth();
         // TODO use object instead of global var, handle screen size
-        if(bob.position.x < leftBound) {
-//            bob.position.x = leftBound;
-            bob.position.x = Gdx.graphics.getWidth()/2;
+        if(hero.position.x < leftBound) {
+//            hero.position.x = leftBound;
+            hero.position.x = Gdx.graphics.getWidth()/2;
         }
-        if(bob.position.x > rightBound) {
-            bob.position.x = rightBound;
+        if(hero.position.x > rightBound) {
+            hero.position.x = rightBound;
         }
-        if((bob.position.x >= leftBound) && (bob.position.x <= rightBound) ) {
-            bob.position.x = (bob.position.x + touchpad.getKnobPercentX() * heroSpeed);
+        if((hero.position.x >= leftBound) && (hero.position.x <= rightBound) ) {
+            hero.position.x = (hero.position.x + touchpad.getKnobPercentX() * heroSpeed);
         }
-//        if(touchpad.getKnobPercentX() < 0) {
-//            bob.facingLeft = true;
-//        } else {
-//            bob.facingLeft = false;
-//        }
-
-//        Gdx.app.log("INFO", "Left "+ leftBound + " right " + rightBound + " bob: " + bob.position.x + " y "+ bob.position.y);
     }
 
     protected void checkCollisionHeroToEnemy() {
-        Rectangle heroItem = bob.getItem().getBound();
+        Rectangle heroItem = hero.getItem().getBound();
         if(heroItem.overlaps(huey.getBound())) {
-            huey.loseHp(bob.getItem().getDamage());
+            huey.loseHp(hero.getItem().getDamage());
         }
 
         if(heroItem.overlaps(dewey.getBound())) {
-            dewey.loseHp(bob.getItem().getDamage());
+            dewey.loseHp(hero.getItem().getDamage());
         }
 
         if(heroItem.overlaps(boss.getBound())) {
-            boss.loseHp(bob.getItem().getDamage());
+            boss.loseHp(hero.getItem().getDamage());
         }
     }
 
@@ -779,7 +605,7 @@ public class Screen1 extends DefaultScreen {
     }
 
     protected int getGameState() {
-        if(bob.isDead()) {
+        if(hero.isDead()) {
             return 2;
         }
         if(huey.isDead() && dewey.isDead() && boss.isDead()) {
@@ -799,7 +625,7 @@ public class Screen1 extends DefaultScreen {
     }
 
     protected void updateHeroBullet() {
-        bob.setBound(new Rectangle(bob.position.x, bob.position.y, bob.getBobTexture().getWidth(), bob.getBobTexture().getHeight()));
+        hero.setBound(new Rectangle(hero.position.x, hero.position.y, hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight()));
     }
     protected void updateEnemyBound() {
         huey.setBound(new Rectangle(huey.position.x, huey.position.y, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight()));

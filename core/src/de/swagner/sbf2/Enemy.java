@@ -12,7 +12,7 @@ import com.badlogic.gdx.math.Vector2;
 
 import java.util.Random;
 
-public class Bob {
+public class Enemy {
 
     public enum State {
         IDLE, WALKING, JUMPING, DYING, FIRING, FREEZE, HANGING
@@ -37,7 +37,7 @@ public class Bob {
     // snow or stone item used in firing
     private Item item;
 
-    public Bob(Vector2 position) {
+    public Enemy(Vector2 position) {
         this.position = position;
         this.bounds.height = SIZE;
         bounds = new Rectangle(0, 0, 0, 0);
@@ -46,11 +46,11 @@ public class Bob {
         position.add(velocity.cpy().mul(delta));
     }
 
-    public Bob(Texture texture) {
+    public Enemy(Texture texture) {
         bobTexture = texture;
     }
 
-    public Bob(Sprite sprite) {
+    public Enemy(Sprite sprite) {
         this.sprite = new Sprite(sprite);
     }
     public void setBobTexture(Texture texture) {
@@ -98,12 +98,6 @@ public class Bob {
         return (this.hp <= 0) ? true : false;
     }
 
-    public void e_move() {
-
-    }
-    public void e_move_ai() {
-
-    }
     /*
     * Try reset/update enemy position when it hit bound. TODO use vector or another better solution.
     * */
@@ -119,6 +113,113 @@ public class Bob {
         }
         if(this.position.y <= bottomBound) {
             this.position.y = get_random(4) + bottomBound;
+        }
+    }
+
+    /*
+     * Try ony huey instead of array
+     * */
+    public void e_move() {
+        int i = this.e_move_dir;
+        if ((i >= 1) && (i < 8))
+        {
+            i++;
+            if (i == 8) {
+                i = 100;
+            }
+        }
+        else if ((i >= 21) && (i < 31))
+        {
+            i++;
+            if ((this.position.x != 2) && (i % 3 == 0)) {
+                this.position.x -= 1;
+            }
+            if (i == 31) {
+                i = 100;
+            }
+        }
+        else if ((i > -31) && (i <= -21))
+        {
+            i--;
+            if ((this.position.x != 22) && (i % 3 == 0)) {
+                this.position.x += 1;
+            }
+            if (i == -31) {
+                i = 100;
+            }
+        }
+        else if ((i >= 11) && (i < 14))
+        {
+            i++;
+            if ((this.position.y != 1) && (i % 2 == 0)) {
+                this.position.y -= 1;
+            }
+            if (i == 14) {
+                i = 100;
+            }
+        }
+        else if ((i > -14) && (i <= -11))
+        {
+            i--;
+            if ((this.position.y != 7) && (i % 2 == 0)) {
+                this.position.y += 1;
+            }
+            if (i == -14) {
+                i = 100;
+            }
+        }
+        this.e_move_dir = i;
+    }
+
+    public void e_move_ai() {
+        int i;
+        if (((int)this.position.x == 2))
+        {
+            i = get_random(4);
+            if ((i == 0) || (i == 1)) {
+                this.e_move_dir = -21;
+            } else if (i == 2) {
+                this.e_move_dir = -11;
+            } else if (i == 3) {
+                this.e_move_dir = 11;
+            }
+        }
+        else if (((int)this.position.x == 22) || (((int)this.position.x >= 14)))
+        {
+            i = get_random(4);
+            if ((i == 0) || (i == 1)) {
+                this.e_move_dir = 21;
+            } else if (i == 2) {
+                this.e_move_dir = -11;
+            } else if (i == 3) {
+                this.e_move_dir = 11;
+            }
+        }
+        else if (((int)this.position.y == 6) || ((int)this.position.y == 7))
+        {
+            i = get_random(4);
+            if ((i == 1) || (i == 2)) {
+                this.e_move_dir = 11;
+            } else if (i == 0) {
+                this.e_move_dir = 21;
+            } else if (i == 1) {
+                this.e_move_dir = -21;
+            }
+        }
+        else
+        {
+            i = get_random(8);
+            if ((i == 0) || (i == 1)) {
+                this.e_move_dir = 21;
+            } else if ((i == 2) || (i == 3)) {
+                this.e_move_dir = -21;
+            } else if (i == 4) {
+                this.e_move_dir = 11;
+            } else if (i == 5) {
+                this.e_move_dir = -11;
+            } else {
+                this.e_move_dir = 1;
+            }
         }
     }
 
