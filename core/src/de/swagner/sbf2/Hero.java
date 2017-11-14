@@ -18,6 +18,10 @@ public class Hero {
         IDLE, WALKING, JUMPING, DYING, FIRING, FREEZE, HANGING
     }
 
+    private int h_idx;
+    private int h_timer;
+    private int h_timer_p;
+
     static final float SPEED = 2f; // unit per second
     static final float JUMP_VELOCITY = 1f;
     public static final float SIZE = 0.5f; // half a unit
@@ -134,6 +138,11 @@ public class Hero {
             i = -5;
         }
         return i;
+    }
+
+    public int hero_move(int paramInt1, int paramInt2, int paramInt3)
+    {
+        return 0;
     }
 
 }

@@ -19,6 +19,17 @@ public class Boss {
     public enum State {
         IDLE, WALKING, JUMPING, DYING, FIRING, FREEZE, HANGING
     }
+    private int e_boss_idx;
+    private int e_boss_fire_time;
+    private int e_boss_hp;
+    private int max_e_boss_hp;
+    private int e_boss_snow_y;
+    private int e_boss_snow_x;
+    private int e_boss_snow_top;
+    private int e_boss_snow_gap;
+    private int e_boss_snow_dx;
+    private int e_boss_wp;
+    private int e_boss_behv;
 
     static final float SPEED = 2f; // unit per second
     static final float JUMP_VELOCITY = 1f;
@@ -98,6 +109,13 @@ public class Boss {
 
     public boolean isDead() {
         return (this.hp <= 0) ? true : false;
+    }
+
+    public void setIdx(int idx) {
+        this.e_boss_idx = idx;
+    }
+    public int getIdx() {
+        return this.e_boss_idx;
     }
 
     public void e_move() {

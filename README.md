@@ -26,3 +26,4 @@ SnowBallFight is a Samsung J2ME [arcade game by MCookie n Wait4U, NeoMnT](http:/
 # TODO
  * Apply design pattern, libGDX best practice to implement AI, Sprite batch, etc.
  * Object oriented approach to refactor old J2ME source.
+ * Renfine sprite image, media quality.

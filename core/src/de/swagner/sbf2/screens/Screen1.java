@@ -51,6 +51,7 @@ public class Screen1 extends DefaultScreen {
     private Enemy huey;
     private Enemy dewey;
     private Boss boss;
+    private Enemy[] enemies = new Enemy[2];
 
     private Texture bobTexture;
 
@@ -59,7 +60,7 @@ public class Screen1 extends DefaultScreen {
     private Random rnd = new Random();
 
     // Test touchpad
-    private Stage stage;
+    private Stage touch_stage;
     private Touchpad touchpad;
     private Touchpad.TouchpadStyle touchpadStyle;
     private Skin touchpadSkin;
@@ -74,7 +75,8 @@ public class Screen1 extends DefaultScreen {
     public static int GAMESTATE_WIN = 1;
     public static int GAMESTATE_LOSE = 2;
     public static int GAMESTATE_PLAYING = 0;
-    public static float sgh_120_1080_screen_ratio = (5*9); // (5*9/2)
+    public static int sgh_120_1080_screen_ratio = (5*9); // (5*9/2)
+    public static int sgh_scale_ratio = Gdx.graphics.getWidth()/120; // 120 or 128px from original J2ME resolution.
 
     private static final String PREF_VIBRATION = "vibration";
     private static final String PREF_SOUND_ENABLED = "soundenabled";
@@ -83,6 +85,97 @@ public class Screen1 extends DefaultScreen {
     private static final String PREF_SAVEDGOLD = "saved_gold";
     private static final String PREF_MANA= "mana";
     Preferences prefs = Gdx.app.getPreferences("gamestate");
+
+    private static final int DEFAULT_DEM = 12;
+    private int game_state = 0;
+    private int saved_gold = 10;
+    private int speed = 4;
+    private int game_speed = 17;
+    private int screen = -1;
+    private boolean gameOn = true;
+    private String message;
+    private int m_mode = 1;
+    private int s_play = 1;
+    private int v_mode = 1;
+    //  AudioClip audioClip = null;
+    private int p_mode;
+    private int ani_step;
+
+//    private Image imgLogo;
+//    private Image imgMM;
+//    private Image imgBk;
+//    private Image imgSl;
+//    private Image imgPl;
+//    private Image imgCh;
+//    private Image imgBack;
+//    private Image imgAl;
+//    private Image imgShadow;
+//    private Image imgPok;
+//    private Image imgPPang;
+//    private Image imgPPang1;
+//    private Image imgH_ppang;
+//    private Image imgSnow_g;
+//    private Image imgPwd;
+//    private Image[] imgItem;
+//    private Image[] imgItem_hyo;
+//    private Image imgVill;
+//    private Image imgSchool;
+//    private Image imgShop;
+//    private Image[] imgSpecial;
+//    private Image imgSp;
+//    private Image[] imgEffect;
+//    private Image imgVictory;
+//    private Image imgV;
+//    private Image imgHero_v;
+//    private Image imgLose;
+//    private Image imgHero_l;
+//    private Image imgStage_num;
+//    private Image[] imgStage;
+
+    private int stage;
+    private int last_stage = 11;
+    private int tmp_stage;
+    private int school;
+    private int state;
+
+    private int pw_up;
+    private int mana = 0;
+    private int hp;
+    private int max_hp;
+    private int dem;
+    private int wp;
+    private int snow_pw;
+    private int real_snow_pw;
+    private int snow_last_y;
+    private int snow_top_y;
+    private int snow_gap;
+    private int snow_y;
+    private int snow_x;
+    private int ppang;
+    private int gold;
+    private int[] item_slot = new int[5];
+    private int ppang_item;
+    private int ppang_time;
+    private int special;
+    private int item_mode;
+    private int[] item_price = new int[8];
+    private int del = -1;
+    private int item_a_num;
+    private int item_b_num;
+    private int item_c_num = 2;
+    private int item_d_num;
+    private int b_item;
+    private int s_item;
+    private int e_num;
+    private int e_t_num;
+
+    private int e_time;
+    private int e_dem;
+    private int hit_idx;
+    private int e_boss;
+    private int boss_dis_count;
+    private int al;
+    private int d_gauge;
 
     public Screen1(Game game) {
         super(game);
@@ -121,9 +214,9 @@ public class Screen1 extends DefaultScreen {
         touchpad.setBounds(15, 15, 200, 200);
 
         //Create a Stage and add TouchPad
-        stage = new Stage(new StretchViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()), batch);
-        stage.addActor(touchpad);
-        Gdx.input.setInputProcessor(stage);
+        touch_stage = new Stage(new StretchViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()), batch);
+        touch_stage.addActor(touchpad);
+        Gdx.input.setInputProcessor(touch_stage);
 
         //Create block sprite
         blockTexture = new Texture(Gdx.files.internal("data/gui/block.png"));
@@ -339,9 +432,9 @@ public class Screen1 extends DefaultScreen {
         huey = new Enemy(new Vector2(240/sgh_120_1080_screen_ratio, (enemyPosY-enemyStepY)/sgh_120_1080_screen_ratio ));
         dewey = new Enemy(new Vector2(480/sgh_120_1080_screen_ratio, enemyPosY/sgh_120_1080_screen_ratio));
         boss = new Boss(new Vector2(320/sgh_120_1080_screen_ratio, (enemyPosY-(3*enemyStepY))/sgh_120_1080_screen_ratio ));
-        huey.setBobTexture("data/samsung-white/enemy0_0_60x.png");
-        dewey.setBobTexture("data/samsung-white/enemy1_1_60x.png");
-        boss.setBobTexture("data/samsung-white/boss2_0_60x.png");
+        huey.setBobTexture("data/samsung-white/enemy0_0_106x.png");
+        dewey.setBobTexture("data/samsung-white/enemy1_1_106x.png");
+        boss.setBobTexture("data/samsung-white/boss2_0_120x.png");
 
         huey.setBound(new Rectangle(huey.position.x*sgh_120_1080_screen_ratio, huey.position.y*sgh_120_1080_screen_ratio, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight()));
         dewey.setBound(new Rectangle(dewey.position.x*sgh_120_1080_screen_ratio, dewey.position.y*sgh_120_1080_screen_ratio, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight()));
@@ -385,15 +478,15 @@ public class Screen1 extends DefaultScreen {
 
     protected void oldTestDrawInitPositionEnermy() {
         if(!huey.isDead()) {
-            batch.draw(huey.getBobTexture(), (int)huey.position.x, (int)huey.position.y, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), 2, 2, 0, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), huey.facingLeft, false);
+            batch.draw(huey.getBobTexture(), (int)huey.position.x, (int)huey.position.y, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), 1, 1, 0, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), huey.facingLeft, false);
             huey.facingLeft = !huey.facingLeft;
         }
         if(!dewey.isDead()) {
-            batch.draw(dewey.getBobTexture(), (int)dewey.position.x, (int)dewey.position.y, 0, 0, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight(), 2, 2, 0, 0, 0, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight(), dewey.facingLeft, false);
+            batch.draw(dewey.getBobTexture(), (int)dewey.position.x, (int)dewey.position.y, 0, 0, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight(), 1, 1, 0, 0, 0, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight(), dewey.facingLeft, false);
             dewey.facingLeft = !dewey.facingLeft;
         }
         if(!boss.isDead()) {
-            batch.draw(boss.getBobTexture(), (int)boss.position.x, (int)boss.position.y, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), 2, 2, 0, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), boss.facingLeft, false);
+            batch.draw(boss.getBobTexture(), (int)boss.position.x, (int)boss.position.y, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), 1, 1, 0, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), boss.facingLeft, false);
             boss.facingLeft = !boss.facingLeft;
         }
     }
@@ -403,25 +496,89 @@ public class Screen1 extends DefaultScreen {
     * */
     protected void testDrawInitPositionEnermy() {
         if(!huey.isDead()) {
-            batch.draw(huey.getBobTexture(), (int)huey.position.x*sgh_120_1080_screen_ratio, (int)huey.position.y*sgh_120_1080_screen_ratio, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), 2, 2, 0, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), huey.facingLeft, false);
+            batch.draw(huey.getBobTexture(), (int)huey.position.x*sgh_120_1080_screen_ratio, (int)huey.position.y*sgh_120_1080_screen_ratio, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), 1, 1, 0, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), huey.facingLeft, false);
             huey.facingLeft = !huey.facingLeft;
         }
         if(!dewey.isDead()) {
-            batch.draw(dewey.getBobTexture(), (int)dewey.position.x*sgh_120_1080_screen_ratio, (int)dewey.position.y*sgh_120_1080_screen_ratio, 0, 0, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight(), 2, 2, 0, 0, 0, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight(), dewey.facingLeft, false);
+            batch.draw(dewey.getBobTexture(), (int)dewey.position.x*sgh_120_1080_screen_ratio, (int)dewey.position.y*sgh_120_1080_screen_ratio, 0, 0, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight(), 1, 1, 0, 0, 0, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight(), dewey.facingLeft, false);
             dewey.facingLeft = !dewey.facingLeft;
         }
         if(!boss.isDead()) {
-            batch.draw(boss.getBobTexture(), (int)boss.position.x*sgh_120_1080_screen_ratio, (int)boss.position.y*sgh_120_1080_screen_ratio, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), 2, 2, 0, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), boss.facingLeft, false);
+            batch.draw(boss.getBobTexture(), (int)boss.position.x*sgh_120_1080_screen_ratio, (int)boss.position.y*sgh_120_1080_screen_ratio, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), 1, 1, 0, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), boss.facingLeft, false);
             boss.facingLeft = !boss.facingLeft;
         }
     }
 
     /*
-    * J2ME original
+    * J2ME original port to gdx
     * */
     public void draw_enemy()
     {
+        for (int i = 0; i < enemies.length; i++) {
+            if (enemies[i].position.x != -10) {
+                batch.draw(enemies[i].getBobTexture(), (int) enemies[i].position.x * 5 * sgh_scale_ratio, enemies[i].position.y * 5 * sgh_scale_ratio + 5, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), 1, 1, 0, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), false, false);
+                if (enemies[i].e_ppang_time > 0) {
+                    enemies[i].e_ppang_time -= 1;
+                    // paramGraphics.drawImage(this.imgItem_hyo[(this.e_ppang_item[i] - 1)], this.e_x[i] * 5, this.e_y[i] * 5 + 1, 0x10 | 0x1);
+                    if (enemies[i].e_ppang_time == 0) {
+                        enemies[i].e_ppang_item = 0;
+                        if (enemies[i].e_lv < 0) {
+                            enemies[i].e_lv = (-enemies[i].e_lv);
+                        }
+                    }
+                }
+                if (enemies[i].dis_count >= 1) {
+                    enemies[i].dis_count += 1;
+                    if (enemies[i].dis_count == 4) {
+                        enemies[i].dis_count = 0;
+                        enemies[i].setIdx(0);
+                    }
+                } else if (enemies[i].dis_count <= -1) {
+                    enemies[i].dis_count -= 1;
+                    if (enemies[i].dis_count == -10) {
+                        enemies[i].position.x = -10;
+                        enemies[i].dis_count = 0;
+                        this.e_t_num -= 1;
+                        if ((this.e_t_num == 0) && (this.e_boss == 0)) {
+                            this.item_mode = 0;
+                            this.game_state = 2;
+                            this.state = 3;
+                            this.gameOn = true;
+                        }
+                    }
+                }
+            }
+        }
 
+        if (this.e_boss > 0)
+        {
+            batch.draw(boss.getBobTexture(), (int)boss.position.x * 5 *sgh_scale_ratio , (boss.position.y * 5)*sgh_scale_ratio, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), 1, 1, 0, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), false, false);
+            if (this.boss_dis_count >= 1)
+            {
+                this.boss_dis_count += 1;
+                if (this.boss_dis_count == 4)
+                {
+                    this.boss_dis_count = 0;
+                    boss.setIdx(0);
+                }
+            }
+            else if (this.boss_dis_count <= -1)
+            {
+                this.boss_dis_count -= 1;
+                if (this.boss_dis_count == -10)
+                {
+                    this.e_boss = 0;
+                    this.boss_dis_count = 0;
+                    if (this.e_t_num == 0)
+                    {
+                        this.item_mode = 0;
+                        this.game_state = 2;
+                        this.state = 3;
+                        this.gameOn = true;
+                    }
+                }
+            }
+        }
     }
 
     protected void displayManualTextureDraw() {
@@ -493,12 +650,12 @@ public class Screen1 extends DefaultScreen {
         batch.begin();
 //        blockSprite.draw(batch);
 
-        batch.draw(hero.getBobTexture(), hero.position.x, hero.position.y, 0, 0, heroTexture.getWidth(), heroTexture.getHeight(), 2, 2, 0, 0, 0, heroTexture.getWidth(), heroTexture.getHeight(), hero.facingLeft, false);
+        batch.draw(hero.getBobTexture(), hero.position.x, hero.position.y, 0, 0, heroTexture.getWidth(), heroTexture.getHeight(), 1, 1, 0, 0, 0, heroTexture.getWidth(), heroTexture.getHeight(), hero.facingLeft, false);
         hero.facingLeft = !hero.facingLeft;
 
         batch.end();
-        stage.act(Gdx.graphics.getDeltaTime());
-        stage.draw();
+        touch_stage.act(Gdx.graphics.getDeltaTime());
+        touch_stage.draw();
     }
 
     protected void handleFireTouch() {
@@ -587,6 +744,9 @@ public class Screen1 extends DefaultScreen {
 
     protected void checkCollisionHeroToEnemy() {
         Rectangle heroItem = hero.getItem().getBound();
+        Gdx.app.log("INFO", "Hero fire " + heroItem.toString());
+        Gdx.app.log("INFO", "Huey fire " + huey.getBound().toString());
+        Gdx.app.log("INFO", "Boss fire " + boss.getBound().toString());
         if(heroItem.overlaps(huey.getBound())) {
             huey.loseHp(hero.getItem().getDamage());
         }
@@ -625,11 +785,85 @@ public class Screen1 extends DefaultScreen {
     }
 
     protected void updateHeroBullet() {
-        hero.setBound(new Rectangle(hero.position.x, hero.position.y, hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight()));
+        hero.setBound(new Rectangle(hero.position.x * sgh_120_1080_screen_ratio, hero.position.y * sgh_120_1080_screen_ratio, hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight()));
     }
     protected void updateEnemyBound() {
-        huey.setBound(new Rectangle(huey.position.x, huey.position.y, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight()));
-        dewey.setBound(new Rectangle(dewey.position.x, dewey.position.y, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight()));
-        boss.setBound(new Rectangle(boss.position.x, boss.position.y, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight()));
+        huey.setBound(new Rectangle(huey.position.x * sgh_120_1080_screen_ratio, huey.position.y * sgh_120_1080_screen_ratio, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight()));
+        dewey.setBound(new Rectangle(dewey.position.x*sgh_120_1080_screen_ratio, dewey.position.y*sgh_120_1080_screen_ratio, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight()));
+        boss.setBound(new Rectangle(boss.position.x*sgh_120_1080_screen_ratio, boss.position.y*sgh_120_1080_screen_ratio, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight()));
+    }
+
+    public void check_building(int paramInt1, int paramInt2)
+    {
+        if ((paramInt1 == 43) && (paramInt2 == 22))
+        {
+            this.m_mode = 0;
+            this.b_item = 0;
+            this.s_item = 0;
+        }
+        else if ((paramInt1 == 71) && (paramInt2 == 22))
+        {
+            this.m_mode = 1;
+            this.b_item = 0;
+            this.s_item = 0;
+        }
+        else if ((paramInt1 == 92) && (paramInt2 == 46))
+        {
+            this.m_mode = 2;
+            this.school = 1;
+        }
+        else if ((paramInt1 == 71) && (paramInt2 == 70))
+        {
+            if (this.last_stage > 20) {
+                this.m_mode = 3;
+            } else {
+                this.m_mode = 100;
+            }
+            this.school = 2;
+        }
+        else if ((paramInt1 == 43) && (paramInt2 == 70))
+        {
+            if (this.last_stage > 30) {
+                this.m_mode = 4;
+            } else {
+                this.m_mode = 100;
+            }
+            this.school = 3;
+        }
+        else if ((paramInt1 == 22) && (paramInt2 == 46))
+        {
+            if (this.last_stage > 40) {
+                this.m_mode = 5;
+            } else {
+                this.m_mode = 100;
+            }
+            this.school = 4;
+        }
+        else
+        {
+            this.m_mode = -1;
+        }
+    }
+    public int hero_move(int paramInt1, int paramInt2, int paramInt3)
+    {
+        if (paramInt3 == 0)
+        {
+            if ((paramInt2 == 46) && (paramInt1 >= 22) && (paramInt1 <= 92))
+            {
+                check_building(paramInt1, paramInt2);
+                return 1;
+            }
+            return 0;
+        }
+        if (paramInt3 == 1)
+        {
+            if (((paramInt1 == 43) || (paramInt1 == 71)) && (paramInt2 >= 15) && (paramInt2 <= 71))
+            {
+                check_building(paramInt1, paramInt2);
+                return 1;
+            }
+            return 0;
+        }
+        return 1;
     }
 }

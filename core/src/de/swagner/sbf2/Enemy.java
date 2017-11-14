@@ -18,6 +18,21 @@ public class Enemy {
         IDLE, WALKING, JUMPING, DYING, FIRING, FREEZE, HANGING
     }
 
+    private int e_idx;
+    public int max_e_hp;
+    public int e_snow_y;
+    public int e_snow_x;
+    public int e_snow_top;
+    public int e_snow_gap;
+    public int e_snow_dx;
+    public int e_ppang_item;
+    public int e_ppang_time;
+    public int e_lv;
+    public int e_fire_time;
+    public int e_wp;
+    public int e_behv;
+    public int dis_count;
+
     static final float SPEED = 2f; // unit per second
     static final float JUMP_VELOCITY = 1f;
     public static final float SIZE = 0.5f; // half a unit
@@ -89,6 +104,12 @@ public class Enemy {
     public int getHp() {
         return this.hp;
     }
+    public int getIdx() {
+        return e_idx;
+    }
+    public void setIdx(int e_idx) {
+        this.e_idx = e_idx;
+    }
 
     public void loseHp(int damage) {
         this.hp -= damage;
@@ -117,7 +138,7 @@ public class Enemy {
     }
 
     /*
-     * Try ony huey instead of array
+     * This function simulate enemy moving like in real. It's based on screen size 120x160 and some arithmetic calculate.
      * */
     public void e_move() {
         int i = this.e_move_dir;
