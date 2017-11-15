@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="de.swagner.paxbritannica"
+    package="wait4u.littlewing.snowballfight"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -12,7 +12,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="de.swagner.sbf.android.AndroidLauncher"
+            android:name="wait4u.littlewing.paxbritan.android.AndroidLauncher"
             android:label="Pax Britannica"
             android:configChanges="keyboard|keyboardHidden|orientation"
             android:screenOrientation="portrait" >
@@ -22,7 +22,7 @@
         </activity>
 
         <activity
-            android:name="de.swagner.sbf.android.AndroidLauncher2"
+            android:name="wait4u.littlewing.paxbritan.android.AndroidLauncher2"
             android:label="SnowBallFight"
             android:configChanges="keyboard|keyboardHidden|orientation"
             android:screenOrientation="portrait" >
@@ -33,7 +33,7 @@
         </activity>
 
         <activity
-            android:name="de.swagner.sbf.android.CubocyLauncher"
+            android:name="wait4u.littlewing.paxbritan.android.CubocyLauncher"
             android:label="Cubocy"
             android:configChanges="keyboard|keyboardHidden|orientation"
             android:screenOrientation="portrait" >
