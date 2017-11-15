@@ -18,7 +18,7 @@ public class Enemy {
         IDLE, WALKING, JUMPING, DYING, FIRING, FREEZE, HANGING
     }
 
-    private int e_idx;
+    public int e_idx;
     public int max_e_hp;
     public int e_snow_y;
     public int e_snow_x;
@@ -140,7 +140,7 @@ public class Enemy {
     /*
      * This function simulate enemy moving like in real. It's based on screen size 120x160 and some arithmetic calculate.
      * */
-    public void e_move() {
+    public void e_move_() {
         int i = this.e_move_dir;
         if ((i >= 1) && (i < 8))
         {
@@ -192,7 +192,7 @@ public class Enemy {
         this.e_move_dir = i;
     }
 
-    public void e_move_ai() {
+    public void e_move_ai_() {
         int i;
         if (((int)this.position.x == 2))
         {
@@ -337,6 +337,112 @@ public class Enemy {
         this.e_move_dir = i2;
     }
 
+    public void e_move_ai(Enemy[] enemies, int paramInt)
+    {
+        int i;
+        if ((enemies[paramInt].position.x == 2) || ((enemies[1].position.x <= 9) && (paramInt == 1)))
+        {
+            i = get_random(4);
+            if ((i == 0) || (i == 1)) {
+                enemies[paramInt].e_move_dir = -21;
+            } else if (i == 2) {
+                enemies[paramInt].e_move_dir = -11;
+            } else if (i == 3) {
+                enemies[paramInt].e_move_dir = 11;
+            }
+        }
+        else if ((enemies[paramInt].position.x == 22) || ((enemies[0].position.x >= 14) && (paramInt == 0)))
+        {
+            i = get_random(4);
+            if ((i == 0) || (i == 1)) {
+                enemies[paramInt].e_move_dir = 21;
+            } else if (i == 2) {
+                enemies[paramInt].e_move_dir = -11;
+            } else if (i == 3) {
+                enemies[paramInt].e_move_dir = 11;
+            }
+        }
+        else if ((enemies[paramInt].position.y == 6) || (enemies[paramInt].position.y == 7))
+        {
+            i = get_random(4);
+            if ((i == 1) || (i == 2)) {
+                enemies[paramInt].e_move_dir = 11;
+            } else if (i == 0) {
+                enemies[paramInt].e_move_dir = 21;
+            } else if (i == 1) {
+                enemies[paramInt].e_move_dir = -21;
+            }
+        }
+        else
+        {
+            i = get_random(8);
+            if ((i == 0) || (i == 1)) {
+                enemies[paramInt].e_move_dir = 21;
+            } else if ((i == 2) || (i == 3)) {
+                enemies[paramInt].e_move_dir = -21;
+            } else if (i == 4) {
+                enemies[paramInt].e_move_dir = 11;
+            } else if (i == 5) {
+                enemies[paramInt].e_move_dir = -11;
+            } else {
+                enemies[paramInt].e_move_dir = 1;
+            }
+        }
+    }
+
+    public void e_move(Enemy[] enemies, int paramInt)
+    {
+        int i = enemies[paramInt].e_move_dir;
+        if ((i >= 1) && (i < 8))
+        {
+            i++;
+            if (i == 8) {
+                i = 100;
+            }
+        }
+        else if ((i >= 21) && (i < 31))
+        {
+            i++;
+            if ((enemies[paramInt].position.x != 2) && (i % 3 == 0)) {
+                enemies[paramInt].position.x -= 1;
+            }
+            if (i == 31) {
+                i = 100;
+            }
+        }
+        else if ((i > -31) && (i <= -21))
+        {
+            i--;
+            if ((enemies[paramInt].position.x != 22) && (i % 3 == 0)) {
+                enemies[paramInt].position.x += 1;
+            }
+            if (i == -31) {
+                i = 100;
+            }
+        }
+        else if ((i >= 11) && (i < 14))
+        {
+            i++;
+            if ((enemies[paramInt].position.y != 1) && (i % 2 == 0)) {
+                enemies[paramInt].position.y -= 1;
+            }
+            if (i == 14) {
+                i = 100;
+            }
+        }
+        else if ((i > -14) && (i <= -11))
+        {
+            i--;
+            if ((enemies[paramInt].position.y != 7) && (i % 2 == 0)) {
+                enemies[paramInt].position.y += 1;
+            }
+            if (i == -14) {
+                i = 100;
+            }
+        }
+        enemies[paramInt].e_move_dir = i;
+    }
+
     public int get_random(int paramInt)
     {
         Random rnd = new Random();
@@ -356,6 +462,215 @@ public class Enemy {
         }
         return i;
     }
-
+    public void e_attack_ai(Hero hero, Boss boss, Enemy[] enemies, int paramInt)
+    {
+        int i = 0;
+        int j = 0;
+        int k = 0;
+        int m = 0;
+        if (paramInt > 100)
+        {
+            m = (int)(hero.position.x - boss.position.x);
+            j = paramInt;
+        }
+        else
+        {
+            m = (int)(hero.position.x - enemies[paramInt].position.x);
+            k = paramInt;
+        }
+        int n;
+        if ((m >= -9) && (m <= -6))
+        {
+            if ((enemies[k].e_lv >= 2) || (j > 100))
+            {
+                n = get_random(3);
+                if (n == 0) {
+                    i = -2;
+                } else if (n == 1) {
+                    i = -3;
+                } else {
+                    i = -4;
+                }
+            }
+            else
+            {
+                i = get_random1(6);
+            }
+        }
+        else if ((m >= -5) && (m <= -2))
+        {
+            if ((enemies[k].e_lv >= 2) || (j > 100))
+            {
+                n = get_random(3);
+                if (n == 0) {
+                    i = -1;
+                } else if (n == 1) {
+                    i = -2;
+                } else {
+                    i = -3;
+                }
+            }
+            else
+            {
+                i = get_random1(6);
+            }
+        }
+        else if ((m >= -1) && (m <= 1))
+        {
+            if ((enemies[k].e_lv >= 2) || (j > 100))
+            {
+                n = get_random(3);
+                if (n == 0) {
+                    i = -1;
+                } else if (n == 1) {
+                    i = 0;
+                } else {
+                    i = 1;
+                }
+            }
+            else
+            {
+                i = get_random1(6);
+            }
+        }
+        else if ((m >= 2) && (m <= 5))
+        {
+            if ((enemies[k].e_lv >= 2) || (j > 100))
+            {
+                n = get_random(3);
+                if (n == 0) {
+                    i = 1;
+                } else if (n == 1) {
+                    i = 2;
+                } else {
+                    i = 3;
+                }
+            }
+            else
+            {
+                i = get_random1(6);
+            }
+        }
+        else if ((m >= 6) && (m <= 9))
+        {
+            if ((enemies[k].e_lv >= 2) || (j > 100))
+            {
+                n = get_random(3);
+                if (n == 0) {
+                    i = 2;
+                } else if (n == 1) {
+                    i = 3;
+                } else {
+                    i = 4;
+                }
+            }
+            else
+            {
+                i = get_random1(6);
+            }
+        }
+        else if (m >= 10)
+        {
+            if ((enemies[k].e_lv >= 2) || (j > 100))
+            {
+                n = get_random(3);
+                if (n == 0) {
+                    i = 4;
+                } else {
+                    i = 5;
+                }
+            }
+            else
+            {
+                i = get_random1(6);
+            }
+        }
+        else if (m <= -10) {
+            if ((enemies[k].e_lv >= 2) || (j > 100))
+            {
+                n = get_random(2);
+                if (n == 0) {
+                    i = -4;
+                } else {
+                    i = -5;
+                }
+            }
+            else
+            {
+                i = get_random1(6);
+            }
+        }
+        if (j < 100)
+        {
+            if (enemies[k].e_lv >= 2)
+            {
+                n = get_random(4);
+                if (n == 1)
+                {
+                    int i1 = get_random(3);
+                    if (i1 == 0) {
+                        enemies[k].e_wp = 1;
+                    } else if (i1 == 1) {
+                        enemies[k].e_wp = 2;
+                    } else {
+                        enemies[k].e_wp = 3;
+                    }
+                }
+                else
+                {
+                    enemies[k].e_wp = 0;
+                }
+            }
+            enemies[k].e_behv = i;
+            enemies[k].e_snow_y = (int)enemies[k].position.y; // TODO why y do not multiple by cell (5)
+            enemies[k].e_snow_x = (int)(enemies[k].position.x * 5);
+            enemies[k].e_snow_gap = 0;
+            enemies[k].e_snow_dx = i;
+            enemies[k].e_snow_top = 1;
+            enemies[k].e_idx = 3;
+            enemies[k].dis_count = 1;
+        }
+        else
+        {
+            if (j < 103)
+            {
+                n = get_random(2);
+                if (n == 0)
+                {
+                    n = get_random(3);
+                    if (n == 0) {
+                        boss.e_boss_wp = 1;
+                    } else if (n == 1) {
+                        boss.e_boss_wp = 2;
+                    } else {
+                        boss.e_boss_wp = 3;
+                    }
+                }
+                else
+                {
+                    boss.e_boss_wp = 0;
+                }
+            }
+            else
+            {
+                n = get_random(3);
+                if (n == 0) {
+                    boss.e_boss_wp = 1;
+                } else if (n == 1) {
+                    boss.e_boss_wp = 2;
+                } else {
+                    boss.e_boss_wp = 3;
+                }
+            }
+            boss.e_boss_behv = i;
+            boss.e_boss_snow_y = (int)boss.position.y;
+            boss.e_boss_snow_x = (int)(boss.position.x * 5);
+            boss.e_boss_snow_gap = 0;
+            boss.e_boss_snow_dx = i;
+            boss.e_boss_snow_top = 1;
+            boss.e_boss_idx = 3;
+            boss.boss_dis_count = 1;
+        }
+    }
 
 }

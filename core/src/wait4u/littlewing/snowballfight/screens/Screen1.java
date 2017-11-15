@@ -16,6 +16,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.Preferences;
+import wait4u.littlewing.snowballfight.Item;
+import wait4u.littlewing.snowballfight.Enemy;
+import wait4u.littlewing.snowballfight.Boss;
+import wait4u.littlewing.snowballfight.Hero;
 
 import java.util.Random;
 
@@ -38,12 +42,12 @@ public class Screen1 extends DefaultScreen {
     private int ppuX = 5;	// pixels per unit on the X axis
     private int ppuY = 5;	// pixels per unit on the Y axis
 
-    private wait4u.littlewing.snowballfight.Hero hero;
+    private Hero hero;
     // TODO loop create sprite
-    private wait4u.littlewing.snowballfight.Enemy huey;
-    private wait4u.littlewing.snowballfight.Enemy dewey;
-    private wait4u.littlewing.snowballfight.Boss boss;
-    private wait4u.littlewing.snowballfight.Enemy[] enemies = new wait4u.littlewing.snowballfight.Enemy[2];
+    private Enemy huey;
+    private Enemy dewey;
+    private Boss boss;
+    private Enemy[] enemies = new Enemy[2];
 
     private Texture bobTexture;
 
@@ -93,37 +97,6 @@ public class Screen1 extends DefaultScreen {
     private int p_mode;
     private int ani_step;
 
-//    private Image imgLogo;
-//    private Image imgMM;
-//    private Image imgBk;
-//    private Image imgSl;
-//    private Image imgPl;
-//    private Image imgCh;
-//    private Image imgBack;
-//    private Image imgAl;
-//    private Image imgShadow;
-//    private Image imgPok;
-//    private Image imgPPang;
-//    private Image imgPPang1;
-//    private Image imgH_ppang;
-//    private Image imgSnow_g;
-//    private Image imgPwd;
-//    private Image[] imgItem;
-//    private Image[] imgItem_hyo;
-//    private Image imgVill;
-//    private Image imgSchool;
-//    private Image imgShop;
-//    private Image[] imgSpecial;
-//    private Image imgSp;
-//    private Image[] imgEffect;
-//    private Image imgVictory;
-//    private Image imgV;
-//    private Image imgHero_v;
-//    private Image imgLose;
-//    private Image imgHero_l;
-//    private Image imgStage_num;
-//    private Image[] imgStage;
-
     private int stage;
     private int last_stage = 11;
     private int tmp_stage;
@@ -132,7 +105,6 @@ public class Screen1 extends DefaultScreen {
 
     private int pw_up;
     private int mana = 0;
-    private int hp;
     private int max_hp;
     private int dem;
     private int wp;
@@ -158,14 +130,13 @@ public class Screen1 extends DefaultScreen {
     private int item_d_num;
     private int b_item;
     private int s_item;
-    private int e_num;
+    private int e_num = 2; // set dafaut value for debug avoid eceed 2 item size
     private int e_t_num;
 
     private int e_time;
     private int e_dem;
     private int hit_idx;
     private int e_boss;
-    private int boss_dis_count;
     private int al;
     private int d_gauge;
 
@@ -266,11 +237,371 @@ public class Screen1 extends DefaultScreen {
         getPrefs().flush();
     }
 
+    public int getSavedMana() {
+        return getPrefs().getInteger(PREF_MANA, 64);
+    }
+
+    public void setSavedMana(int saved_gold) {
+        getPrefs().putInteger(PREF_MANA, saved_gold);
+        getPrefs().flush();
+    }
+
+    public int getGameSpeed() {
+        return getPrefs().getInteger(PREF_SPEED, 64);
+    }
+
+    public void setGameSpeed(int saved_gold) {
+        getPrefs().putInteger(PREF_SPEED, saved_gold);
+        getPrefs().flush();
+    }
+
     public void render(float delta) {
+        int viewPortHeight = (int)Gdx.graphics.getHeight()*3/4;
+        int topBound = viewPortHeight + (int)Gdx.graphics.getHeight()/8;
+        int bottomSpace = (int)Gdx.graphics.getHeight()/8; // May be change for fit touch button
+
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         camera.update();
         generalUpdate();
+
+        int j;
+        if (screen == 6)        // normal playing screen, TODO may be use constants name
+        {
+            // paramGraphics.drawImage(this.imgBack, 0, 0, 20); // options|* button
+            // TODO init topBound as global var to reuse
+            // 1/8 as 1/4 (4/16 * scr_height) 4 = 16-12; 12 is from ratio 3x3 = 9 => 4X3 = 12
+
+            batch.draw(hero.getBobTexture(), hero.position.x * 5 * sgh_scale_ratio, (int)83/160*viewPortHeight , hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight());
+            if (ppang_time > 0)
+            {
+                if (ppang_item == 1) {
+//                    paramGraphics.drawImage(this.imgItem_hyo[0], this.h_x * 5, 74, 0x10 | 0x1);
+                } else {
+//                    paramGraphics.drawImage(this.imgItem_hyo[1], this.h_x * 5, 83, 0x10 | 0x1);
+                }
+                ppang_time -= 1;
+                if (ppang_time == 0) {
+                    ppang_item = 0;
+                }
+            }
+//            draw_enemy(paramGraphics);
+            if (item_mode != 0)
+            {
+                if (message != "") {
+                    draw_text();
+                }
+                for (int i = 1; i <= 5; i++) {
+//                    paramGraphics.drawRect(i * 12 + 23, 110, 10, 9);
+                }
+                if (item_mode != 100)
+                {
+//                    paramGraphics.setColor(16711680);
+//                    paramGraphics.drawRect(this.item_mode * 12 + 23, 110, 10, 9);
+                }
+                else if (item_mode == 100)
+                {
+                    item_mode = 0;
+                }
+            }
+            if (pw_up == 2)
+            {
+//                paramGraphics.drawImage(this.imgShadow, this.snow_x * 5, this.snow_y * 7 + 4, 0x2 | 0x1);
+//                paramGraphics.drawImage(this.imgItem[this.wp], this.snow_x * 5, this.snow_y * 7 - this.snow_gap + 4, 0x2 | 0x1);
+            }
+            else if (this.pw_up == 1)
+            {
+                if ((real_snow_pw > 0) && (ppang_item != 1))
+                {
+//                    paramGraphics.setColor(7196662);
+                    if (hero.position.x >= 13)
+                    {
+//                        paramGraphics.fillRect(this.h_x * 5 - 16, 106 - this.real_snow_pw * 3, 3, this.real_snow_pw * 3);
+//                        paramGraphics.drawImage(this.imgPwd, this.h_x * 5 - 15, 83, 0x10 | 0x1);
+                    }
+                    else
+                    {
+//                        paramGraphics.fillRect(this.h_x * 5 + 14, 106 - this.real_snow_pw * 3, 3, this.real_snow_pw * 3);
+//                        paramGraphics.drawImage(this.imgPwd, this.h_x * 5 + 15, 83, 0x10 | 0x1);
+                    }
+                }
+            }
+            else if (this.pw_up == 0)
+            {
+                if (this.ppang <= -1)
+                {
+//                    paramGraphics.drawImage(this.imgPok, this.snow_x * 5, this.snow_y * 7 - 3, 0x2 | 0x1);
+                    this.ppang -= 1;
+                    if (this.ppang == -3) {
+                        this.ppang = 0;
+                    }
+                }
+                else if ((this.ppang >= 1) && (this.ppang <= 10))
+                {
+                    if (this.s_item != -10)
+                    {
+                        if (this.ppang < 3) {
+//                            paramGraphics.drawImage(this.imgPPang, this.snow_x * 5, this.snow_y * 7 - 6, 0x2 | 0x1);
+                        } else {
+//                            paramGraphics.drawImage(this.imgPPang1, this.snow_x * 5, this.snow_y * 7 - 6, 0x2 | 0x1);
+                        }
+                    }
+                    else if (this.ppang < 4) {
+//                        paramGraphics.drawImage(this.imgEffect[0], this.snow_x * 5, this.snow_y * 7 - 2, 0x2 | 0x1);
+                    } else {
+//                        paramGraphics.drawImage(this.imgEffect[1], this.snow_x * 5, this.snow_y * 7 - 2, 0x2 | 0x1);
+                    }
+                    if (this.hit_idx != 10)
+                    {
+                        if (enemies[hit_idx].getHp() > 0)
+                        {
+//                            paramGraphics.setColor(16711680);
+//                            paramGraphics.fillRect(this.e_x[this.hit_idx] * 5 + 8, this.e_y[this.hit_idx] * 5 + 5, 3, 15);
+//                            paramGraphics.setColor(9672090);
+//                            paramGraphics.fillRect(this.e_x[this.hit_idx] * 5 + 8, this.e_y[this.hit_idx] * 5 + 5, 3, 15 - 15 * this.e_hp[this.hit_idx] / this.max_e_hp[this.hit_idx]);
+                        }
+                    }
+                    else if (hit_idx == 10)
+                    {
+                        if (boss.getHp() > 0)
+                        {
+//                            paramGraphics.setColor(16711680);
+//                            paramGraphics.fillRect(this.e_boss_x * 5 + 12, this.e_boss_y * 5 + 5, 3, 15);
+                            // draw boss hp bar
+//                            http://libgdx.badlogicgames.com/nightlies/docs/api/com/badlogic/gdx/graphics/glutils/ShapeRenderer.html
+//                            batch.draw(boss.getBobTexture(), (boss.position.x* 5 + 12)*sgh_scale_ratio, (boss.position.y* 5 + 5)*sgh_scale_ratio, 3*sgh_scale_ratio, 15*sgh_scale_ratio);
+//                            paramGraphics.setColor(9672090);
+//                            paramGraphics.fillRect(this.e_boss_x * 5 + 12, this.e_boss_y * 5 + 5, 3, 15 - 15 * this.e_boss_hp / this.max_e_boss_hp);
+                        }
+                        if (al == 1) {
+//                            paramGraphics.drawImage(this.imgAl, this.snow_x * 5 + 6, this.snow_y * 7 - 10, 0x2 | 0x1);
+                        }
+                    }
+                    ppang += 1;
+                    if (ppang == 6)
+                    {
+                        ppang = 0;
+                        s_item = 0;
+                        al = -1;
+                    }
+                }
+                else if (ppang >= 50)
+                {
+//                    draw_sp_hyo(paramGraphics);
+                }
+                if (message != "") {
+                    draw_text();
+                }
+            }
+            else if (pw_up == -1)
+            {
+                pw_up = 0;
+            }
+            if (p_mode == 1)
+            {
+                try
+                {
+//                    paramGraphics.drawImage(Image.createImage("/ui.png"), 0, 109, 20);
+                }
+                catch (Exception localException1) {}
+//                draw_item(paramGraphics);
+                p_mode = 2;
+            }
+            if (this.d_gauge != 0) {
+//                draw_gauge();
+            }
+            for (j = 0; j < e_num; j++) { // or count array elements enemies
+                if (enemies[j].e_behv != 100)
+                {
+//                    paramGraphics.drawImage(this.imgShadow, this.e_snow_x[j], this.e_snow_y[j] * 6 + 17, 0x2 | 0x1);
+//                    paramGraphics.drawImage(this.imgItem[this.e_wp[j]], this.e_snow_x[j], this.e_snow_y[j] * 6 + 13 - this.e_snow_gap[j], 0x2 | 0x1);
+                }
+            }
+            if ((boss.e_boss_behv != 100) && (e_boss > 0))
+            {
+//                paramGraphics.drawImage(this.imgShadow, this.e_boss_snow_x, this.e_boss_snow_y * 6 + 17, 0x2 | 0x1);
+//                paramGraphics.drawImage(this.imgItem[this.e_boss_wp], this.e_boss_snow_x, this.e_boss_snow_y * 6 + 13 - this.e_boss_snow_gap, 0x2 | 0x1);
+            }
+            if (del != -1) {
+//                draw_item();
+            }
+            if (hero.h_timer_p <= -1) {
+                if (hero.h_timer_p != -5)
+                {
+//                    paramGraphics.drawImage(this.imgH_ppang, this.h_x * 5 + 1, 81, 0x2 | 0x1);
+                    hero.h_timer_p -= 1;
+                }
+                else if (hero.h_timer_p == -5)
+                {
+                    hero.h_timer_p = 0;
+//                    paramGraphics.setColor(16711680);
+//                    paramGraphics.fillRect(5, 113, 9, 12);
+//                    paramGraphics.setColor(9342606);
+                    if (hero.getHp() > 0) {
+//                        paramGraphics.fillRect(5, 113, 9, 12 - 12 * this.hp / this.max_hp);
+                    }
+                    if (hero.getHp() <= 0)
+                    {
+                        state = 3;
+                        game_state = 1;
+                        gameOn = true;
+                    }
+                }
+            }
+            if (state == 2)
+            {
+                if (ani_step >= 3) {
+//                    paramGraphics.drawImage(imgStage[0], 20, 60, 20);
+                }
+                if (ani_step >= 6) {
+//                    paramGraphics.drawImage(imgStage[1], 35, 60, 20);
+                }
+                if (ani_step >= 9) {
+//                    paramGraphics.drawImage(imgStage[2], 50, 60, 20);
+                }
+                if (ani_step >= 12) {
+//                    paramGraphics.drawImage(imgStage[3], 65, 60, 20);
+                }
+                if (ani_step >= 15) {
+//                    paramGraphics.drawImage(imgStage[4], 80, 60, 20);
+                }
+                if (ani_step >= 19) {
+//                    paramGraphics.drawImage(imgStage_num, 95, 60, 20);
+                }
+            }
+        }
+        else if (screen == 2)
+        {
+
+        }
+        else if (screen == 3)
+        {
+
+        }
+        else if (screen == 31)
+        {
+
+        }
+        else if (screen == 100)
+        {
+
+        }
+        else if (screen == -88)
+        {
+
+        }
+        else if (screen == 8)
+        {
+
+        }
+        else if (screen == 9)
+        {
+            if ((ani_step == 1) || (ani_step == 46))
+            {
+                if (ani_step == 46)
+                {
+//                    destroyImage(9);
+//                    loadImage(100);
+                    pw_up = -1;
+//                    paramGraphics.drawImage(imgBack, 0, 0, 20);
+                    screen = 6;
+                    ppang = 50;
+                    for (j = 0; j < e_num; j++)
+                    {
+                        enemies[j].e_move_dir = 0;
+//                        decs_e_hp(j);
+                    }
+                    if (e_boss > 0)
+                    {
+                        boss.e_boss_move_dir = 0;
+//                        decs_e_hp(10);
+                    }
+                    dem = 12;
+                    mana = 0;
+                }
+//                paramGraphics.setColor(16777215);
+//                paramGraphics.fillRect(0, 25, 128, 84);
+                for (j = 0; j < e_num; j++)
+                {
+                    if (enemies[j].position.x != -10) {
+                        batch.draw(enemies[j].getBobTexture(), enemies[j].position.x * 5*sgh_scale_ratio, (enemies[j].position.y * 5 + 5)*sgh_scale_ratio, enemies[j].getBobTexture().getWidth(), enemies[j].getBobTexture().getHeight());
+                    }
+                    if (enemies[j].e_behv != 100)
+                    {
+//                        paramGraphics.drawImage(imgShadow, e_snow_x[j], e_snow_y[j] * 6 + 17, 0x2 | 0x1);
+//                        paramGraphics.drawImage(imgItem[e_wp[j]], e_snow_x[j], e_snow_y[j] * 6 + 13 - e_snow_gap[j], 0x2 | 0x1);
+                    }
+                }
+                if (e_boss > 0) {
+//                    paramGraphics.drawImage(imgBoss[e_boss_idx], e_boss_x * 5, e_boss_y * 5, 0x10 | 0x1);
+                }
+            }
+            if (this.special == 1)
+            {
+                if (ani_step <= 45) {
+//                    paramGraphics.drawImage(imgSp, 158 - ani_step * 3, 0, 20);
+                }
+            }
+            else if (special == 2)
+            {
+                if (ani_step <= 45) {
+//                    paramGraphics.drawImage(imgSp, 158 - ani_step * 3, 0, 20);
+                }
+            }
+            else if ((special == 3) && (ani_step <= 45)) {
+//                paramGraphics.drawImage(imgSp, 168 - ani_step * 3, 30, 20);
+            }
+            batch.draw(hero.getBobTexture(), hero.position.x * 5 * sgh_scale_ratio, (int)(83/160)*viewPortHeight+bottomSpace, hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight());
+        }
+        else if (screen == 4)
+        {
+
+        }
+        else if (screen == 5)
+        {
+
+        }
+        else if (screen == -33)
+        {
+
+        }
+        else if (screen == 200)
+        {
+
+        }
+        else if (screen == 65335)
+        {
+
+        }
+        else if (screen == 300)
+        {
+
+        }
+        else if (screen == 77)
+        {
+
+        }
+        else if (screen == -1)
+        {
+
+        }
+        else if (screen == -2)
+        {
+
+        }
+        else if (screen == 1000)
+        {
+
+        }
+        else if (screen == -5)
+        {
+
+        }
+        else if (screen == 1)
+        {
+
+        }
+
 //        batch.setProjectionMatrix(camera.combined);
 
         if (huey.e_move_dir >= 100)
@@ -284,13 +615,11 @@ public class Screen1 extends DefaultScreen {
         }
         else if ((huey.e_move_dir == 0) && (!huey.isDead()))
         {
-            Gdx.app.log("INFO", "Huey move dir = 0 AI :"+ huey.e_move_dir + " --x--" + huey.position.x + " y " + huey.position.y);
-            huey.e_move_ai();
+            huey.e_move_ai_();
         }
         else if ((huey.e_move_dir < 100) && (huey.e_move_dir != 0) && (!huey.isDead()))
         {
-            Gdx.app.log("INFO", "Huey move dir = 0 AI :"+ huey.e_move_dir + " --x--" + huey.position.x + " y " + huey.position.y);
-            huey.e_move();
+            huey.e_move_();
         }
 
         if (dewey.e_move_dir >= 100)
@@ -304,14 +633,44 @@ public class Screen1 extends DefaultScreen {
         }
         else if ((dewey.e_move_dir == 0) && (!dewey.isDead()))
         {
-            Gdx.app.log("INFO", "Dewey move dir = 0 AI : "+ dewey.e_move_dir + " --x--" + dewey.position.x + " y " + dewey.position.y);
             dewey.e_move_ai2();
         }
         else if ((dewey.e_move_dir < 100) && (dewey.e_move_dir != 0) && (!dewey.isDead()))
         {
-            Gdx.app.log("INFO", "Dewey move dir = 0 AI : "+ dewey.e_move_dir + " --x--" + dewey.position.x + " y " + dewey.position.y);
             dewey.e_move2();
         }
+
+        /*for (int i = 0; i < e_num; i++)
+        {
+            if (enemies[i].getHp() >= 0)
+            {
+                if ((e_time == enemies[i].e_fire_time) && (boss.get_random(3) != 1) && (enemies[i].e_ppang_item != 2)) {
+                    enemies[i].e_attack_ai(hero, boss, enemies, i);
+                }
+                if (enemies[i].e_ppang_item != 2) {
+                    if (enemies[i].e_idx == 0) {
+                        enemies[i].e_idx = 1;
+                    } else if (enemies[i].e_idx == 1) {
+                        enemies[i].e_idx = 0;
+                    }
+                }
+            }
+            if (enemies[i].e_move_dir >= 100)
+            {
+                enemies[i].e_move_dir += 1;
+                if (enemies[i].e_move_dir == 120) {
+                    enemies[i].e_move_dir = 0;
+                }
+            }
+            else if ((enemies[i].e_move_dir == 0) && (enemies[i].getHp() > 0) && (enemies[i].e_ppang_item != 2))
+            {
+                enemies[i].e_move_ai(enemies, i);
+            }
+            else if ((enemies[i].e_move_dir < 100) && (enemies[i].e_move_dir != 0) && (enemies[i].getHp() > 0))
+            {
+                enemies[i].e_move(enemies, i);
+            }
+        }*/ // End enemy attack n move ai
 
         if (boss.e_boss_move_dir >= 100)
         {
@@ -413,9 +772,10 @@ public class Screen1 extends DefaultScreen {
         int enemyStepY = 45; // 5 * 9 (5px from orig J2ME), 9 on scale up resolution.
 //        huey = new Enemy(new Vector2(240, enemyPosY-enemyStepY));
         // Try J2ME original: 5px is old cell in map (120px = 24 * 5) In 1080 = 120 * 9. But because of sprite scale we try 4.5 instead of 9.
-        huey = new wait4u.littlewing.snowballfight.Enemy(new Vector2(240/sgh_120_1080_screen_ratio, (enemyPosY-enemyStepY)/sgh_120_1080_screen_ratio ));
-        dewey = new wait4u.littlewing.snowballfight.Enemy(new Vector2(480/sgh_120_1080_screen_ratio, enemyPosY/sgh_120_1080_screen_ratio));
-        boss = new wait4u.littlewing.snowballfight.Boss(new Vector2(320/sgh_120_1080_screen_ratio, (enemyPosY-(3*enemyStepY))/sgh_120_1080_screen_ratio ));
+        huey = new Enemy(new Vector2(240/sgh_120_1080_screen_ratio, (enemyPosY-enemyStepY)/sgh_120_1080_screen_ratio ));
+        dewey = new Enemy(new Vector2(480/sgh_120_1080_screen_ratio, enemyPosY/sgh_120_1080_screen_ratio));
+        boss = new Boss(new Vector2(320/sgh_120_1080_screen_ratio, (enemyPosY-(3*enemyStepY))/sgh_120_1080_screen_ratio ));
+        // TODO scale texture due to ratio, may be in draw()
         huey.setBobTexture("data/samsung-white/enemy0_0_106x.png");
         dewey.setBobTexture("data/samsung-white/enemy1_1_106x.png");
         boss.setBobTexture("data/samsung-white/boss2_0_120x.png");
@@ -427,7 +787,7 @@ public class Screen1 extends DefaultScreen {
 
     protected void initBobItem() {
         Vector2 facing = new Vector2(hero.position.x, Gdx.graphics.getHeight()*4/5);
-        wait4u.littlewing.snowballfight.Item item = new wait4u.littlewing.snowballfight.Item(0, hero.position, facing);
+        Item item = new Item(0, hero.position, facing);
         item.setTexture(new Texture("data/samsung-white/item3_0_36x.png"));
         hero.setItem(item);
         hero.getItem().setBound(new Rectangle(item.getX(), item.getY(), item.getWidth(), item.getHeight()) );
@@ -436,10 +796,11 @@ public class Screen1 extends DefaultScreen {
     protected void initSpriteBatchAndHeroTexture () {
         batch = new SpriteBatch();
         ttrSplash = new Texture("data/samsung-white/menu_bg.png");
-        heroTexture = new Texture("data/samsung-white/hero3_1_60x80.png");
-        hero = new wait4u.littlewing.snowballfight.Hero(new Sprite());
+        heroTexture = new Texture("data/samsung-white/hero3_1_120x.png");
+        hero = new Hero(new Sprite());
         hero.position.x = Gdx.graphics.getWidth()/2;
-        hero.setBobTexture(new Texture("data/samsung-white/hero3_1_60x80.png"));
+        // TODO scaleX, Y follow screen ratio
+        hero.setBobTexture(new Texture("data/samsung-white/hero3_1_120x.png"));
         hero.position.y = Gdx.graphics.getHeight()/5-hero.getBobTexture().getHeight();
 
         fireBtnTexture = new Texture("data/samsung-white/fire.png");
@@ -454,10 +815,6 @@ public class Screen1 extends DefaultScreen {
     }
 
     protected void handleKeyMoveHero() {
-    }
-
-    protected void testDrawHero() {
-        batch.draw(hero.getBobTexture(), (int)hero.position.x, (int)hero.position.y, 0, 0, 45, 60, 5/2, 5/2, 0, 0, 0, 45, 60, hero.facingLeft, false);
     }
 
     protected void oldTestDrawInitPositionEnermy() {
@@ -537,22 +894,22 @@ public class Screen1 extends DefaultScreen {
         if (this.e_boss > 0)
         {
             batch.draw(boss.getBobTexture(), (int)boss.position.x * 5 *sgh_scale_ratio , (boss.position.y * 5)*sgh_scale_ratio, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), 1, 1, 0, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), false, false);
-            if (this.boss_dis_count >= 1)
+            if (boss.boss_dis_count >= 1)
             {
-                this.boss_dis_count += 1;
-                if (this.boss_dis_count == 4)
+                boss.boss_dis_count += 1;
+                if (boss.boss_dis_count == 4)
                 {
-                    this.boss_dis_count = 0;
+                    boss.boss_dis_count = 0;
                     boss.setIdx(0);
                 }
             }
-            else if (this.boss_dis_count <= -1)
+            else if (boss.boss_dis_count <= -1)
             {
-                this.boss_dis_count -= 1;
-                if (this.boss_dis_count == -10)
+                boss.boss_dis_count -= 1;
+                if (boss.boss_dis_count == -10)
                 {
                     this.e_boss = 0;
-                    this.boss_dis_count = 0;
+                    boss.boss_dis_count = 0;
                     if (this.e_t_num == 0)
                     {
                         this.item_mode = 0;
@@ -563,11 +920,6 @@ public class Screen1 extends DefaultScreen {
                 }
             }
         }
-    }
-
-    protected void displayManualTextureDraw() {
-        //  batch.draw(hero, (int)heroX, (int)heroY, 0, 0, 45, 60, 2, 2, 0, 0, 0, 45, 60, false, false);
-        //  (Texture texture, float x, float y, float originX, float originY, float width, float height, float scaleX, float scaleY, float rotation, int srcX, int srcY, int srcWidth, int srcHeight, boolean flipX, boolean flipY)
     }
 
     /*
@@ -587,8 +939,12 @@ public class Screen1 extends DefaultScreen {
         // Ie. 1920 we will cut 1/4 = 480px to keep ratio 3:4 1080:1440.
         // Bottom space used for fireBtn, so top should space only 240px
         int topBound =  (int)Gdx.graphics.getHeight()*3/4 + 240;
+        Gdx.app.log("INFO", "Top = " + topBound);
+
         int topBoundInCell = (int) (topBound / sgh_120_1080_screen_ratio);
         int bottomBoundInCell = topBoundInCell - 8; // We draw map of 24x32 cell
+
+        Gdx.app.log("INFO", "Bottom (in cell) = " + bottomBoundInCell);
 
         Random r = new Random();
         // TODO random position when hit rightBound, Horizontal front line enemy move by step up/down
@@ -651,7 +1007,7 @@ public class Screen1 extends DefaultScreen {
 //            camera.unproject(touchPos);
             Rectangle textureBounds=new Rectangle(Gdx.graphics.getWidth()-fireBtnTexture.getWidth()-50, Gdx.graphics.getHeight()-50-fireBtnTexture.getHeight(), fireBtnTexture.getWidth(),fireBtnTexture.getHeight());
 
-            wait4u.littlewing.snowballfight.Item bobItem = hero.getItem();
+            Item bobItem = hero.getItem();
             if(textureBounds.contains(touchPos.x, touchPos.y) && (heroFireState == false))
             {
                 if(bobItem.position.y <= Gdx.graphics.getHeight()*4/5) {
@@ -688,24 +1044,8 @@ public class Screen1 extends DefaultScreen {
     }
 
     protected void heroFire() {
-        wait4u.littlewing.snowballfight.Item bobItem = hero.getItem();
-//        bobItem.acting();
-        // 10 space between player and snow
-//        batch.draw(bobItem.getItemTexture(), bobItem.position.x+(hero.getBobTexture().getWidth()*2-10), bobItem.position.y+hero.getBobTexture().getHeight()/2, 0, 0, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight(), (float)1.3, (float)1.3, 0, 0, 0, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight(), false, false);
+        Item bobItem = hero.getItem();
         batch.draw(bobItem.getItemTexture(), hero.position.x+(hero.getBobTexture().getWidth()*2-10), bobItem.position.y+hero.getBobTexture().getHeight()/2, 0, 0, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight(), (float)1.3, (float)1.3, 0, 0, 0, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight(), false, false);
-    }
-
-    // TODO firePos, itemType, power, direction, angle (gap)
-    protected void fireItem() {
-
-    }
-
-    protected void heroHitTarget() {
-
-    }
-
-    protected void enermyHitTarget() {
-
     }
 
     protected void handleHeroMoveBound() {
@@ -714,7 +1054,6 @@ public class Screen1 extends DefaultScreen {
         float rightBound = Gdx.graphics.getWidth() - bobTexture.getWidth();
         // TODO use object instead of global var, handle screen size
         if(hero.position.x < leftBound) {
-//            hero.position.x = leftBound;
             hero.position.x = Gdx.graphics.getWidth()/2;
         }
         if(hero.position.x > rightBound) {
@@ -727,9 +1066,6 @@ public class Screen1 extends DefaultScreen {
 
     protected void checkCollisionHeroToEnemy() {
         Rectangle heroItem = hero.getItem().getBound();
-        Gdx.app.log("INFO", "Hero fire " + heroItem.toString());
-        Gdx.app.log("INFO", "Huey fire " + huey.getBound().toString());
-        Gdx.app.log("INFO", "Boss fire " + boss.getBound().toString());
         if(heroItem.overlaps(huey.getBound())) {
             huey.loseHp(hero.getItem().getDamage());
         }
@@ -848,5 +1184,862 @@ public class Screen1 extends DefaultScreen {
             return 0;
         }
         return 1;
+    }
+    public void draw_text() {
+
+    }
+    public void draw_text_box() {
+
+    }
+//    https://docs.oracle.com/javame/config/cldc/ref-impl/midp2.0/jsr118/constant-values.html#javax.microedition.lcdui.Canvas.UP
+    public void keyPressed(int paramInt)
+    {
+        int viewPortHeight = Gdx.graphics.getHeight()*3/4;
+        int topBound = viewPortHeight + (int)Gdx.graphics.getHeight()/8;
+        int bottomSpace = (int)Gdx.graphics.getHeight()/8; // May be change for fit touch button
+
+        int i;
+        int j;
+        if ((this.screen == 6) && (this.state == 1))
+        {
+            if ((getGameAction(paramInt) == 2) || (paramInt == 52))
+            {
+                if ((this.item_mode == 0) && (this.ppang_item != 2))
+                {
+                    if (hero.position.x != 2)
+                    {
+                        hero.position.x -= 1;
+                        if (hero.h_idx == 0) {
+                            hero.h_idx = 1;
+                        } else if (hero.h_idx == 1) {
+                            hero.h_idx = 0;
+                        }
+                    }
+                }
+                else if (item_mode != 0)
+                {
+                    if (item_mode != 1) {
+                        item_mode -= 1;
+                    }
+                    message = "Item Mode";
+//                    repaint();
+                }
+            }
+            else if ((getGameAction(paramInt) == 5) || (paramInt == 54))
+            {
+                if ((this.item_mode == 0) && (this.ppang_item != 2))
+                {
+                    if (hero.position.x != 23)
+                    {
+                        hero.position.x += 1;
+                        if (hero.h_idx == 0) {
+                            hero.h_idx = 1;
+                        } else if (hero.h_idx == 1) {
+                            hero.h_idx = 0;
+                        }
+                    }
+                }
+                else if (this.item_mode != 0)
+                {
+                    if (this.item_mode != 5) {
+                        this.item_mode += 1;
+                    }
+                    this.message = "Item Mode";
+//                    repaint();
+                }
+            }
+            else if ((getGameAction(paramInt) == 6) || (paramInt == 56))
+            {
+                if (mana >= 12) {
+//                    use_special();
+                } else {
+                    message = "Insufficient Mana";
+                }
+            }
+            else if ((paramInt == -5) || (getGameAction(paramInt) == 1) || (paramInt == 50) || (paramInt == 53))
+            {
+                if (item_mode == 0)
+                {
+                    if ((pw_up == 0) && (ppang_item != 2))
+                    {
+                        snow_pw = 0;
+                        real_snow_pw = 0;
+                        pw_up = 1;
+                        hero.h_idx = 2;
+                    }
+                    else if ((this.pw_up == 1) && (this.real_snow_pw > 0))
+                    {
+                        hero.h_idx = 4;
+//                        make_attack();
+                    }
+                }
+                else
+                {
+//                    use_item(item_mode - 1);
+                    gameOn = true;
+                }
+            }
+            else if (((paramInt == 35) || (paramInt == -7)) && (this.game_state == 0))
+            {
+                m_mode = 1;
+                gameOn = false;
+                screen = 100;
+//                repaint();
+            }
+            else if ((paramInt == 51) && (game_state == 0))
+            {
+                i = 0;
+                j = 0;
+                while (i < 5)
+                {
+                    if (item_slot[i] != 0)
+                    {
+                        j = 1;
+                        break;
+                    }
+                    i++;
+                }
+                if (j == 1)
+                {
+                    gameOn = false;
+                    message = "Item Mode";
+                    item_mode = 1;
+//                    repaint();
+                }
+                else
+                {
+                    message = "No Item";
+                }
+            }
+        }
+        else if (screen == 100)
+        {
+            if (getGameAction(paramInt) == 1)
+            {
+                if (m_mode == 1) {
+                    m_mode = 5;
+                } else {
+                    m_mode -= 1;
+                }
+            }
+            else if (getGameAction(paramInt) == 6)
+            {
+                if (m_mode == 5) {
+                    m_mode = 1;
+                } else {
+                    m_mode += 1;
+                }
+            }
+            else if (getGameAction(paramInt) == 2)
+            {
+                if (this.m_mode == 3) {
+                    this.s_play = 1;
+                }
+            }
+            else if (getGameAction(paramInt) == 5)
+            {
+                if (m_mode == 3) {
+                    s_play = 2;
+                }
+            }
+            else if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == -7)) {
+                if (m_mode == 2)
+                {
+//                    goto_menu();
+                }
+                else
+                {
+                    if (this.m_mode == 5)
+                    {
+//                        SJ.destroyApp(true);
+//                        SJ.notifyDestroyed();
+                        return;
+                    }
+                    if (m_mode == 1)
+                    {
+                        screen = 6;
+                        if (item_mode == 0)
+                        {
+                            gameOn = true;
+                        }
+                        else
+                        {
+                            message = "Item Mode";
+//                            repaint();
+                        }
+                    }
+                    else if (m_mode == 4)
+                    {
+                        screen = -5;
+                    }
+                }
+            }
+//            repaint();
+        }
+        else if (this.screen == 2)
+        {
+            if (getGameAction(paramInt) == 1)
+            {
+                if (m_mode <= 1) {
+                    m_mode = 4;
+                } else {
+                    m_mode -= 1;
+                }
+            }
+            else if (getGameAction(paramInt) == 6)
+            {
+                if (this.m_mode >= 4) {
+                    this.m_mode = 1;
+                } else {
+                    this.m_mode += 1;
+                }
+            }
+            else if ((paramInt == 35) || (getGameAction(paramInt) == 8) || ((paramInt >= 49) && (paramInt <= 52)) || (paramInt == -7))
+            {
+                if (paramInt > 48) {
+                    m_mode = (paramInt - 48);
+                }
+                if (m_mode == 1) {
+                    screen = -88;
+                }
+                if (m_mode == 3)
+                {
+                    screen = 4;
+                    m_mode = 1;
+                }
+                if (m_mode == 2)
+                {
+                    m_mode = 1;
+                    screen = 5;
+                }
+                if (m_mode == 4)
+                {
+//                    SJ.destroyApp(true);
+//                    SJ.notifyDestroyed();
+                    return;
+                }
+            }
+//            repaint();
+        }
+        else if (this.screen == 3)
+        {
+            if (getGameAction(paramInt) == 1)
+            {
+                j = (int)hero.position.y - 8;
+                if (hero_move((int)hero.position.x, j, 1) > 0) {
+                    hero.position.y = j;
+                }
+            }
+            else if (getGameAction(paramInt) == 6)
+            {
+                j = (int)hero.position.y + 8;
+                if (hero_move((int)hero.position.x, j, 1) > 0) {
+                    hero.position.y = j;
+                }
+            }
+            else if (getGameAction(paramInt) == 5)
+            {
+                i = (int)hero.position.x + 7;
+                if (hero_move(i, (int)hero.position.y, 0) > 0) {
+                    hero.position.x = i;
+                }
+            }
+            else if (getGameAction(paramInt) == 2)
+            {
+                i = (int)hero.position.x - 7;
+                if (hero_move(i, (int)hero.position.y, 0) > 0) {
+                    hero.position.x = i;
+                }
+            }
+            else if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == -7))
+            {
+                if ((m_mode == 0) || (m_mode == 1))
+                {
+//                    loadImage(31);
+                    screen = 31;
+//                    repaint();
+                }
+                else if ((m_mode >= 2) && (m_mode <= 5))
+                {
+                    int k = -1;
+                    if ((last_stage / 10 - school == 0) && (last_stage != 45)) {
+                        k = last_stage;
+                    }
+//                    destroyImage(3);
+                    message = "Loading";
+//                    init_game(k);
+                }
+            }
+            else if ((paramInt == 42) || (paramInt == -6))
+            {
+//                destroyImage(3);
+//                loadImage(2);
+                screen = 2;
+                m_mode = 1;
+            }
+//            repaint();
+        }
+        else if (screen == 31)
+        {
+            if (getGameAction(paramInt) == 1) {
+                s_item = 0;
+            }
+            if (getGameAction(paramInt) == 6) {
+                s_item = 1;
+            }
+            if (getGameAction(paramInt) == 2)
+            {
+                if (b_item != 0) {
+                    b_item -= 1;
+                }
+            }
+            else if ((getGameAction(paramInt) == 5) && (b_item != 3)) {
+                b_item += 1;
+            }
+            if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == -7)) {
+                if (s_item == 1)
+                {
+                    m_mode = -1;
+//                    destroyImage(31);
+                    screen = 3;
+                }
+                else if (s_item == 0)
+                {
+                    i = 0;
+                    if (m_mode == 0) {
+                        i = 4;
+                    }
+                    if (saved_gold >= item_price[(b_item + i)])
+                    {
+                        j = input_item(b_item + i + 1);
+                        if (j == 1)
+                        {
+                            saved_gold -= item_price[(b_item + i)];
+                            message = "Purchasing Items";
+                        }
+                        else if (j == 0)
+                        {
+                            message = "Bag is full";
+                        }
+                        else if (j == 3)
+                        {
+                            message = "Duplicated item";
+                        }
+                    }
+                    else
+                    {
+                        message = "not enough gold";
+                    }
+                }
+            }
+//            repaint();
+        }
+        else if (screen == 4)
+        {
+            if ((paramInt == 42) || (paramInt == -6))
+            {
+                screen = 2;
+                if (speed == 5) {
+                    game_speed = 8;
+                }
+                if (speed == 4) {
+                    game_speed = 17;
+                }
+                if (speed == 3) {
+                    game_speed = 24;
+                }
+                if (speed == 2) {
+                    game_speed = 31;
+                }
+                if (speed == 1) {
+                    game_speed = 38;
+                }
+                setGameSpeed(speed);
+
+                m_mode = 3;
+            }
+            if (getGameAction(paramInt) == 1) {
+                if (m_mode == 1) {
+                    m_mode = 3;
+                } else {
+                    m_mode -= 1;
+                }
+            }
+            if (getGameAction(paramInt) == 6) {
+                if (m_mode == 3) {
+                    m_mode = 1;
+                } else {
+                    m_mode += 1;
+                }
+            }
+            if (m_mode == 1)
+            {
+                if (getGameAction(paramInt) == 2) {
+                    s_play = 1;
+                }
+                if (getGameAction(paramInt) == 5) {
+                    s_play = 2;
+                }
+            }
+            if (m_mode == 2)
+            {
+                if (getGameAction(paramInt) == 2) {
+                    v_mode = 1;
+                }
+                if (getGameAction(paramInt) == 5) {
+                    v_mode = 2;
+                }
+            }
+            if (this.m_mode == 3)
+            {
+                if ((getGameAction(paramInt) == 2) && (this.speed != 1)) {
+                    speed -= 1;
+                }
+                if ((getGameAction(paramInt) == 5) && (this.speed != 5)) {
+                    speed += 1;
+                }
+            }
+//            repaint();
+        }
+        else if (screen == 5)
+        {
+            if (getGameAction(paramInt) == 1) {
+                if (m_mode == 1) {
+                    m_mode = 3;
+                } else {
+                    m_mode -= 1;
+                }
+            }
+            if (getGameAction(paramInt) == 6) {
+                if (m_mode == 3) {
+                    m_mode = 1;
+                } else {
+                    m_mode += 1;
+                }
+            }
+            if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == 49) || (paramInt == 50) || (paramInt == 51) || (paramInt == -7))
+            {
+                if (paramInt > 48) {
+                    m_mode = (paramInt - 48);
+                }
+                if (m_mode == 1) {
+                    screen = -33;
+                }
+                if (m_mode == 2) {
+                    screen = -33;
+                }
+                if (m_mode == 3) {
+                    screen = -33;
+                }
+            }
+            if ((paramInt == 42) || (paramInt == -6))
+            {
+                screen = 2;
+                m_mode = 2;
+            }
+//            repaint();
+        }
+        else if (screen == -5)
+        {
+            screen = 100;
+//            repaint();
+        }
+        else if (screen == -88)
+        {
+            if (getGameAction(paramInt) == 1) {
+                if (m_mode <= 1) {
+                    m_mode = 2;
+                } else {
+                    m_mode -= 1;
+                }
+            }
+            if (getGameAction(paramInt) == 6) {
+                if (m_mode >= 2) {
+                    m_mode = 1;
+                } else {
+                    m_mode += 1;
+                }
+            }
+            if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == 49) || (paramInt == 50) || (paramInt == -7))
+            {
+                if (paramInt > 48) {
+                    m_mode = (paramInt - 48);
+                }
+                if (m_mode == 1)
+                {
+                    last_stage = 11;
+                    stage = 11;
+                    saved_gold = 0;
+                    mana = 0;
+
+                }
+//                destroyImage(2);
+//                loadImage(3);
+                hero.position.x = (57/120)*Gdx.graphics.getWidth();
+                hero.position.y = (46/160)*viewPortHeight; // TODO reverse top/down of geometry
+                this.m_mode = -1;
+                this.screen = 3;
+            }
+            if ((paramInt == 42) || (paramInt == -6))
+            {
+                this.screen = 2;
+                this.m_mode = 1;
+            }
+//            repaint();
+        }
+        else if (this.screen == -33)
+        {
+            if ((paramInt == 42) || (paramInt == -6))
+            {
+//                loadImage(2);
+                m_mode = 1;
+                screen = 5;
+//                repaint();
+            }
+        }
+        else if (this.screen == 300)
+        {
+//            MPlay(3);
+            m_mode = -1;
+//            destroyImage(2);
+//            loadImage(3);
+            hero.position.x = (57/120)*Gdx.graphics.getWidth()/sgh_120_1080_screen_ratio;
+            hero.position.y = (46/120)*(Gdx.graphics.getHeight()*3/4)/sgh_120_1080_screen_ratio;
+            saved_gold += gold;
+            setSavedGold(saved_gold);
+            setSavedMana(mana);
+
+            ani_step = 0;
+            screen = 3;
+        }
+        else if (screen == -1)
+        {
+//            loadImage(-2);
+            screen = -2;
+//            repaint();
+        }
+        else if (screen == -2)
+        {
+//            loadImage(2);
+            screen = 1;
+//            repaint();
+        }
+        else if (screen == 1)
+        {
+            if ((paramInt == 35) || (paramInt == -7))
+            {
+                screen = -88;
+                m_mode = 1;
+            }
+            else if ((paramInt == 42) || (paramInt == -6))
+            {
+                screen = 2;
+            }
+//            repaint();
+        }
+        else if (screen == 1000)
+        {
+//            loadImage(2);
+            screen = 300;
+//            repaint();
+        }
+    }
+
+    public void run()
+    {
+        for (;;)
+        {
+            if (gameOn)
+            {
+                if (screen == 6)
+                {
+                    if (state == 1)
+                    {
+                        try
+                        {
+                            Thread.sleep(game_speed);
+                        }
+                        catch (Exception localException1) {}
+                        if (pw_up == 1)
+                        {
+//                            setPower();
+                            if (hero.h_idx == 2) {
+                                hero.h_idx = 3;
+                            } else if (hero.h_idx == 3) {
+                                hero.h_idx = 2;
+                            }
+                        }
+                        else if (pw_up == 2)
+                        {
+                            if (hero.h_timer < 4)
+                            {
+                                hero.h_timer += 1;
+                                if (hero.h_timer == 4) {
+                                    hero.h_idx = 0;
+                                }
+                            }
+                            if (snow_y > snow_last_y)
+                            {
+                                snow_y -= 1;
+                                if (snow_y > snow_top_y) {
+                                    snow_gap += 3;
+                                } else if (snow_y < snow_top_y) {
+                                    snow_gap -= 3;
+                                }
+                            }
+                            else
+                            {
+//                                check_ppang();
+                            }
+                        }
+                        this.e_time += 1;
+                        for (int i = 0; i < e_num; i++)
+                        {
+                            if (enemies[i].getHp() >= 0)
+                            {
+                                if ((e_time == enemies[i].e_fire_time) && (boss.get_random(3) != 1) && (enemies[i].e_ppang_item != 2)) {
+                                    enemies[i].e_attack_ai(hero, boss, enemies, i);
+                                }
+                                if (enemies[i].e_ppang_item != 2) {
+                                    if (enemies[i].e_idx == 0) {
+                                        enemies[i].e_idx = 1;
+                                    } else if (enemies[i].e_idx == 1) {
+                                        enemies[i].e_idx = 0;
+                                    }
+                                }
+                            }
+                            if (enemies[i].e_move_dir >= 100)
+                            {
+                                enemies[i].e_move_dir += 1;
+                                if (enemies[i].e_move_dir == 120) {
+                                    enemies[i].e_move_dir = 0;
+                                }
+                            }
+                            else if ((enemies[i].e_move_dir == 0) && (enemies[i].getHp() > 0) && (enemies[i].e_ppang_item != 2))
+                            {
+                                enemies[i].e_move_ai(enemies, i);
+                            }
+                            else if ((enemies[i].e_move_dir < 100) && (enemies[i].e_move_dir != 0) && (enemies[i].getHp() > 0))
+                            {
+                                enemies[i].e_move(enemies, i);
+                            }
+                        }
+                        if (e_boss > 0)
+                        {
+                            if (boss.getHp() >= 0)
+                            {
+                                if ((e_time == boss.e_boss_fire_time) && (boss.get_random(3) != 1)) {
+                                    if ((this.e_boss == 1) || (this.e_boss == 2)) {
+                                        enemies[0].e_attack_ai(hero, boss, enemies, 101);
+                                    } else {
+                                        enemies[0].e_attack_ai(hero, boss, enemies, 102);
+                                    }
+                                }
+                                if (boss.e_boss_idx == 0) {
+                                    boss.e_boss_idx = 1;
+                                } else if (boss.e_boss_idx == 1) {
+                                    boss.e_boss_idx = 0;
+                                }
+                            }
+                            if (boss.e_boss_move_dir >= 100)
+                            {
+                                boss.e_boss_move_dir += 1;
+                                if (boss.e_boss_move_dir == 115) {
+                                    boss.e_boss_move_dir = 0;
+                                }
+                            }
+                            else if ((boss.e_boss_move_dir == 0) && (boss.getHp() > 0))
+                            {
+                                boss.boss_move_ai();
+                            }
+                            else if ((boss.e_boss_move_dir != 0) && (boss.getHp() > 0))
+                            {
+                                boss.boss_move();
+                            }
+                        }
+                        if ((e_num == 3) || (e_num == 4))
+                        {
+                            if (e_time == 21) {
+                                e_time = 0;
+                            }
+                        }
+                        else if ((e_num == 2) && (e_time == 18)) {
+                            e_time = 0;
+                        }
+//                        e_snow();
+                        if (gameOn)
+                        {
+//                            repaint();
+//                            serviceRepaints();
+                        }
+                    }
+                    else if (state == 2)
+                    {
+                        if ((ani_step >= 1) && (ani_step <= 20)) {
+                            ani_step += 1;
+                        }
+                        if (ani_step == 0)
+                        {
+//                            loadImage(-6);
+                            ani_step = 1;
+                        }
+                        else if ((ani_step >= 1) && (ani_step <= 19))
+                        {
+//                            repaint();
+//                            serviceRepaints();
+                        }
+                        else if (ani_step == 20)
+                        {
+//                            destroyImage(-6);
+                            state = 1;
+                        }
+                    }
+                    else if (state == 3)
+                    {
+                        if (game_state == 2)
+                        {
+                            screen = 201;
+//                            MPlay(7);
+                            gold = (school * 6 + boss.get_random(7) + 5);
+                        }
+                        else if (game_state == 1)
+                        {
+                            screen = 65336;
+                            gold = 3;
+                        }
+                    }
+                }
+                else if (screen == 8)
+                {
+                    if ((ani_step < 50) && (ani_step > 0)) {
+                        ani_step += 1;
+                    }
+//                    repaint();
+//                    serviceRepaints();
+                }
+                else if (screen == 9)
+                {
+                    if ((ani_step < 46) && (ani_step >= 0)) {
+                        ani_step += 1;
+                    }
+//                    repaint();
+//                    serviceRepaints();
+                }
+                else if (screen == 200)
+                {
+                    if ((ani_step < 51) && (ani_step >= 0))
+                    {
+                        ani_step += 1;
+//                        repaint();
+//                        serviceRepaints();
+                    }
+                    else
+                    {
+                        gameOn = false;
+//                        destroyImage(200);
+                        if (state != 10)
+                        {
+//                            loadImage(2);
+                            screen = 300;
+                        }
+                        else
+                        {
+                            screen = 1000;
+                        }
+//                        repaint();
+                    }
+                }
+                else if (screen == 201)
+                {
+                    ani_step = 0;
+                    if (last_stage / 10 == school)
+                    {
+                        if (stage % 10 != 4)
+                        {
+                            stage += 1;
+                        }
+                        else if (stage != 44)
+                        {
+                            stage += 10;
+                            stage = (stage - stage % 10 + 1);
+                        }
+                        else
+                        {
+                            stage = 45;
+                            state = 10;
+                        }
+                        last_stage = stage;
+                    }
+
+                    screen = 200;
+                }
+                else if (screen == 65336)
+                {
+                    item_mode = 0;
+                    ani_step = 0;
+//                    loadImage(65336);
+//                    MPlay(6);
+                    screen = 65335;
+                }
+                else if (screen == 65335)
+                {
+                    if (ani_step <= 100)
+                    {
+                        ani_step += 1;
+//                        repaint();
+//                        serviceRepaints();
+                    }
+                    else
+                    {
+                        gameOn = false;
+//                        loadImage(2);
+                        screen = 300;
+//                        repaint();
+                    }
+                }
+            }
+            else {
+                try
+                {
+                    Thread.sleep(100L);
+                }
+                catch (Exception localException2) {}
+            }
+        }
+    }
+
+    public int input_item(int paramInt)
+    {
+        for (int i = 0; i < 5; i++) {
+            if ((item_slot[i] == paramInt) && (paramInt <= 8)) {
+                return 3;
+            }
+        }
+        for (int j = 0; j < 5; j++) {
+            if (item_slot[j] == 0)
+            {
+                item_slot[j] = paramInt;
+                if (paramInt == 1) {
+                    item_a_num = 2;
+                } else if (paramInt == 2) {
+                    item_b_num = 2;
+                } else if (paramInt == 3) {
+                    item_c_num = 2;
+                } else if (paramInt == 4) {
+                    item_d_num = 2;
+                }
+                return 1;
+            }
+        }
+        return 0;
+    }
+
+    /*
+    * Simulate J2ME keyCode
+    * https://docs.oracle.com/javame/config/cldc/ref-impl/midp2.0/jsr118/constant-values.html#javax.microedition.lcdui.Canvas.UP
+    * */
+    public int getGameAction(int keyCode) {
+
+        return 0;
     }
 }

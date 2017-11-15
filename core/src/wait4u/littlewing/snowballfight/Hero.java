@@ -18,9 +18,9 @@ public class Hero {
         IDLE, WALKING, JUMPING, DYING, FIRING, FREEZE, HANGING
     }
 
-    private int h_idx;
-    private int h_timer;
-    private int h_timer_p;
+    public int h_idx;
+    public int h_timer;
+    public int h_timer_p;
 
     static final float SPEED = 2f; // unit per second
     static final float JUMP_VELOCITY = 1f;
