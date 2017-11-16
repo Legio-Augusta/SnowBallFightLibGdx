@@ -21,8 +21,6 @@ import wait4u.littlewing.snowballfight.Enemy;
 import wait4u.littlewing.snowballfight.Boss;
 import wait4u.littlewing.snowballfight.Hero;
 
-import java.util.Random;
-
 /**
  * Created by nickfarow on 13/10/2016.
  */
@@ -35,7 +33,7 @@ public class Screen1 extends DefaultScreen {
     Texture fireBtnTexture;
     Texture snowShadowTexture;
 
-    float heroSpeed = 10.0f; // 10 pixels per second.
+    int heroSpeed = 1; // 1 cell step (screen width devided to about 24 cell).
 
     private boolean heroFireState = false;
 
@@ -43,17 +41,11 @@ public class Screen1 extends DefaultScreen {
     private int ppuY = 5;	// pixels per unit on the Y axis
 
     private Hero hero;
-    // TODO loop create sprite
-    private Enemy huey;
-    private Enemy dewey;
     private Boss boss;
-    private Enemy[] enemies = new Enemy[2];
+    private Enemy[] enemies;
 
     private Texture bobTexture;
-
     float stateTime;
-
-    private Random rnd = new Random();
 
     // Test touchpad
     private Stage touch_stage;
@@ -71,8 +63,22 @@ public class Screen1 extends DefaultScreen {
     public static int GAMESTATE_WIN = 1;
     public static int GAMESTATE_LOSE = 2;
     public static int GAMESTATE_PLAYING = 0;
-    public static int sgh_120_1080_screen_ratio = (5*9); // (5*9/2)
-    public static int sgh_scale_ratio = Gdx.graphics.getWidth()/120; // 120 or 128px from original J2ME resolution.
+    // Ratio 3:4 ~ 9:12 So with ratio 9:16 we lost (not use) 4/16 = 1/4 of height.
+    // Ie. 1920 we will cut 1/4 = 480px to keep ratio 3:4 1080:1440.
+    // Bottom space used for fireBtn, so top should space only 240px
+    private static int SCREEN_WIDTH = Gdx.graphics.getWidth();
+    private static int SCREEN_HEIGHT = Gdx.graphics.getHeight();
+    private static int SGH_120_CELL = 5; // 5 pixel per cell in original 120px SGH
+    private static int SGH_SCALE_RATIO = (int)Gdx.graphics.getWidth()/120; // 120 or 128px from original J2ME resolution.
+    private static int CELL_WIDTH = SGH_120_CELL*SGH_SCALE_RATIO;
+    private static int VIEW_PORT_HEIGHT = (int)SCREEN_HEIGHT*3/4;
+    private static int TOP_BOUND = VIEW_PORT_HEIGHT + (int)SCREEN_HEIGHT/8;
+    private static int BOTTOM_SPACE = (int)SCREEN_HEIGHT/8; // May be change for fit touch button
+    // TODO scale sprite texture (on draw())
+    // With ratio 4:3 on SGH X550 or X357 120x160, SGH 930 (S7) 1080x1920, to keep ratio 4:3 we need crop 1920 to use only 1440.
+    // On 380px space, place 180 or 200px for fire, move btn. 200px on top is space.
+    // So on J2ME original enemy seem to move on 1/4 of screen height (3 cell +1 /32 cell 5px).
+    // That mean enemy should move on 1080 to 1440 on 360px vertical distance.
 
     private static final String PREF_VIBRATION = "vibration";
     private static final String PREF_SOUND_ENABLED = "soundenabled";
@@ -87,7 +93,7 @@ public class Screen1 extends DefaultScreen {
     private int saved_gold = 10;
     private int speed = 4;
     private int game_speed = 17;
-    private int screen = -1;
+    private int screen = 6; //-1;
     private boolean gameOn = true;
     private String message;
     private int m_mode = 1;
@@ -139,21 +145,64 @@ public class Screen1 extends DefaultScreen {
     private int e_boss;
     private int al;
     private int d_gauge;
+    private int game_action = 0;
+    private static final int GAME_ACTION_OK = 8; // simulate KEY, gameAction in J2ME
+    private static final int GAME_ACTION_LEFT = 2;
+    private static final int GAME_ACTION_RIGHT = 5;
+    private static final int GAME_ACTION_UP = 8;
+    private static final int GAME_ACTION_DOWN = 6;
+    private static final int KEY_RIGHT_MENU = 35;
+    private static final int KEY_STAR = 0;
+    private static final int KEY_NUM_3 = 0; // for item mode
+    private static final int KEY_SHARP = 0;
+
+    private Texture imgLogo;
+    private Texture imgMM;
+    private Texture imgBk;
+    private Texture imgSl;
+    private Texture imgPl;
+    private Texture imgCh;
+    private Texture imgBack;
+    private Texture imgAl;
+    private Texture imgShadow;
+    private Texture imgPok;
+    private Texture imgPPang;
+    private Texture imgPPang1;
+    private Texture imgH_ppang;
+    private Texture imgSnow_g;
+    private Texture imgPwd;
+//    private Texture [] imgItem;
+//    private Texture [] imgItem_hyo;
+    private Texture imgVill;
+    private Texture imgSchool;
+    private Texture imgShop;
+//    private Texture [] imgSpecial;
+    private Texture imgSp;
+//    private Texture [] imgEffect;
+    private Texture imgVictory;
+    private Texture imgV;
+    private Texture imgHero_v;
+    private Texture imgLose;
+    private Texture imgHero_l;
+    private Texture imgStage_num;
+//    private Texture [] imgStage;
 
     public Screen1(Game game) {
         super(game);
 
-        camera = newOrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camera = newOrthographicCamera(SCREEN_WIDTH, SCREEN_HEIGHT);
+        // Calculate global var width/height, view port ...
         initSpriteBatchAndHeroTexture();
         initBobItem();
-        setEnermyTexture();
+        initEnemy();
+        loadTextures();
         create();
     }
 
     public void create () {
         batch = new SpriteBatch();
         //Create camera
-        float aspectRatio = (float) Gdx.graphics.getWidth() / (float) Gdx.graphics.getHeight();
+        float aspectRatio = (float) SCREEN_WIDTH / (float) SCREEN_HEIGHT;
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 10f*aspectRatio, 10f);
 
@@ -173,97 +222,31 @@ public class Screen1 extends DefaultScreen {
         touchpadStyle.knob = touchKnob;
         //Create new TouchPad with the created style
         touchpad = new Touchpad(10, touchpadStyle);
-        //setBounds(x,y,width,height)
         touchpad.setBounds(15, 15, 200, 200);
 
         //Create a Stage and add TouchPad
-        touch_stage = new Stage(new StretchViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()), batch);
+        touch_stage = new Stage(new StretchViewport(SCREEN_WIDTH, SCREEN_HEIGHT), batch);
         touch_stage.addActor(touchpad);
         Gdx.input.setInputProcessor(touch_stage);
 
         //Create block sprite
-        blockTexture = new Texture(Gdx.files.internal("data/gui/block.png"));
+/*        blockTexture = new Texture(Gdx.files.internal("data/gui/block.png"));
         blockSprite = new Sprite(blockTexture);
-
-        //Set position to centre of the screen
-        blockSprite.setPosition(Gdx.graphics.getWidth()/2-blockSprite.getWidth()/2, Gdx.graphics.getHeight()/2-blockSprite.getHeight()/2);
-        blockSpeed = 5;
+        blockSprite.setPosition(Gdx.graphics.getWidth()/2-blockSprite.getWidth()/2, Gdx.graphics.getHeight()/2-blockSprite.getHeight()/2);*/
     }
 
     public void update() {
 
     }
 
-    protected Preferences getPrefs() {
-        if(prefs==null){
-            prefs = Gdx.app.getPreferences("gamestate");
-        }
-        return prefs;
-    }
-
-    public boolean isSoundEffectsEnabled() {
-        return getPrefs().getBoolean(PREF_SOUND_ENABLED, true);
-    }
-
-    public void setSoundEffectsEnabled(boolean soundEffectsEnabled) {
-        getPrefs().putBoolean(PREF_SOUND_ENABLED, soundEffectsEnabled);
-        getPrefs().flush();
-    }
-
-    public boolean getVibraEnabled() {
-        return getPrefs().getBoolean(PREF_VIBRATION, true);
-    }
-
-    public void setVibraEnabled(boolean vibra) {
-        getPrefs().putBoolean(PREF_VIBRATION, vibra);
-        getPrefs().flush();
-    }
-
-    public int getLevel() {
-        return getPrefs().getInteger(PREF_LEVEL, 11);
-    }
-
-    public void setLevel(int level) {
-        getPrefs().putInteger(PREF_LEVEL, level);
-        getPrefs().flush();
-
-    }
-    public int getSavedgold() {
-        return getPrefs().getInteger(PREF_SAVEDGOLD, 64);
-    }
-
-    public void setSavedGold(int saved_gold) {
-        getPrefs().putInteger(PREF_SAVEDGOLD, saved_gold);
-        getPrefs().flush();
-    }
-
-    public int getSavedMana() {
-        return getPrefs().getInteger(PREF_MANA, 64);
-    }
-
-    public void setSavedMana(int saved_gold) {
-        getPrefs().putInteger(PREF_MANA, saved_gold);
-        getPrefs().flush();
-    }
-
-    public int getGameSpeed() {
-        return getPrefs().getInteger(PREF_SPEED, 64);
-    }
-
-    public void setGameSpeed(int saved_gold) {
-        getPrefs().putInteger(PREF_SPEED, saved_gold);
-        getPrefs().flush();
-    }
-
     public void render(float delta) {
-        int viewPortHeight = (int)Gdx.graphics.getHeight()*3/4;
-        int topBound = viewPortHeight + (int)Gdx.graphics.getHeight()/8;
-        int bottomSpace = (int)Gdx.graphics.getHeight()/8; // May be change for fit touch button
-
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         camera.update();
         generalUpdate();
+
+        batch.enableBlending();
+        batch.begin();
 
         int j;
         if (screen == 6)        // normal playing screen, TODO may be use constants name
@@ -272,7 +255,7 @@ public class Screen1 extends DefaultScreen {
             // TODO init topBound as global var to reuse
             // 1/8 as 1/4 (4/16 * scr_height) 4 = 16-12; 12 is from ratio 3x3 = 9 => 4X3 = 12
 
-            batch.draw(hero.getBobTexture(), hero.position.x * 5 * sgh_scale_ratio, (int)83/160*viewPortHeight , hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight());
+            batch.draw(hero.getBobTexture(), hero.position.x * 5 * SGH_SCALE_RATIO, (int)83/160*VIEW_PORT_HEIGHT , hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight());
             if (ppang_time > 0)
             {
                 if (ppang_item == 1) {
@@ -313,7 +296,7 @@ public class Screen1 extends DefaultScreen {
             {
                 if ((real_snow_pw > 0) && (ppang_item != 1))
                 {
-//                    paramGraphics.setColor(7196662);
+//                    paramGraphics.setColor(7196662); // 6DCFF6 light_blue
                     if (hero.position.x >= 13)
                     {
 //                        paramGraphics.fillRect(this.h_x * 5 - 16, 106 - this.real_snow_pw * 3, 3, this.real_snow_pw * 3);
@@ -355,7 +338,7 @@ public class Screen1 extends DefaultScreen {
                     {
                         if (enemies[hit_idx].getHp() > 0)
                         {
-//                            paramGraphics.setColor(16711680);
+//                            paramGraphics.setColor(16711680); // FFFFFF
 //                            paramGraphics.fillRect(this.e_x[this.hit_idx] * 5 + 8, this.e_y[this.hit_idx] * 5 + 5, 3, 15);
 //                            paramGraphics.setColor(9672090);
 //                            paramGraphics.fillRect(this.e_x[this.hit_idx] * 5 + 8, this.e_y[this.hit_idx] * 5 + 5, 3, 15 - 15 * this.e_hp[this.hit_idx] / this.max_e_hp[this.hit_idx]);
@@ -365,12 +348,12 @@ public class Screen1 extends DefaultScreen {
                     {
                         if (boss.getHp() > 0)
                         {
-//                            paramGraphics.setColor(16711680);
+//                            paramGraphics.setColor(16711680); // FFFFFF
 //                            paramGraphics.fillRect(this.e_boss_x * 5 + 12, this.e_boss_y * 5 + 5, 3, 15);
                             // draw boss hp bar
 //                            http://libgdx.badlogicgames.com/nightlies/docs/api/com/badlogic/gdx/graphics/glutils/ShapeRenderer.html
-//                            batch.draw(boss.getBobTexture(), (boss.position.x* 5 + 12)*sgh_scale_ratio, (boss.position.y* 5 + 5)*sgh_scale_ratio, 3*sgh_scale_ratio, 15*sgh_scale_ratio);
-//                            paramGraphics.setColor(9672090);
+//                            batch.draw(boss.getBobTexture(), (boss.position.x* 5 + 12)*SGH_SCALE_RATIO, (boss.position.y* 5 + 5)*SGH_SCALE_RATIO, 3*SGH_SCALE_RATIO, 15*SGH_SCALE_RATIO);
+//                            paramGraphics.setColor(9672090); // 0093959A gray
 //                            paramGraphics.fillRect(this.e_boss_x * 5 + 12, this.e_boss_y * 5 + 5, 3, 15 - 15 * this.e_boss_hp / this.max_e_boss_hp);
                         }
                         if (al == 1) {
@@ -434,9 +417,9 @@ public class Screen1 extends DefaultScreen {
                 else if (hero.h_timer_p == -5)
                 {
                     hero.h_timer_p = 0;
-//                    paramGraphics.setColor(16711680);
+//                    paramGraphics.setColor(16711680);    // FFFFFF
 //                    paramGraphics.fillRect(5, 113, 9, 12);
-//                    paramGraphics.setColor(9342606);
+//                    paramGraphics.setColor(9342606); // 8E8E8E
                     if (hero.getHp() > 0) {
 //                        paramGraphics.fillRect(5, 113, 9, 12 - 12 * this.hp / this.max_hp);
                     }
@@ -524,7 +507,7 @@ public class Screen1 extends DefaultScreen {
                 for (j = 0; j < e_num; j++)
                 {
                     if (enemies[j].position.x != -10) {
-                        batch.draw(enemies[j].getBobTexture(), enemies[j].position.x * 5*sgh_scale_ratio, (enemies[j].position.y * 5 + 5)*sgh_scale_ratio, enemies[j].getBobTexture().getWidth(), enemies[j].getBobTexture().getHeight());
+                        batch.draw(enemies[j].getBobTexture(), enemies[j].position.x * 5*SGH_SCALE_RATIO, (enemies[j].position.y * 5 + 5)*SGH_SCALE_RATIO, enemies[j].getBobTexture().getWidth(), enemies[j].getBobTexture().getHeight());
                     }
                     if (enemies[j].e_behv != 100)
                     {
@@ -551,7 +534,7 @@ public class Screen1 extends DefaultScreen {
             else if ((special == 3) && (ani_step <= 45)) {
 //                paramGraphics.drawImage(imgSp, 168 - ani_step * 3, 30, 20);
             }
-            batch.draw(hero.getBobTexture(), hero.position.x * 5 * sgh_scale_ratio, (int)(83/160)*viewPortHeight+bottomSpace, hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight());
+            batch.draw(hero.getBobTexture(), hero.position.x * 5 * SGH_SCALE_RATIO, (int)(83/160)*VIEW_PORT_HEIGHT+BOTTOM_SPACE, hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight());
         }
         else if (screen == 4)
         {
@@ -604,43 +587,7 @@ public class Screen1 extends DefaultScreen {
 
 //        batch.setProjectionMatrix(camera.combined);
 
-        if (huey.e_move_dir >= 100)
-        {
-            Gdx.app.log("INFO", "Huey move dir > 100:" + huey.e_move_dir + " --x-- "+ huey.position.x + " y "
-                    + huey.position.y);
-            huey.e_move_dir += 1;
-            if (huey.e_move_dir == 120) {
-                huey.e_move_dir = 0;
-            }
-        }
-        else if ((huey.e_move_dir == 0) && (!huey.isDead()))
-        {
-            huey.e_move_ai_();
-        }
-        else if ((huey.e_move_dir < 100) && (huey.e_move_dir != 0) && (!huey.isDead()))
-        {
-            huey.e_move_();
-        }
-
-        if (dewey.e_move_dir >= 100)
-        {
-            Gdx.app.log("INFO", "Dewey move dir > 100:" + dewey.e_move_dir + " --x-- "+ dewey.position.x + " y "
-                    + dewey.position.y);
-            dewey.e_move_dir += 1;
-            if (dewey.e_move_dir == 120) {
-                dewey.e_move_dir = 0;
-            }
-        }
-        else if ((dewey.e_move_dir == 0) && (!dewey.isDead()))
-        {
-            dewey.e_move_ai2();
-        }
-        else if ((dewey.e_move_dir < 100) && (dewey.e_move_dir != 0) && (!dewey.isDead()))
-        {
-            dewey.e_move2();
-        }
-
-        /*for (int i = 0; i < e_num; i++)
+        for (int i = 0; i < e_num; i++)
         {
             if (enemies[i].getHp() >= 0)
             {
@@ -670,7 +617,7 @@ public class Screen1 extends DefaultScreen {
             {
                 enemies[i].e_move(enemies, i);
             }
-        }*/ // End enemy attack n move ai
+        } // End enemy attack n move ai
 
         if (boss.e_boss_move_dir >= 100)
         {
@@ -688,40 +635,57 @@ public class Screen1 extends DefaultScreen {
             boss.boss_move();
         }
 
+        batch.end();
+
         drawSplashBatch();
         drawTouchPad();
-        batch.enableBlending();
+
         batch.begin();
-//        HeroAsset.hero1.draw(batch);
-
-//        handleKeyMoveHero();
-//        testDrawHero();
-
         drawFireBtn();
         handleFireTouch();
 
-        testDrawInitPositionEnermy();
-//        drawBob();
+        drawInitPositionEnermy();
         batch.end();
 
         handleVictoryOrLose();
     }
 
     private void loadTextures() {
-    }
+        imgLogo = new Texture("data/samsung-white/logo.png");
+        imgMM = new Texture("data/samsung-white/mm.png");
+        imgBk = new Texture("data/samsung-white/bk.png");
+        imgSl = new Texture("data/samsung-white/sl.png");
+        imgPl = new Texture("data/samsung-white/play.png");
+        imgCh = new Texture("data/samsung-white/check.png");
+        imgBack = new Texture("data/samsung-white/back1.png");
+        imgAl = new Texture("data/samsung-white/al.png");
+        imgShadow = new Texture("data/samsung-white/shadow0.png");
+        imgPok = new Texture("data/samsung-white/pok.png");
+        imgPPang = new Texture("data/samsung-white/bbang0.png");
+        imgPPang1 = new Texture("data/samsung-white/bbang1.png");
+        imgH_ppang = new Texture("data/samsung-white/h_bbang.png");
+        imgSnow_g = new Texture("data/samsung-white/snow_gauge.png");
+        imgPwd = new Texture("data/samsung-white/power.png");
+        //    private Texture [] imgItem;
+        //    private Texture [] imgItem_hyo;
+        imgVill = new Texture("data/samsung-white/village.png");
+        imgSchool = new Texture("data/samsung-white/school.png");
+        imgShop = new Texture("data/samsung-white/shop0.png");
+        //    private Texture [] imgSpecial;
+        imgSp = new Texture("data/samsung-white/sp1.png");
+        //    private Texture [] imgEffect;
+        imgVictory = new Texture("data/samsung-white/victory.png");
+        imgV = new Texture("data/samsung-white/v.png");
+        imgHero_v = new Texture("data/samsung-white/hero-vic.png");
+        imgLose = new Texture("data/samsung-white/lose.png");
+        imgHero_l = new Texture("data/samsung-white/hero-lose.png");
+        imgStage_num = new Texture("data/samsung-white/word-1.png");
+        //    private Texture [] imgStage;
 
-    private void drawBob() {
-        if (hero.state==hero.state.WALKING){
-            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-            stateTime += Gdx.graphics.getDeltaTime();
-        }
-        else if(hero.state==hero.state.IDLE){
-            batch.draw(heroTexture, hero.position.x * ppuX * sgh_scale_ratio, hero.position.y * ppuY * sgh_scale_ratio, hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight());
-        }
     }
 
     public void generalUpdate() {
-        testEnermyMoving();
+        enermyMoving();
         updateEnemyBound();
     }
 
@@ -762,27 +726,27 @@ public class Screen1 extends DefaultScreen {
         return camera;
     }
 
-    protected void setEnermyTexture() {
-        // With ratio 4:3 on SGH X550 or X357 120x160, SGH 930 (S7) 1080x1920, to keep ratio 4:3 we need crop 1920 to use only 1440.
-        // On 380px space, place 180 or 200px for fire, move btn. 200px on top is space.
-        // So on J2ME original enemy seem to move on 1/4 of screen height (3 cell +1 /32 cell 5px).
-        // That mean enemy should move on 1080 to 1440 on 360px vertical distance.
-        // TODO handle screen size ratio multi screen.
-        int enemyPosY = Gdx.graphics.getHeight()*3/4-180;
-        int enemyStepY = 45; // 5 * 9 (5px from orig J2ME), 9 on scale up resolution.
-//        huey = new Enemy(new Vector2(240, enemyPosY-enemyStepY));
-        // Try J2ME original: 5px is old cell in map (120px = 24 * 5) In 1080 = 120 * 9. But because of sprite scale we try 4.5 instead of 9.
-        huey = new Enemy(new Vector2(240/sgh_120_1080_screen_ratio, (enemyPosY-enemyStepY)/sgh_120_1080_screen_ratio ));
-        dewey = new Enemy(new Vector2(480/sgh_120_1080_screen_ratio, enemyPosY/sgh_120_1080_screen_ratio));
-        boss = new Boss(new Vector2(320/sgh_120_1080_screen_ratio, (enemyPosY-(3*enemyStepY))/sgh_120_1080_screen_ratio ));
-        // TODO scale texture due to ratio, may be in draw()
-        huey.setBobTexture("data/samsung-white/enemy0_0_106x.png");
-        dewey.setBobTexture("data/samsung-white/enemy1_1_106x.png");
+    public void initEnemy() {
+        if(e_num <= 2) {
+            e_num = 2;
+        }
+        boss = new Boss(new Vector2(SCREEN_WIDTH/2/CELL_WIDTH, TOP_BOUND/CELL_WIDTH-6 ));
         boss.setBobTexture("data/samsung-white/boss2_0_120x.png");
 
-        huey.setBound(new Rectangle(huey.position.x*sgh_120_1080_screen_ratio, huey.position.y*sgh_120_1080_screen_ratio, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight()));
-        dewey.setBound(new Rectangle(dewey.position.x*sgh_120_1080_screen_ratio, dewey.position.y*sgh_120_1080_screen_ratio, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight()));
-        boss.setBound(new Rectangle(boss.position.x*sgh_120_1080_screen_ratio, boss.position.y*sgh_120_1080_screen_ratio, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight()));
+        enemies = new Enemy[e_num];
+        for (int i = 0; i < enemies.length; i++) {
+            // Add some random on start position of enemies
+            int enemyPosY = TOP_BOUND - 3*CELL_WIDTH;
+            int enemyStartPositionX = (int) SCREEN_WIDTH / 2 / CELL_WIDTH;
+            if(i%2 == 0) {
+                enemyStartPositionX += boss.get_random(6);
+            } else {
+                enemyStartPositionX -= boss.get_random(6);
+            }
+            enemies[i] = new Enemy(new Vector2(enemyStartPositionX, enemyPosY ));
+            enemies[i].setBobTexture("data/samsung-white/enemy0_0_106x.png");
+            enemies[i].setBound(new Rectangle(enemies[i].position.x*CELL_WIDTH, enemies[i].position.y*CELL_WIDTH, enemies[i].getBobTexture().getWidth(), enemies[i].getBobTexture().getHeight()));
+        }
     }
 
     protected void initBobItem() {
@@ -798,10 +762,9 @@ public class Screen1 extends DefaultScreen {
         ttrSplash = new Texture("data/samsung-white/menu_bg.png");
         heroTexture = new Texture("data/samsung-white/hero3_1_120x.png");
         hero = new Hero(new Sprite());
-        hero.position.x = Gdx.graphics.getWidth()/2;
-        // TODO scaleX, Y follow screen ratio
+        hero.position.x = SCREEN_WIDTH/2/CELL_WIDTH;
         hero.setBobTexture(new Texture("data/samsung-white/hero3_1_120x.png"));
-        hero.position.y = Gdx.graphics.getHeight()/5-hero.getBobTexture().getHeight();
+        hero.position.y = (SCREEN_HEIGHT/5)/CELL_WIDTH;
 
         fireBtnTexture = new Texture("data/samsung-white/fire.png");
         initBobItem();
@@ -810,42 +773,24 @@ public class Screen1 extends DefaultScreen {
     protected void drawSplashBatch() {
         batch.disableBlending();
         batch.begin();
-        batch.draw(ttrSplash, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch.draw(ttrSplash, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
         batch.end();
     }
 
     protected void handleKeyMoveHero() {
     }
 
-    protected void oldTestDrawInitPositionEnermy() {
-        if(!huey.isDead()) {
-            batch.draw(huey.getBobTexture(), (int)huey.position.x, (int)huey.position.y, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), 1, 1, 0, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), huey.facingLeft, false);
-            huey.facingLeft = !huey.facingLeft;
-        }
-        if(!dewey.isDead()) {
-            batch.draw(dewey.getBobTexture(), (int)dewey.position.x, (int)dewey.position.y, 0, 0, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight(), 1, 1, 0, 0, 0, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight(), dewey.facingLeft, false);
-            dewey.facingLeft = !dewey.facingLeft;
-        }
-        if(!boss.isDead()) {
-            batch.draw(boss.getBobTexture(), (int)boss.position.x, (int)boss.position.y, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), 1, 1, 0, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), boss.facingLeft, false);
-            boss.facingLeft = !boss.facingLeft;
-        }
-    }
-
     /*
     * Try use old J2ME logic to render position of enemy
     * */
-    protected void testDrawInitPositionEnermy() {
-        if(!huey.isDead()) {
-            batch.draw(huey.getBobTexture(), (int)huey.position.x*sgh_120_1080_screen_ratio, (int)huey.position.y*sgh_120_1080_screen_ratio, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), 1, 1, 0, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), huey.facingLeft, false);
-            huey.facingLeft = !huey.facingLeft;
-        }
-        if(!dewey.isDead()) {
-            batch.draw(dewey.getBobTexture(), (int)dewey.position.x*sgh_120_1080_screen_ratio, (int)dewey.position.y*sgh_120_1080_screen_ratio, 0, 0, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight(), 1, 1, 0, 0, 0, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight(), dewey.facingLeft, false);
-            dewey.facingLeft = !dewey.facingLeft;
+    protected void drawInitPositionEnermy() {
+        for(int i=0; i < e_num; i++) {
+            if(!enemies[i].isDead()) {
+                batch.draw(enemies[i].getBobTexture(), (int)enemies[i].position.x*CELL_WIDTH, (int)enemies[i].position.y*CELL_WIDTH, 0, 0, enemies[i].getBobTexture().getWidth(), enemies[i].getBobTexture().getHeight(), 1, 1, 0, 0, 0, enemies[i].getBobTexture().getWidth(), enemies[i].getBobTexture().getHeight(), enemies[i].facingLeft, false);
+            }
         }
         if(!boss.isDead()) {
-            batch.draw(boss.getBobTexture(), (int)boss.position.x*sgh_120_1080_screen_ratio, (int)boss.position.y*sgh_120_1080_screen_ratio, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), 1, 1, 0, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), boss.facingLeft, false);
+            batch.draw(boss.getBobTexture(), (int)boss.position.x*CELL_WIDTH, (int)boss.position.y*CELL_WIDTH, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), 1, 1, 0, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), boss.facingLeft, false);
             boss.facingLeft = !boss.facingLeft;
         }
     }
@@ -853,11 +798,10 @@ public class Screen1 extends DefaultScreen {
     /*
     * J2ME original port to gdx
     * */
-    public void draw_enemy()
-    {
+    public void draw_enemy() {
         for (int i = 0; i < enemies.length; i++) {
             if (enemies[i].position.x != -10) {
-                batch.draw(enemies[i].getBobTexture(), (int) enemies[i].position.x * 5 * sgh_scale_ratio, enemies[i].position.y * 5 * sgh_scale_ratio + 5, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), 1, 1, 0, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), false, false);
+                batch.draw(enemies[i].getBobTexture(), (int) enemies[i].position.x * 5 * SGH_SCALE_RATIO, enemies[i].position.y * 5 * SGH_SCALE_RATIO + 5, 0, 0, enemies[i].getBobTexture().getWidth(), enemies[i].getBobTexture().getHeight(), 1, 1, 0, 0, 0, enemies[i].getBobTexture().getWidth(), enemies[i].getBobTexture().getHeight(), false, false);
                 if (enemies[i].e_ppang_time > 0) {
                     enemies[i].e_ppang_time -= 1;
                     // paramGraphics.drawImage(this.imgItem_hyo[(this.e_ppang_item[i] - 1)], this.e_x[i] * 5, this.e_y[i] * 5 + 1, 0x10 | 0x1);
@@ -893,7 +837,7 @@ public class Screen1 extends DefaultScreen {
 
         if (this.e_boss > 0)
         {
-            batch.draw(boss.getBobTexture(), (int)boss.position.x * 5 *sgh_scale_ratio , (boss.position.y * 5)*sgh_scale_ratio, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), 1, 1, 0, 0, 0, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight(), false, false);
+            batch.draw(boss.getBobTexture(), (int)boss.position.x * 5 *SGH_SCALE_RATIO , (boss.position.y * 5)*SGH_SCALE_RATIO, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), 1, 1, 0, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), false, false);
             if (boss.boss_dis_count >= 1)
             {
                 boss.boss_dis_count += 1;
@@ -923,64 +867,30 @@ public class Screen1 extends DefaultScreen {
     }
 
     /*
-    * Update 8-Nov-2017.
     * Try use original e_move() from J2ME.
     * */
-    protected void testEnermyMoving() {
-//        setSavedGold(32);
-        Gdx.app.log("INFO", "Test recordStore " + getSavedgold());
+    protected void enermyMoving() {
+        int rightBoundEnemy = (int)(SCREEN_WIDTH - enemies[0].getBobTexture().getWidth())/CELL_WIDTH;
+        int rightBoundBoss = (int)((SCREEN_WIDTH - boss.getBobTexture().getWidth())/CELL_WIDTH);
 
-        float leftBound = 0;
-        float rightBoundHuey = (Gdx.graphics.getWidth() - huey.getBobTexture().getWidth())/sgh_120_1080_screen_ratio;
-        int rightBoundDewey = (int) ((Gdx.graphics.getWidth() - dewey.getBobTexture().getWidth())/sgh_120_1080_screen_ratio);
-        int rightBoundBoss = (int)((Gdx.graphics.getWidth() - boss.getBobTexture().getWidth())/sgh_120_1080_screen_ratio);
-
-        // Ratio 3:4 ~ 9:12 So with ratio 9:16 we lost (not use) 4/16 = 1/4 of height.
-        // Ie. 1920 we will cut 1/4 = 480px to keep ratio 3:4 1080:1440.
-        // Bottom space used for fireBtn, so top should space only 240px
-        int topBound =  (int)Gdx.graphics.getHeight()*3/4 + 240;
-        Gdx.app.log("INFO", "Top = " + topBound);
-
-        int topBoundInCell = (int) (topBound / sgh_120_1080_screen_ratio);
+        int topBoundInCell = (int) (TOP_BOUND / CELL_WIDTH);
         int bottomBoundInCell = topBoundInCell - 8; // We draw map of 24x32 cell
 
-        Gdx.app.log("INFO", "Bottom (in cell) = " + bottomBoundInCell);
-
-        Random r = new Random();
-        // TODO random position when hit rightBound, Horizontal front line enemy move by step up/down
-
-        if(huey.position.x >= rightBoundHuey) {
-            int i1 = r.nextInt(180) + Gdx.graphics.getWidth()/3;
-            huey.position.x = i1/sgh_120_1080_screen_ratio;
+        for(int i = 0; i < e_num; i++) {
+            enemies[i].check_move_outof_bound(0, rightBoundEnemy, bottomBoundInCell, topBoundInCell);
         }
-        if(huey.position.x <= leftBound) {
-            huey.position.x = (r.nextInt(180) + hero.position.x)/sgh_120_1080_screen_ratio;
-        }
-
-        // Top bound
-        if(huey.position.y >= topBoundInCell) {
-            huey.position.y = r.nextInt(90)/sgh_120_1080_screen_ratio + bottomBoundInCell;
-        }
-        if(huey.position.y <= bottomBoundInCell) {
-            huey.position.y = r.nextInt(180)/sgh_120_1080_screen_ratio + bottomBoundInCell;
-        }
-
-        dewey.check_move_outof_bound(0, rightBoundDewey, bottomBoundInCell, topBoundInCell);
 
         boss.check_move_outof_bound(0, rightBoundBoss, bottomBoundInCell-7, topBoundInCell);
     }
 
     protected void drawFireBtn() {
-        batch.draw(fireBtnTexture, Gdx.graphics.getWidth()-50-fireBtnTexture.getWidth(), 50, fireBtnTexture.getWidth(), fireBtnTexture.getHeight());
+        batch.draw(fireBtnTexture, SCREEN_WIDTH-50-fireBtnTexture.getWidth(), 50, fireBtnTexture.getWidth(), fireBtnTexture.getHeight());
     }
 
     protected void drawTouchPad() {
-//        Gdx.gl.glClearColor(0.294f, 0.294f, 0.294f, 1f);
-//        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         camera.update();
 
-        //Move blockSprite with TouchPad. TODO remove test code
-//        blockSprite.setX(blockSprite.getX() + touchpad.getKnobPercentX()*blockSpeed);
+        //blockSprite.setX(blockSprite.getX() + touchpad.getKnobPercentX()*blockSpeed);
 
         handleHeroMoveBound();
         updateHeroBullet();
@@ -988,9 +898,9 @@ public class Screen1 extends DefaultScreen {
         //Draw
         batch.enableBlending();
         batch.begin();
-//        blockSprite.draw(batch);
+        //blockSprite.draw(batch);
 
-        batch.draw(hero.getBobTexture(), hero.position.x, hero.position.y, 0, 0, heroTexture.getWidth(), heroTexture.getHeight(), 1, 1, 0, 0, 0, heroTexture.getWidth(), heroTexture.getHeight(), hero.facingLeft, false);
+        batch.draw(hero.getBobTexture(), hero.position.x*CELL_WIDTH, hero.position.y*CELL_WIDTH, 0, 0, heroTexture.getWidth(), heroTexture.getHeight(), 1, 1, 0, 0, 0, heroTexture.getWidth(), heroTexture.getHeight(), hero.facingLeft, false);
         hero.facingLeft = !hero.facingLeft;
 
         batch.end();
@@ -1001,11 +911,13 @@ public class Screen1 extends DefaultScreen {
     protected void handleFireTouch() {
         if(Gdx.input.isTouched())
         {
+            game_action = GAME_ACTION_OK;
             Vector3 touchPos=new Vector3(Gdx.input.getX(),Gdx.input.getY(), 0);
             // TODO find out why unproject make position wrong. Unproject deal with zoom or similar variables in touch screen
             // When zoom in/out ... the extract position may be difference. So the pointer pos after unproject may be reset to 0
-//            camera.unproject(touchPos);
-            Rectangle textureBounds=new Rectangle(Gdx.graphics.getWidth()-fireBtnTexture.getWidth()-50, Gdx.graphics.getHeight()-50-fireBtnTexture.getHeight(), fireBtnTexture.getWidth(),fireBtnTexture.getHeight());
+
+            // camera.unproject(touchPos);
+            Rectangle textureBounds=new Rectangle(SCREEN_WIDTH-fireBtnTexture.getWidth()-50, Gdx.graphics.getHeight()-50-fireBtnTexture.getHeight(), fireBtnTexture.getWidth(),fireBtnTexture.getHeight());
 
             Item bobItem = hero.getItem();
             if(textureBounds.contains(touchPos.x, touchPos.y) && (heroFireState == false))
@@ -1019,13 +931,10 @@ public class Screen1 extends DefaultScreen {
             if(heroFireState) {
                 bobItem.setVelocity(new Vector2(0, 12));
                 bobItem.velocity.scl(2);
-//                Gdx.app.log("INFO", "snow x "+ bobItem.position.toString() + " delta "+ bobItem.getDelta() + " state " + heroFireState + " screen "+ Gdx.graphics.getHeight()*4/5);
                 if(bobItem.position.y <= Gdx.graphics.getHeight()*4/5) {
                     bobItem.position.add(bobItem.velocity.x * bobItem.getDelta(), bobItem.velocity.y * 2);
-                    // Update snow bound. TODO handle messing between hero.x and snow.x
                     bobItem.setBound(new Rectangle(hero.position.x, bobItem.position.y, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight()));
                     heroFire();
-                    // collision
                     checkCollisionHeroToEnemy();
                 } else {
                     heroFireState = false;
@@ -1035,7 +944,7 @@ public class Screen1 extends DefaultScreen {
                     Gdx.app.log("INFO", "Over rooftop " + bobItem.position.toString());
                 }
             }
-            Gdx.app.log("INFO", "Snow "+ bobItem.getBound().toString()+ "huey "+ huey.getBound().toString() + " dewey "+ dewey.getBound().toString() + " boss " + boss.getHp() + " screen ");
+            Gdx.app.log("INFO", "Snow "+ bobItem.getBound().toString()+ "huey "+ enemies[0].getBound().toString() + " dewey "+ enemies[1].getBound().toString() + " boss " + boss.getHp() + " screen ");
             if(bobItem.position.y > Gdx.graphics.getHeight()*4/5) {
                 heroFireState = false;
                 bobItem.setPosition(hero.position.x, hero.position.y);
@@ -1051,10 +960,10 @@ public class Screen1 extends DefaultScreen {
     protected void handleHeroMoveBound() {
         bobTexture = hero.getBobTexture();
         float leftBound = 0;
-        float rightBound = Gdx.graphics.getWidth() - bobTexture.getWidth();
+        float rightBound = (int)(SCREEN_WIDTH - bobTexture.getWidth())/CELL_WIDTH;
         // TODO use object instead of global var, handle screen size
         if(hero.position.x < leftBound) {
-            hero.position.x = Gdx.graphics.getWidth()/2;
+            hero.position.x = SCREEN_WIDTH/2;
         }
         if(hero.position.x > rightBound) {
             hero.position.x = rightBound;
@@ -1062,16 +971,26 @@ public class Screen1 extends DefaultScreen {
         if((hero.position.x >= leftBound) && (hero.position.x <= rightBound) ) {
             hero.position.x = (hero.position.x + touchpad.getKnobPercentX() * heroSpeed);
         }
+        // TODO find where touch event (dragged) call, can it be overrided ?
+        // convert touch event to key event (getGameAction)
+        if(touchpad.getKnobPercentX() > 0) {
+            game_action = GAME_ACTION_RIGHT;
+        } else if(touchpad.getKnobPercentX() < 0){
+            game_action = GAME_ACTION_LEFT;
+        }
+        if(touchpad.getKnobPercentY() > 0) {
+            game_action = GAME_ACTION_UP;
+        } else if(touchpad.getKnobPercentY() < 0) {
+            game_action = GAME_ACTION_DOWN;
+        }
     }
 
     protected void checkCollisionHeroToEnemy() {
         Rectangle heroItem = hero.getItem().getBound();
-        if(heroItem.overlaps(huey.getBound())) {
-            huey.loseHp(hero.getItem().getDamage());
-        }
-
-        if(heroItem.overlaps(dewey.getBound())) {
-            dewey.loseHp(hero.getItem().getDamage());
+        for(int i=0; i < e_num; i++) {
+            if(heroItem.overlaps(enemies[i].getBound())) {
+                enemies[i].loseHp(hero.getItem().getDamage());
+            }
         }
 
         if(heroItem.overlaps(boss.getBound())) {
@@ -1079,16 +998,19 @@ public class Screen1 extends DefaultScreen {
         }
     }
 
-    protected void checkCollisionEnemyToHero() {
-
-    }
-
     protected int getGameState() {
         if(hero.isDead()) {
             return 2;
         }
-        if(huey.isDead() && dewey.isDead() && boss.isDead()) {
-            return 1;
+        if(boss.isDead()) {
+            int temp_state = 1;
+            for(int i=0; i < e_num; i++) {
+                if(!enemies[i].isDead()) {
+                    temp_state = 0;
+                    return 0;
+                }
+            }
+            return temp_state;
         }
 
         return 0;
@@ -1104,16 +1026,16 @@ public class Screen1 extends DefaultScreen {
     }
 
     protected void updateHeroBullet() {
-        hero.setBound(new Rectangle(hero.position.x * sgh_120_1080_screen_ratio, hero.position.y * sgh_120_1080_screen_ratio, hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight()));
+        hero.setBound(new Rectangle(hero.position.x * CELL_WIDTH, hero.position.y * CELL_WIDTH, hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight()));
     }
     protected void updateEnemyBound() {
-        huey.setBound(new Rectangle(huey.position.x * sgh_120_1080_screen_ratio, huey.position.y * sgh_120_1080_screen_ratio, huey.getBobTexture().getWidth(), huey.getBobTexture().getHeight()));
-        dewey.setBound(new Rectangle(dewey.position.x*sgh_120_1080_screen_ratio, dewey.position.y*sgh_120_1080_screen_ratio, dewey.getBobTexture().getWidth(), dewey.getBobTexture().getHeight()));
-        boss.setBound(new Rectangle(boss.position.x*sgh_120_1080_screen_ratio, boss.position.y*sgh_120_1080_screen_ratio, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight()));
+        for(int i = 0; i < e_num; i++) {
+            enemies[i].setBound(new Rectangle(enemies[i].position.x * CELL_WIDTH, enemies[i].position.y * CELL_WIDTH, enemies[i].getBobTexture().getWidth(), enemies[i].getBobTexture().getHeight()));
+        }
+        boss.setBound(new Rectangle(boss.position.x*CELL_WIDTH, boss.position.y*CELL_WIDTH, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight()));
     }
 
-    public void check_building(int paramInt1, int paramInt2)
-    {
+    public void check_building(int paramInt1, int paramInt2) {
         if ((paramInt1 == 43) && (paramInt2 == 22))
         {
             this.m_mode = 0;
@@ -1163,8 +1085,7 @@ public class Screen1 extends DefaultScreen {
             this.m_mode = -1;
         }
     }
-    public int hero_move(int paramInt1, int paramInt2, int paramInt3)
-    {
+    public int hero_move(int paramInt1, int paramInt2, int paramInt3) {
         if (paramInt3 == 0)
         {
             if ((paramInt2 == 46) && (paramInt1 >= 22) && (paramInt1 <= 92))
@@ -1191,20 +1112,27 @@ public class Screen1 extends DefaultScreen {
     public void draw_text_box() {
 
     }
-//    https://docs.oracle.com/javame/config/cldc/ref-impl/midp2.0/jsr118/constant-values.html#javax.microedition.lcdui.Canvas.UP
-    public void keyPressed(int paramInt)
-    {
-        int viewPortHeight = Gdx.graphics.getHeight()*3/4;
-        int topBound = viewPortHeight + (int)Gdx.graphics.getHeight()/8;
-        int bottomSpace = (int)Gdx.graphics.getHeight()/8; // May be change for fit touch button
 
+    /*
+    *    https://docs.oracle.com/javame/config/cldc/ref-impl/midp2.0/jsr118/constant-values.html#javax.microedition.lcdui.Canvas.UP
+    *    key code = -5 game action = 8 OK
+    *    key code = 35 game action = 0 #
+    *    key code = -2 game action = 6 DOWN
+    *    key code = -4 game action = 5 LEFT
+    *    key code = -1 game action = 1 UP ~ OK
+    *    key code = 35 game action = 0 #
+    *    key code = 49 game action = 9 KEY_2 = UP ?
+    *    key code = 51 game action = 10 KEY_3 (use item)
+    *    key code = -7 game action = 0 RIGHT_MENU
+    */
+    public void keyPressed(int paramInt) {
         int i;
         int j;
-        if ((this.screen == 6) && (this.state == 1))
+        if ((screen == 6) && (state == 1))
         {
-            if ((getGameAction(paramInt) == 2) || (paramInt == 52))
+            if ((getGameAction(paramInt) == 2) || (paramInt == 52)) // NUM_4 or left key
             {
-                if ((this.item_mode == 0) && (this.ppang_item != 2))
+                if ((item_mode == 0) && (ppang_item != 2))
                 {
                     if (hero.position.x != 2)
                     {
@@ -1225,9 +1153,9 @@ public class Screen1 extends DefaultScreen {
 //                    repaint();
                 }
             }
-            else if ((getGameAction(paramInt) == 5) || (paramInt == 54))
+            else if ((getGameAction(paramInt) == 5) || (paramInt == 54)) // NUM_6 or RIGHT_KEY (may be LEFT_KEY by keyboard view)
             {
-                if ((this.item_mode == 0) && (this.ppang_item != 2))
+                if ((item_mode == 0) && (ppang_item != 2))
                 {
                     if (hero.position.x != 23)
                     {
@@ -1239,16 +1167,16 @@ public class Screen1 extends DefaultScreen {
                         }
                     }
                 }
-                else if (this.item_mode != 0)
+                else if (item_mode != 0)
                 {
-                    if (this.item_mode != 5) {
-                        this.item_mode += 1;
+                    if (item_mode != 5) {
+                        item_mode += 1;
                     }
-                    this.message = "Item Mode";
+                    message = "Item Mode";
 //                    repaint();
                 }
             }
-            else if ((getGameAction(paramInt) == 6) || (paramInt == 56))
+            else if ((getGameAction(paramInt) == 6) || (paramInt == 56)) // NUM_8 or DOWN KEY
             {
                 if (mana >= 12) {
 //                    use_special();
@@ -1256,7 +1184,8 @@ public class Screen1 extends DefaultScreen {
                     message = "Insufficient Mana";
                 }
             }
-            else if ((paramInt == -5) || (getGameAction(paramInt) == 1) || (paramInt == 50) || (paramInt == 53))
+            // KEY_UP = 50 (fire can be use up key), -5 = OK keycode
+            else if ((paramInt == -5) || (getGameAction(paramInt) == 1) || (paramInt == 50) || (paramInt == 53)) // OK, NUM_5 etc
             {
                 if (item_mode == 0)
                 {
@@ -1267,7 +1196,7 @@ public class Screen1 extends DefaultScreen {
                         pw_up = 1;
                         hero.h_idx = 2;
                     }
-                    else if ((this.pw_up == 1) && (this.real_snow_pw > 0))
+                    else if ((pw_up == 1) && (real_snow_pw > 0))
                     {
                         hero.h_idx = 4;
 //                        make_attack();
@@ -1279,14 +1208,14 @@ public class Screen1 extends DefaultScreen {
                     gameOn = true;
                 }
             }
-            else if (((paramInt == 35) || (paramInt == -7)) && (this.game_state == 0))
+            else if (((paramInt == 35) || (paramInt == -7)) && (game_state == 0)) // RIGHT_MENU, # (pound_key) => options|# action
             {
                 m_mode = 1;
                 gameOn = false;
                 screen = 100;
 //                repaint();
             }
-            else if ((paramInt == 51) && (game_state == 0))
+            else if ((paramInt == 51) && (game_state == 0)) // ITEM_MODE (NUM_3)
             {
                 i = 0;
                 j = 0;
@@ -1314,7 +1243,7 @@ public class Screen1 extends DefaultScreen {
         }
         else if (screen == 100)
         {
-            if (getGameAction(paramInt) == 1)
+            if (getGameAction(paramInt) == 1) // UP
             {
                 if (m_mode == 1) {
                     m_mode = 5;
@@ -1322,7 +1251,7 @@ public class Screen1 extends DefaultScreen {
                     m_mode -= 1;
                 }
             }
-            else if (getGameAction(paramInt) == 6)
+            else if (getGameAction(paramInt) == 6) // DOWN
             {
                 if (m_mode == 5) {
                     m_mode = 1;
@@ -1332,17 +1261,17 @@ public class Screen1 extends DefaultScreen {
             }
             else if (getGameAction(paramInt) == 2)
             {
-                if (this.m_mode == 3) {
-                    this.s_play = 1;
+                if (m_mode == 3) {
+                    s_play = 1;
                 }
             }
-            else if (getGameAction(paramInt) == 5)
+            else if (getGameAction(paramInt) == 5) // LEFT
             {
                 if (m_mode == 3) {
                     s_play = 2;
                 }
             }
-            else if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == -7)) {
+            else if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == -7)) { // 35, -7 = right menu, action 8 = OK
                 if (m_mode == 2)
                 {
 //                    goto_menu();
@@ -1378,7 +1307,7 @@ public class Screen1 extends DefaultScreen {
         }
         else if (this.screen == 2)
         {
-            if (getGameAction(paramInt) == 1)
+            if (getGameAction(paramInt) == 1) // UP
             {
                 if (m_mode <= 1) {
                     m_mode = 4;
@@ -1386,18 +1315,23 @@ public class Screen1 extends DefaultScreen {
                     m_mode -= 1;
                 }
             }
-            else if (getGameAction(paramInt) == 6)
+            else if (getGameAction(paramInt) == 6) // DOWN
             {
-                if (this.m_mode >= 4) {
-                    this.m_mode = 1;
+                if (m_mode >= 4) {
+                    m_mode = 1;
                 } else {
-                    this.m_mode += 1;
+                    m_mode += 1;
                 }
             }
+            // RIGHT MENU ?
+            // KEY_NUM1	49
+            // KEY_NUM2	50
+            // KEY_NUM3	51
+            // KEY_NUM4	52
             else if ((paramInt == 35) || (getGameAction(paramInt) == 8) || ((paramInt >= 49) && (paramInt <= 52)) || (paramInt == -7))
             {
                 if (paramInt > 48) {
-                    m_mode = (paramInt - 48);
+                    m_mode = (paramInt - 48); // - keycode to get mode
                 }
                 if (m_mode == 1) {
                     screen = -88;
@@ -1423,35 +1357,35 @@ public class Screen1 extends DefaultScreen {
         }
         else if (this.screen == 3)
         {
-            if (getGameAction(paramInt) == 1)
+            if (getGameAction(paramInt) == 1) // UP
             {
                 j = (int)hero.position.y - 8;
                 if (hero_move((int)hero.position.x, j, 1) > 0) {
                     hero.position.y = j;
                 }
             }
-            else if (getGameAction(paramInt) == 6)
+            else if (getGameAction(paramInt) == 6) // DOWN
             {
                 j = (int)hero.position.y + 8;
                 if (hero_move((int)hero.position.x, j, 1) > 0) {
                     hero.position.y = j;
                 }
             }
-            else if (getGameAction(paramInt) == 5)
+            else if (getGameAction(paramInt) == 5) // LEFT
             {
                 i = (int)hero.position.x + 7;
                 if (hero_move(i, (int)hero.position.y, 0) > 0) {
                     hero.position.x = i;
                 }
             }
-            else if (getGameAction(paramInt) == 2)
+            else if (getGameAction(paramInt) == 2) // UP ?
             {
                 i = (int)hero.position.x - 7;
                 if (hero_move(i, (int)hero.position.y, 0) > 0) {
                     hero.position.x = i;
                 }
             }
-            else if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == -7))
+            else if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == -7)) // RIGHT or OK
             {
                 if ((m_mode == 0) || (m_mode == 1))
                 {
@@ -1481,10 +1415,10 @@ public class Screen1 extends DefaultScreen {
         }
         else if (screen == 31)
         {
-            if (getGameAction(paramInt) == 1) {
+            if (getGameAction(paramInt) == 1) { // UP
                 s_item = 0;
             }
-            if (getGameAction(paramInt) == 6) {
+            if (getGameAction(paramInt) == 6) { // DOWN
                 s_item = 1;
             }
             if (getGameAction(paramInt) == 2)
@@ -1493,10 +1427,10 @@ public class Screen1 extends DefaultScreen {
                     b_item -= 1;
                 }
             }
-            else if ((getGameAction(paramInt) == 5) && (b_item != 3)) {
+            else if ((getGameAction(paramInt) == 5) && (b_item != 3)) { // LEFT
                 b_item += 1;
             }
-            if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == -7)) {
+            if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == -7)) { //  RIGHT menu or OK
                 if (s_item == 1)
                 {
                     m_mode = -1;
@@ -1558,14 +1492,14 @@ public class Screen1 extends DefaultScreen {
 
                 m_mode = 3;
             }
-            if (getGameAction(paramInt) == 1) {
+            if (getGameAction(paramInt) == 1) { // UP
                 if (m_mode == 1) {
                     m_mode = 3;
                 } else {
                     m_mode -= 1;
                 }
             }
-            if (getGameAction(paramInt) == 6) {
+            if (getGameAction(paramInt) == 6) { // DOWN
                 if (m_mode == 3) {
                     m_mode = 1;
                 } else {
@@ -1577,7 +1511,7 @@ public class Screen1 extends DefaultScreen {
                 if (getGameAction(paramInt) == 2) {
                     s_play = 1;
                 }
-                if (getGameAction(paramInt) == 5) {
+                if (getGameAction(paramInt) == 5) { // LEFT
                     s_play = 2;
                 }
             }
@@ -1586,16 +1520,16 @@ public class Screen1 extends DefaultScreen {
                 if (getGameAction(paramInt) == 2) {
                     v_mode = 1;
                 }
-                if (getGameAction(paramInt) == 5) {
+                if (getGameAction(paramInt) == 5) { // LEFT
                     v_mode = 2;
                 }
             }
             if (this.m_mode == 3)
             {
-                if ((getGameAction(paramInt) == 2) && (this.speed != 1)) {
+                if ((getGameAction(paramInt) == 2) && (speed != 1)) {
                     speed -= 1;
                 }
-                if ((getGameAction(paramInt) == 5) && (this.speed != 5)) {
+                if ((getGameAction(paramInt) == 5) && (speed != 5)) { // LEFT
                     speed += 1;
                 }
             }
@@ -1603,20 +1537,21 @@ public class Screen1 extends DefaultScreen {
         }
         else if (screen == 5)
         {
-            if (getGameAction(paramInt) == 1) {
+            if (getGameAction(paramInt) == 1) { // UP
                 if (m_mode == 1) {
                     m_mode = 3;
                 } else {
                     m_mode -= 1;
                 }
             }
-            if (getGameAction(paramInt) == 6) {
+            if (getGameAction(paramInt) == 6) { // LEFT
                 if (m_mode == 3) {
                     m_mode = 1;
                 } else {
                     m_mode += 1;
                 }
             }
+            // RIGHT MENU or RIGHT, KEY_NUM
             if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == 49) || (paramInt == 50) || (paramInt == 51) || (paramInt == -7))
             {
                 if (paramInt > 48) {
@@ -1632,7 +1567,7 @@ public class Screen1 extends DefaultScreen {
                     screen = -33;
                 }
             }
-            if ((paramInt == 42) || (paramInt == -6))
+            if ((paramInt == 42) || (paramInt == -6)) // * STAR
             {
                 screen = 2;
                 m_mode = 2;
@@ -1646,20 +1581,21 @@ public class Screen1 extends DefaultScreen {
         }
         else if (screen == -88)
         {
-            if (getGameAction(paramInt) == 1) {
+            if (getGameAction(paramInt) == 1) { // UP
                 if (m_mode <= 1) {
                     m_mode = 2;
                 } else {
                     m_mode -= 1;
                 }
             }
-            if (getGameAction(paramInt) == 6) {
+            if (getGameAction(paramInt) == 6) { // LEFT
                 if (m_mode >= 2) {
                     m_mode = 1;
                 } else {
                     m_mode += 1;
                 }
             }
+            // RIGHT MENU, RIGHT or KEY_CODE
             if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == 49) || (paramInt == 50) || (paramInt == -7))
             {
                 if (paramInt > 48) {
@@ -1675,21 +1611,21 @@ public class Screen1 extends DefaultScreen {
                 }
 //                destroyImage(2);
 //                loadImage(3);
-                hero.position.x = (57/120)*Gdx.graphics.getWidth();
-                hero.position.y = (46/160)*viewPortHeight; // TODO reverse top/down of geometry
-                this.m_mode = -1;
-                this.screen = 3;
+                hero.position.x = (57/120)*SCREEN_WIDTH;
+                hero.position.y = (46/160)*VIEW_PORT_HEIGHT; // TODO reverse top/down of geometry
+                m_mode = -1;
+                screen = 3;
             }
-            if ((paramInt == 42) || (paramInt == -6))
+            if ((paramInt == 42) || (paramInt == -6)) // STAR *
             {
-                this.screen = 2;
-                this.m_mode = 1;
+                screen = 2;
+                m_mode = 1;
             }
 //            repaint();
         }
-        else if (this.screen == -33)
+        else if (screen == -33)
         {
-            if ((paramInt == 42) || (paramInt == -6))
+            if ((paramInt == 42) || (paramInt == -6)) // * STAR
             {
 //                loadImage(2);
                 m_mode = 1;
@@ -1697,14 +1633,14 @@ public class Screen1 extends DefaultScreen {
 //                repaint();
             }
         }
-        else if (this.screen == 300)
+        else if (screen == 300)
         {
 //            MPlay(3);
             m_mode = -1;
 //            destroyImage(2);
 //            loadImage(3);
-            hero.position.x = (57/120)*Gdx.graphics.getWidth()/sgh_120_1080_screen_ratio;
-            hero.position.y = (46/120)*(Gdx.graphics.getHeight()*3/4)/sgh_120_1080_screen_ratio;
+            hero.position.x = (57/120)*SCREEN_WIDTH/CELL_WIDTH;
+            hero.position.y = (46/120)*(Gdx.graphics.getHeight()*3/4)/CELL_WIDTH;
             saved_gold += gold;
             setSavedGold(saved_gold);
             setSavedMana(mana);
@@ -1726,12 +1662,12 @@ public class Screen1 extends DefaultScreen {
         }
         else if (screen == 1)
         {
-            if ((paramInt == 35) || (paramInt == -7))
+            if ((paramInt == 35) || (paramInt == -7)) // R_MENU
             {
                 screen = -88;
                 m_mode = 1;
             }
-            else if ((paramInt == 42) || (paramInt == -6))
+            else if ((paramInt == 42) || (paramInt == -6)) // STAR *
             {
                 screen = 2;
             }
@@ -2008,8 +1944,7 @@ public class Screen1 extends DefaultScreen {
         }
     }
 
-    public int input_item(int paramInt)
-    {
+    public int input_item(int paramInt) {
         for (int i = 0; i < 5; i++) {
             if ((item_slot[i] == paramInt) && (paramInt <= 8)) {
                 return 3;
@@ -2040,6 +1975,67 @@ public class Screen1 extends DefaultScreen {
     * */
     public int getGameAction(int keyCode) {
 
-        return 0;
+        Gdx.app.log("INFO", "Game action = " + game_action);
+        return game_action;
+    }
+    protected Preferences getPrefs() {
+        if(prefs==null){
+            prefs = Gdx.app.getPreferences("gamestate");
+        }
+        return prefs;
+    }
+
+    public boolean isSoundEffectsEnabled() {
+        return getPrefs().getBoolean(PREF_SOUND_ENABLED, true);
+    }
+
+    public void setSoundEffectsEnabled(boolean soundEffectsEnabled) {
+        getPrefs().putBoolean(PREF_SOUND_ENABLED, soundEffectsEnabled);
+        getPrefs().flush();
+    }
+
+    public boolean getVibraEnabled() {
+        return getPrefs().getBoolean(PREF_VIBRATION, true);
+    }
+
+    public void setVibraEnabled(boolean vibra) {
+        getPrefs().putBoolean(PREF_VIBRATION, vibra);
+        getPrefs().flush();
+    }
+
+    public int getLevel() {
+        return getPrefs().getInteger(PREF_LEVEL, 11);
+    }
+
+    public void setLevel(int level) {
+        getPrefs().putInteger(PREF_LEVEL, level);
+        getPrefs().flush();
+
+    }
+    public int getSavedgold() {
+        return getPrefs().getInteger(PREF_SAVEDGOLD, 64);
+    }
+
+    public void setSavedGold(int saved_gold) {
+        getPrefs().putInteger(PREF_SAVEDGOLD, saved_gold);
+        getPrefs().flush();
+    }
+
+    public int getSavedMana() {
+        return getPrefs().getInteger(PREF_MANA, 64);
+    }
+
+    public void setSavedMana(int saved_gold) {
+        getPrefs().putInteger(PREF_MANA, saved_gold);
+        getPrefs().flush();
+    }
+
+    public int getGameSpeed() {
+        return getPrefs().getInteger(PREF_SPEED, 64);
+    }
+
+    public void setGameSpeed(int saved_gold) {
+        getPrefs().putInteger(PREF_SPEED, saved_gold);
+        getPrefs().flush();
     }
 }
