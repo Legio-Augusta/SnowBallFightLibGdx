@@ -44,9 +44,7 @@ public class Screen1 extends DefaultScreen {
     private Enemy[] enemies;
 
     private Texture bobTexture;
-    float stateTime;
 
-    // Test touchpad
     private Stage touch_stage;
     private Touchpad touchpad;
     private Touchpad.TouchpadStyle touchpadStyle;
@@ -245,9 +243,7 @@ public class Screen1 extends DefaultScreen {
         int j;
         if (screen == 6)        // normal playing screen, TODO may be use constants name
         {
-            // paramGraphics.drawImage(this.imgBack, 0, 0, 20); // options|* button
-            // TODO init topBound as global var to reuse
-            // 1/8 as 1/4 (4/16 * scr_height) 4 = 16-12; 12 is from ratio 3x3 = 9 => 4X3 = 12
+            batch.draw(imgBack, 0, 0); // options|* button
 
             batch.draw(hero.getBobTexture(), hero.position.x * 5 * SGH_SCALE_RATIO, (int)83/160*VIEW_PORT_HEIGHT , hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight());
             if (ppang_time > 0)
@@ -292,7 +288,7 @@ public class Screen1 extends DefaultScreen {
                 batch.draw(imgShadow, hero.getItem().position.x * 5*SGH_SCALE_RATIO, (hero.getItem().position.y * 7 + 4)*SGH_SCALE_RATIO);
 //                paramGraphics.drawImage(this.imgItem[this.wp], this.snow_x * 5, this.snow_y * 7 - this.snow_gap + 4, 0x2 | 0x1);
             }
-            else if (this.pw_up == 1)
+            else if (pw_up == 1)
             {
                 if ((real_snow_pw > 0) && (ppang_item != 1))
                 {
@@ -808,7 +804,7 @@ public class Screen1 extends DefaultScreen {
     * */
     public void draw_enemy() {
         for (int i = 0; i < enemies.length; i++) {
-            if (enemies[i].position.x != -10) {
+            if ((int)enemies[i].position.x != -10) {
                 batch.draw(enemies[i].getBobTexture(), (int) enemies[i].position.x * 5 * SGH_SCALE_RATIO, enemies[i].position.y * 5 * SGH_SCALE_RATIO + 5, 0, 0, enemies[i].getBobTexture().getWidth(), enemies[i].getBobTexture().getHeight(), 1, 1, 0, 0, 0, enemies[i].getBobTexture().getWidth(), enemies[i].getBobTexture().getHeight(), false, false);
                 if (enemies[i].e_ppang_time > 0) {
                     enemies[i].e_ppang_time -= 1;
@@ -831,19 +827,19 @@ public class Screen1 extends DefaultScreen {
                     if (enemies[i].dis_count == -10) {
                         enemies[i].position.x = -10;
                         enemies[i].dis_count = 0;
-                        this.e_t_num -= 1;
-                        if ((this.e_t_num == 0) && (this.e_boss == 0)) {
-                            this.item_mode = 0;
-                            this.game_state = 2;
-                            this.state = 3;
-                            this.gameOn = true;
+                        e_t_num -= 1;
+                        if ((e_t_num == 0) && (e_boss == 0)) {
+                            item_mode = 0;
+                            game_state = 2;
+                            state = 3;
+                            gameOn = true;
                         }
                     }
                 }
             }
         }
 
-        if (this.e_boss > 0)
+        if (e_boss > 0)
         {
             batch.draw(boss.getBobTexture(), (int)boss.position.x * 5 *SGH_SCALE_RATIO , (boss.position.y * 5)*SGH_SCALE_RATIO, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), 1, 1, 0, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), false, false);
             if (boss.boss_dis_count >= 1)
@@ -860,14 +856,14 @@ public class Screen1 extends DefaultScreen {
                 boss.boss_dis_count -= 1;
                 if (boss.boss_dis_count == -10)
                 {
-                    this.e_boss = 0;
+                    e_boss = 0;
                     boss.boss_dis_count = 0;
-                    if (this.e_t_num == 0)
+                    if (e_t_num == 0)
                     {
-                        this.item_mode = 0;
-                        this.game_state = 2;
-                        this.state = 3;
-                        this.gameOn = true;
+                        item_mode = 0;
+                        game_state = 2;
+                        state = 3;
+                        gameOn = true;
                     }
                 }
             }
@@ -1046,51 +1042,51 @@ public class Screen1 extends DefaultScreen {
     public void check_building(int paramInt1, int paramInt2) {
         if ((paramInt1 == 43) && (paramInt2 == 22))
         {
-            this.m_mode = 0;
-            this.b_item = 0;
-            this.s_item = 0;
+            m_mode = 0;
+            b_item = 0;
+            s_item = 0;
         }
         else if ((paramInt1 == 71) && (paramInt2 == 22))
         {
-            this.m_mode = 1;
-            this.b_item = 0;
-            this.s_item = 0;
+            m_mode = 1;
+            b_item = 0;
+            s_item = 0;
         }
         else if ((paramInt1 == 92) && (paramInt2 == 46))
         {
-            this.m_mode = 2;
-            this.school = 1;
+            m_mode = 2;
+            school = 1;
         }
         else if ((paramInt1 == 71) && (paramInt2 == 70))
         {
-            if (this.last_stage > 20) {
-                this.m_mode = 3;
+            if (last_stage > 20) {
+                m_mode = 3;
             } else {
-                this.m_mode = 100;
+                m_mode = 100;
             }
             this.school = 2;
         }
         else if ((paramInt1 == 43) && (paramInt2 == 70))
         {
-            if (this.last_stage > 30) {
-                this.m_mode = 4;
+            if (last_stage > 30) {
+                m_mode = 4;
             } else {
-                this.m_mode = 100;
+                m_mode = 100;
             }
             this.school = 3;
         }
         else if ((paramInt1 == 22) && (paramInt2 == 46))
         {
-            if (this.last_stage > 40) {
-                this.m_mode = 5;
+            if (last_stage > 40) {
+                m_mode = 5;
             } else {
-                this.m_mode = 100;
+                m_mode = 100;
             }
-            this.school = 4;
+            school = 4;
         }
         else
         {
-            this.m_mode = -1;
+            m_mode = -1;
         }
     }
     public int hero_move(int paramInt1, int paramInt2, int paramInt3) {
