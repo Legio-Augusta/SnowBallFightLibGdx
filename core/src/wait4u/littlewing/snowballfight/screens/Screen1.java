@@ -2,11 +2,13 @@ package wait4u.littlewing.snowballfight.screens;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -33,12 +35,9 @@ public class Screen1 extends DefaultScreen {
     Texture fireBtnTexture;
     Texture snowShadowTexture;
 
-    int heroSpeed = 1; // 1 cell step (screen width devided to about 24 cell).
+    float heroSpeed = 0.3f; // 1 cell step (screen width devided to about 24 cell).
 
     private boolean heroFireState = false;
-
-    private int ppuX = 5;	// pixels per unit on the X axis
-    private int ppuY = 5;	// pixels per unit on the Y axis
 
     private Hero hero;
     private Boss boss;
@@ -54,9 +53,6 @@ public class Screen1 extends DefaultScreen {
     private Skin touchpadSkin;
     private Drawable touchBackground;
     private Drawable touchKnob;
-    private Texture blockTexture;
-    private Sprite blockSprite;
-    private float blockSpeed;
 
     public static final String TAG = "LOG";
 
@@ -156,6 +152,8 @@ public class Screen1 extends DefaultScreen {
     private static final int KEY_NUM_3 = 0; // for item mode
     private static final int KEY_SHARP = 0;
 
+    private ShapeRenderer shapeRenderer;
+
     private Texture imgLogo;
     private Texture imgMM;
     private Texture imgBk;
@@ -171,21 +169,22 @@ public class Screen1 extends DefaultScreen {
     private Texture imgH_ppang;
     private Texture imgSnow_g;
     private Texture imgPwd;
-//    private Texture [] imgItem;
-//    private Texture [] imgItem_hyo;
+    private Texture [] imgItem;
+    private Texture [] imgItem_hyo;
     private Texture imgVill;
     private Texture imgSchool;
     private Texture imgShop;
-//    private Texture [] imgSpecial;
+    private Texture [] imgSpecial;
     private Texture imgSp;
-//    private Texture [] imgEffect;
+    private Texture [] imgEffect;
     private Texture imgVictory;
     private Texture imgV;
     private Texture imgHero_v;
     private Texture imgLose;
     private Texture imgHero_l;
     private Texture imgStage_num;
-//    private Texture [] imgStage;
+    private Texture ui;
+    private Texture [] imgStage;
 
     public Screen1(Game game) {
         super(game);
@@ -228,11 +227,6 @@ public class Screen1 extends DefaultScreen {
         touch_stage = new Stage(new StretchViewport(SCREEN_WIDTH, SCREEN_HEIGHT), batch);
         touch_stage.addActor(touchpad);
         Gdx.input.setInputProcessor(touch_stage);
-
-        //Create block sprite
-/*        blockTexture = new Texture(Gdx.files.internal("data/gui/block.png"));
-        blockSprite = new Sprite(blockTexture);
-        blockSprite.setPosition(Gdx.graphics.getWidth()/2-blockSprite.getWidth()/2, Gdx.graphics.getHeight()/2-blockSprite.getHeight()/2);*/
     }
 
     public void update() {
@@ -281,6 +275,12 @@ public class Screen1 extends DefaultScreen {
                 {
 //                    paramGraphics.setColor(16711680);
 //                    paramGraphics.drawRect(this.item_mode * 12 + 23, 110, 10, 9);
+                    camera.update();
+                    shapeRenderer.setProjectionMatrix(camera.combined);
+                    shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+                    shapeRenderer.setColor(Color.RED);
+                    shapeRenderer.rect(0, 0, 300, 20); // TODO avoid hard code position, anchor point
+                    shapeRenderer.end();
                 }
                 else if (item_mode == 100)
                 {
@@ -289,7 +289,7 @@ public class Screen1 extends DefaultScreen {
             }
             if (pw_up == 2)
             {
-//                paramGraphics.drawImage(this.imgShadow, this.snow_x * 5, this.snow_y * 7 + 4, 0x2 | 0x1);
+                batch.draw(imgShadow, hero.getItem().position.x * 5*SGH_SCALE_RATIO, (hero.getItem().position.y * 7 + 4)*SGH_SCALE_RATIO);
 //                paramGraphics.drawImage(this.imgItem[this.wp], this.snow_x * 5, this.snow_y * 7 - this.snow_gap + 4, 0x2 | 0x1);
             }
             else if (this.pw_up == 1)
@@ -297,39 +297,39 @@ public class Screen1 extends DefaultScreen {
                 if ((real_snow_pw > 0) && (ppang_item != 1))
                 {
 //                    paramGraphics.setColor(7196662); // 6DCFF6 light_blue
-                    if (hero.position.x >= 13)
+                    if ((int)hero.position.x >= 13)
                     {
 //                        paramGraphics.fillRect(this.h_x * 5 - 16, 106 - this.real_snow_pw * 3, 3, this.real_snow_pw * 3);
-//                        paramGraphics.drawImage(this.imgPwd, this.h_x * 5 - 15, 83, 0x10 | 0x1);
+                        batch.draw(imgPwd, (hero.position.x * 5 - 15)*SGH_SCALE_RATIO, 83/160*SCREEN_HEIGHT);
                     }
                     else
                     {
 //                        paramGraphics.fillRect(this.h_x * 5 + 14, 106 - this.real_snow_pw * 3, 3, this.real_snow_pw * 3);
-//                        paramGraphics.drawImage(this.imgPwd, this.h_x * 5 + 15, 83, 0x10 | 0x1);
+                        batch.draw(imgPwd, (hero.position.x * + 15)*SGH_SCALE_RATIO, 83/160*SCREEN_HEIGHT);
                     }
                 }
             }
-            else if (this.pw_up == 0)
+            else if (pw_up == 0)
             {
-                if (this.ppang <= -1)
+                if (ppang <= -1)
                 {
-//                    paramGraphics.drawImage(this.imgPok, this.snow_x * 5, this.snow_y * 7 - 3, 0x2 | 0x1);
-                    this.ppang -= 1;
-                    if (this.ppang == -3) {
-                        this.ppang = 0;
+                    batch.draw(imgPok, hero.getItem().position.x* 5* SGH_SCALE_RATIO, (hero.getItem().position.y * 7 - 3)*SGH_SCALE_RATIO);
+                    ppang -= 1;
+                    if (ppang == -3) {
+                        ppang = 0;
                     }
                 }
-                else if ((this.ppang >= 1) && (this.ppang <= 10))
+                else if ((ppang >= 1) && (ppang <= 10))
                 {
-                    if (this.s_item != -10)
+                    if (s_item != -10)
                     {
-                        if (this.ppang < 3) {
-//                            paramGraphics.drawImage(this.imgPPang, this.snow_x * 5, this.snow_y * 7 - 6, 0x2 | 0x1);
+                        if (ppang < 3) {
+                            batch.draw(imgPPang, hero.getItem().position.x * 5*SGH_SCALE_RATIO, (hero.getItem().position.y * 7 - 6)*SGH_SCALE_RATIO );
                         } else {
-//                            paramGraphics.drawImage(this.imgPPang1, this.snow_x * 5, this.snow_y * 7 - 6, 0x2 | 0x1);
+                            batch.draw(imgPPang1, hero.getItem().position.x * 5* SGH_SCALE_RATIO, (hero.getItem().position.y * 7 - 6)*SGH_SCALE_RATIO );
                         }
                     }
-                    else if (this.ppang < 4) {
+                    else if (ppang < 4) {
 //                        paramGraphics.drawImage(this.imgEffect[0], this.snow_x * 5, this.snow_y * 7 - 2, 0x2 | 0x1);
                     } else {
 //                        paramGraphics.drawImage(this.imgEffect[1], this.snow_x * 5, this.snow_y * 7 - 2, 0x2 | 0x1);
@@ -340,8 +340,10 @@ public class Screen1 extends DefaultScreen {
                         {
 //                            paramGraphics.setColor(16711680); // FFFFFF
 //                            paramGraphics.fillRect(this.e_x[this.hit_idx] * 5 + 8, this.e_y[this.hit_idx] * 5 + 5, 3, 15);
+
 //                            paramGraphics.setColor(9672090);
 //                            paramGraphics.fillRect(this.e_x[this.hit_idx] * 5 + 8, this.e_y[this.hit_idx] * 5 + 5, 3, 15 - 15 * this.e_hp[this.hit_idx] / this.max_e_hp[this.hit_idx]);
+
                         }
                     }
                     else if (hit_idx == 10)
@@ -352,12 +354,12 @@ public class Screen1 extends DefaultScreen {
 //                            paramGraphics.fillRect(this.e_boss_x * 5 + 12, this.e_boss_y * 5 + 5, 3, 15);
                             // draw boss hp bar
 //                            http://libgdx.badlogicgames.com/nightlies/docs/api/com/badlogic/gdx/graphics/glutils/ShapeRenderer.html
-//                            batch.draw(boss.getBobTexture(), (boss.position.x* 5 + 12)*SGH_SCALE_RATIO, (boss.position.y* 5 + 5)*SGH_SCALE_RATIO, 3*SGH_SCALE_RATIO, 15*SGH_SCALE_RATIO);
+                            batch.draw(boss.getBobTexture(), (boss.position.x* 5 + 12)*SGH_SCALE_RATIO, (boss.position.y* 5 + 5)*SGH_SCALE_RATIO, 3*SGH_SCALE_RATIO, 15*SGH_SCALE_RATIO);
 //                            paramGraphics.setColor(9672090); // 0093959A gray
 //                            paramGraphics.fillRect(this.e_boss_x * 5 + 12, this.e_boss_y * 5 + 5, 3, 15 - 15 * this.e_boss_hp / this.max_e_boss_hp);
                         }
                         if (al == 1) {
-//                            paramGraphics.drawImage(this.imgAl, this.snow_x * 5 + 6, this.snow_y * 7 - 10, 0x2 | 0x1);
+                            batch.draw(imgAl, (hero.getItem().position.x * 5 + 6)*SGH_SCALE_RATIO, (hero.getItem().position.y * 7 - 10)*SGH_SCALE_RATIO);
                         }
                     }
                     ppang += 1;
@@ -384,7 +386,7 @@ public class Screen1 extends DefaultScreen {
             {
                 try
                 {
-//                    paramGraphics.drawImage(Image.createImage("/ui.png"), 0, 109, 20);
+                    batch.draw(ui, 0, (109/160)*SCREEN_HEIGHT);
                 }
                 catch (Exception localException1) {}
 //                draw_item(paramGraphics);
@@ -673,19 +675,24 @@ public class Screen1 extends DefaultScreen {
         imgShop = new Texture("data/samsung-white/shop0.png");
         //    private Texture [] imgSpecial;
         imgSp = new Texture("data/samsung-white/sp1.png");
-        //    private Texture [] imgEffect;
+        // TODO use texture region
+        imgEffect = new Texture[2];
+        imgEffect[0] = new Texture("data/samsung-white/effect0.png");
+        imgEffect[0] = new Texture("data/samsung-white/effect1.png");
+
         imgVictory = new Texture("data/samsung-white/victory.png");
         imgV = new Texture("data/samsung-white/v.png");
         imgHero_v = new Texture("data/samsung-white/hero-vic.png");
         imgLose = new Texture("data/samsung-white/lose.png");
         imgHero_l = new Texture("data/samsung-white/hero-lose.png");
         imgStage_num = new Texture("data/samsung-white/word-1.png");
+        ui = new Texture("data/samsung-white/ui.png");
         //    private Texture [] imgStage;
 
     }
 
     public void generalUpdate() {
-        enermyMoving();
+        enemyMoving();
         updateEnemyBound();
     }
 
@@ -750,7 +757,8 @@ public class Screen1 extends DefaultScreen {
     }
 
     protected void initBobItem() {
-        Vector2 facing = new Vector2(hero.position.x, Gdx.graphics.getHeight()*4/5);
+        // TODO we do not need facing so may be remove it
+        Vector2 facing = new Vector2(hero.position.x, SCREEN_HEIGHT*4/5/CELL_WIDTH);
         Item item = new Item(0, hero.position, facing);
         item.setTexture(new Texture("data/samsung-white/item3_0_36x.png"));
         hero.setItem(item);
@@ -869,7 +877,7 @@ public class Screen1 extends DefaultScreen {
     /*
     * Try use original e_move() from J2ME.
     * */
-    protected void enermyMoving() {
+    protected void enemyMoving() {
         int rightBoundEnemy = (int)(SCREEN_WIDTH - enemies[0].getBobTexture().getWidth())/CELL_WIDTH;
         int rightBoundBoss = (int)((SCREEN_WIDTH - boss.getBobTexture().getWidth())/CELL_WIDTH);
 
@@ -889,8 +897,6 @@ public class Screen1 extends DefaultScreen {
 
     protected void drawTouchPad() {
         camera.update();
-
-        //blockSprite.setX(blockSprite.getX() + touchpad.getKnobPercentX()*blockSpeed);
 
         handleHeroMoveBound();
         updateHeroBullet();
@@ -917,12 +923,12 @@ public class Screen1 extends DefaultScreen {
             // When zoom in/out ... the extract position may be difference. So the pointer pos after unproject may be reset to 0
 
             // camera.unproject(touchPos);
-            Rectangle textureBounds=new Rectangle(SCREEN_WIDTH-fireBtnTexture.getWidth()-50, Gdx.graphics.getHeight()-50-fireBtnTexture.getHeight(), fireBtnTexture.getWidth(),fireBtnTexture.getHeight());
+            Rectangle textureBounds=new Rectangle(SCREEN_WIDTH-fireBtnTexture.getWidth()-50, SCREEN_HEIGHT-50-fireBtnTexture.getHeight(), fireBtnTexture.getWidth(),fireBtnTexture.getHeight());
 
             Item bobItem = hero.getItem();
             if(textureBounds.contains(touchPos.x, touchPos.y) && (heroFireState == false))
             {
-                if(bobItem.position.y <= Gdx.graphics.getHeight()*4/5) {
+                if(bobItem.position.y <= SCREEN_HEIGHT*4/5/CELL_WIDTH) {
                     heroFireState = true;
                 } else {
                     bobItem.position.y = hero.position.y;
@@ -931,9 +937,9 @@ public class Screen1 extends DefaultScreen {
             if(heroFireState) {
                 bobItem.setVelocity(new Vector2(0, 12));
                 bobItem.velocity.scl(2);
-                if(bobItem.position.y <= Gdx.graphics.getHeight()*4/5) {
-                    bobItem.position.add(bobItem.velocity.x * bobItem.getDelta(), bobItem.velocity.y * 2);
-                    bobItem.setBound(new Rectangle(hero.position.x, bobItem.position.y, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight()));
+                if(bobItem.position.y <= SCREEN_HEIGHT*4/5/CELL_WIDTH) {
+                    bobItem.position.add(bobItem.velocity.x * bobItem.getDelta()/CELL_WIDTH, bobItem.velocity.y * 2/CELL_WIDTH);
+                    bobItem.setBound(new Rectangle(hero.position.x*CELL_WIDTH, bobItem.position.y*CELL_WIDTH, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight()));
                     heroFire();
                     checkCollisionHeroToEnemy();
                 } else {
@@ -945,7 +951,7 @@ public class Screen1 extends DefaultScreen {
                 }
             }
             Gdx.app.log("INFO", "Snow "+ bobItem.getBound().toString()+ "huey "+ enemies[0].getBound().toString() + " dewey "+ enemies[1].getBound().toString() + " boss " + boss.getHp() + " screen ");
-            if(bobItem.position.y > Gdx.graphics.getHeight()*4/5) {
+            if(bobItem.position.y > SCREEN_HEIGHT*4/5) {
                 heroFireState = false;
                 bobItem.setPosition(hero.position.x, hero.position.y);
             }
@@ -954,7 +960,7 @@ public class Screen1 extends DefaultScreen {
 
     protected void heroFire() {
         Item bobItem = hero.getItem();
-        batch.draw(bobItem.getItemTexture(), hero.position.x+(hero.getBobTexture().getWidth()*2-10), bobItem.position.y+hero.getBobTexture().getHeight()/2, 0, 0, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight(), (float)1.3, (float)1.3, 0, 0, 0, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight(), false, false);
+        batch.draw(bobItem.getItemTexture(), hero.position.x*CELL_WIDTH+(hero.getBobTexture().getWidth()), bobItem.position.y*CELL_WIDTH+hero.getBobTexture().getHeight()/2, 0, 0, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight(), (float)1.3, (float)1.3, 0, 0, 0, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight(), false, false);
     }
 
     protected void handleHeroMoveBound() {
@@ -963,7 +969,7 @@ public class Screen1 extends DefaultScreen {
         float rightBound = (int)(SCREEN_WIDTH - bobTexture.getWidth())/CELL_WIDTH;
         // TODO use object instead of global var, handle screen size
         if(hero.position.x < leftBound) {
-            hero.position.x = SCREEN_WIDTH/2;
+            hero.position.x = 0;
         }
         if(hero.position.x > rightBound) {
             hero.position.x = rightBound;
@@ -983,6 +989,8 @@ public class Screen1 extends DefaultScreen {
         } else if(touchpad.getKnobPercentY() < 0) {
             game_action = GAME_ACTION_DOWN;
         }
+
+        keyPressed();
     }
 
     protected void checkCollisionHeroToEnemy() {
@@ -1125,7 +1133,8 @@ public class Screen1 extends DefaultScreen {
     *    key code = 51 game action = 10 KEY_3 (use item)
     *    key code = -7 game action = 0 RIGHT_MENU
     */
-    public void keyPressed(int paramInt) {
+    public void keyPressed() {
+        int paramInt = 0;
         int i;
         int j;
         if ((screen == 6) && (state == 1))
@@ -1134,7 +1143,7 @@ public class Screen1 extends DefaultScreen {
             {
                 if ((item_mode == 0) && (ppang_item != 2))
                 {
-                    if (hero.position.x != 2)
+                    if ((int)hero.position.x != 2)
                     {
                         hero.position.x -= 1;
                         if (hero.h_idx == 0) {
@@ -1157,7 +1166,7 @@ public class Screen1 extends DefaultScreen {
             {
                 if ((item_mode == 0) && (ppang_item != 2))
                 {
-                    if (hero.position.x != 23)
+                    if ((int)hero.position.x != 23)
                     {
                         hero.position.x += 1;
                         if (hero.h_idx == 0) {
@@ -1278,7 +1287,7 @@ public class Screen1 extends DefaultScreen {
                 }
                 else
                 {
-                    if (this.m_mode == 5)
+                    if (m_mode == 5)
                     {
 //                        SJ.destroyApp(true);
 //                        SJ.notifyDestroyed();
@@ -1355,7 +1364,7 @@ public class Screen1 extends DefaultScreen {
             }
 //            repaint();
         }
-        else if (this.screen == 3)
+        else if (screen == 3)
         {
             if (getGameAction(paramInt) == 1) // UP
             {
@@ -1611,6 +1620,7 @@ public class Screen1 extends DefaultScreen {
                 }
 //                destroyImage(2);
 //                loadImage(3);
+                // Vile screen, so do not need cell width ratio
                 hero.position.x = (57/120)*SCREEN_WIDTH;
                 hero.position.y = (46/160)*VIEW_PORT_HEIGHT; // TODO reverse top/down of geometry
                 m_mode = -1;
@@ -1639,8 +1649,8 @@ public class Screen1 extends DefaultScreen {
             m_mode = -1;
 //            destroyImage(2);
 //            loadImage(3);
-            hero.position.x = (57/120)*SCREEN_WIDTH/CELL_WIDTH;
-            hero.position.y = (46/120)*(Gdx.graphics.getHeight()*3/4)/CELL_WIDTH;
+            hero.position.x = (57/120)*SCREEN_WIDTH;
+            hero.position.y = (46/120)*(Gdx.graphics.getHeight()*3/4);
             saved_gold += gold;
             setSavedGold(saved_gold);
             setSavedMana(mana);
@@ -1683,8 +1693,7 @@ public class Screen1 extends DefaultScreen {
 
     public void run()
     {
-        for (;;)
-        {
+//        for (;;) {
             if (gameOn)
             {
                 if (screen == 6)
@@ -1941,7 +1950,7 @@ public class Screen1 extends DefaultScreen {
                 }
                 catch (Exception localException2) {}
             }
-        }
+//        } // for(;;) we call run() in render() or update() so do not need loop thread as J2ME does.
     }
 
     public int input_item(int paramInt) {
