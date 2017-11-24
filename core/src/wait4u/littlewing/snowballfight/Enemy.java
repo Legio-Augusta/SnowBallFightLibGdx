@@ -673,4 +673,52 @@ public class Enemy {
         }
     }
 
+    public void e_snow(int e_num, int e_boss, Enemy[] enemies, Boss boss, Hero hero)
+    {
+        for (int i = 0; i < e_num; i++) {
+            if ( enemies[i].e_behv != 100)
+            {
+                enemies[i].e_snow_y += 1;
+                enemies[i].e_snow_x += enemies[i].e_snow_dx;
+                if ((enemies[i].e_snow_gap < 10) && (enemies[i].e_snow_top == 1))
+                {
+                    enemies[i].e_snow_gap += 2;
+                    if (enemies[i].e_snow_gap == 10) {
+                        enemies[i].e_snow_top = 2;
+                    }
+                }
+                else
+                {
+                    enemies[i].e_snow_gap -= 1;
+                }
+                if (enemies[i].e_snow_y == 13) {
+                    hero.check_hero(enemies[i].e_snow_x, i);
+                } else if (enemies[i].e_snow_y >= 16) {
+                    enemies[i].e_behv = 100;
+                }
+            }
+        }
+        if ((e_boss > 0) && (boss.e_boss_behv != 100))
+        {
+            boss.e_boss_snow_y += 1;
+            boss.e_boss_snow_x += boss.e_boss_snow_dx;
+            if ((boss.e_boss_snow_gap < 10) && (boss.e_boss_snow_top == 1))
+            {
+                boss.e_boss_snow_gap += 2;
+                if (boss.e_boss_snow_gap == 10) {
+                    boss.e_boss_snow_top = 2;
+                }
+            }
+            else
+            {
+                boss.e_boss_snow_gap -= 1;
+            }
+            if (boss.e_boss_snow_y == 13) {
+                hero.check_hero(boss.e_boss_snow_x, 100);
+            } else if (boss.e_boss_snow_y >= 16) {
+                boss.e_boss_behv = 100;
+            }
+        }
+    }
+
 }

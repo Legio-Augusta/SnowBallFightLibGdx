@@ -144,5 +144,8 @@ public class Hero {
     {
         return 0;
     }
+    public void check_hero(int paramInt1, int paramInt2) {
+
+    }
 
 }

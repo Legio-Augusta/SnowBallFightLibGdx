@@ -106,7 +106,7 @@ public class Screen1 extends DefaultScreen {
     private int pw_up;
     private int mana = 0;
     private int max_hp;
-    private int dem;
+    private int dem; // damage
     private int wp;
     private int snow_pw;
     private int real_snow_pw;
@@ -134,11 +134,11 @@ public class Screen1 extends DefaultScreen {
     private int e_t_num;
 
     private int e_time;
-    private int e_dem;
+    private int e_dem; // enemy damage
     private int hit_idx;
     private int e_boss;
     private int al;
-    private int d_gauge;
+    private int d_gauge; // gauge rule (power fire)
     private int game_action = 0;
     private static final int GAME_ACTION_OK = 8; // simulate KEY, gameAction in J2ME
     private static final int GAME_ACTION_LEFT = 2;
@@ -243,213 +243,7 @@ public class Screen1 extends DefaultScreen {
         int j;
         if (screen == 6)        // normal playing screen, TODO may be use constants name
         {
-            batch.draw(imgBack, 0, 0); // options|* button
-
-            batch.draw(hero.getBobTexture(), hero.position.x * 5 * SGH_SCALE_RATIO, (int)83/160*VIEW_PORT_HEIGHT , hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight());
-            if (ppang_time > 0)
-            {
-                if (ppang_item == 1) {
-//                    paramGraphics.drawImage(this.imgItem_hyo[0], this.h_x * 5, 74, 0x10 | 0x1);
-                } else {
-//                    paramGraphics.drawImage(this.imgItem_hyo[1], this.h_x * 5, 83, 0x10 | 0x1);
-                }
-                ppang_time -= 1;
-                if (ppang_time == 0) {
-                    ppang_item = 0;
-                }
-            }
-//            draw_enemy(paramGraphics);
-            if (item_mode != 0)
-            {
-                if (message != "") {
-                    draw_text();
-                }
-                for (int i = 1; i <= 5; i++) {
-//                    paramGraphics.drawRect(i * 12 + 23, 110, 10, 9);
-                }
-                if (item_mode != 100)
-                {
-//                    paramGraphics.setColor(16711680);
-//                    paramGraphics.drawRect(this.item_mode * 12 + 23, 110, 10, 9);
-                    camera.update();
-                    shapeRenderer.setProjectionMatrix(camera.combined);
-                    shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-                    shapeRenderer.setColor(Color.RED);
-                    shapeRenderer.rect(0, 0, 300, 20); // TODO avoid hard code position, anchor point
-                    shapeRenderer.end();
-                }
-                else if (item_mode == 100)
-                {
-                    item_mode = 0;
-                }
-            }
-            if (pw_up == 2)
-            {
-                batch.draw(imgShadow, hero.getItem().position.x * 5*SGH_SCALE_RATIO, (hero.getItem().position.y * 7 + 4)*SGH_SCALE_RATIO);
-//                paramGraphics.drawImage(this.imgItem[this.wp], this.snow_x * 5, this.snow_y * 7 - this.snow_gap + 4, 0x2 | 0x1);
-            }
-            else if (pw_up == 1)
-            {
-                if ((real_snow_pw > 0) && (ppang_item != 1))
-                {
-//                    paramGraphics.setColor(7196662); // 6DCFF6 light_blue
-                    if ((int)hero.position.x >= 13)
-                    {
-//                        paramGraphics.fillRect(this.h_x * 5 - 16, 106 - this.real_snow_pw * 3, 3, this.real_snow_pw * 3);
-                        batch.draw(imgPwd, (hero.position.x * 5 - 15)*SGH_SCALE_RATIO, 83/160*SCREEN_HEIGHT);
-                    }
-                    else
-                    {
-//                        paramGraphics.fillRect(this.h_x * 5 + 14, 106 - this.real_snow_pw * 3, 3, this.real_snow_pw * 3);
-                        batch.draw(imgPwd, (hero.position.x * + 15)*SGH_SCALE_RATIO, 83/160*SCREEN_HEIGHT);
-                    }
-                }
-            }
-            else if (pw_up == 0)
-            {
-                if (ppang <= -1)
-                {
-                    batch.draw(imgPok, hero.getItem().position.x* 5* SGH_SCALE_RATIO, (hero.getItem().position.y * 7 - 3)*SGH_SCALE_RATIO);
-                    ppang -= 1;
-                    if (ppang == -3) {
-                        ppang = 0;
-                    }
-                }
-                else if ((ppang >= 1) && (ppang <= 10))
-                {
-                    if (s_item != -10)
-                    {
-                        if (ppang < 3) {
-                            batch.draw(imgPPang, hero.getItem().position.x * 5*SGH_SCALE_RATIO, (hero.getItem().position.y * 7 - 6)*SGH_SCALE_RATIO );
-                        } else {
-                            batch.draw(imgPPang1, hero.getItem().position.x * 5* SGH_SCALE_RATIO, (hero.getItem().position.y * 7 - 6)*SGH_SCALE_RATIO );
-                        }
-                    }
-                    else if (ppang < 4) {
-//                        paramGraphics.drawImage(this.imgEffect[0], this.snow_x * 5, this.snow_y * 7 - 2, 0x2 | 0x1);
-                    } else {
-//                        paramGraphics.drawImage(this.imgEffect[1], this.snow_x * 5, this.snow_y * 7 - 2, 0x2 | 0x1);
-                    }
-                    if (this.hit_idx != 10)
-                    {
-                        if (enemies[hit_idx].getHp() > 0)
-                        {
-//                            paramGraphics.setColor(16711680); // FFFFFF
-//                            paramGraphics.fillRect(this.e_x[this.hit_idx] * 5 + 8, this.e_y[this.hit_idx] * 5 + 5, 3, 15);
-
-//                            paramGraphics.setColor(9672090);
-//                            paramGraphics.fillRect(this.e_x[this.hit_idx] * 5 + 8, this.e_y[this.hit_idx] * 5 + 5, 3, 15 - 15 * this.e_hp[this.hit_idx] / this.max_e_hp[this.hit_idx]);
-
-                        }
-                    }
-                    else if (hit_idx == 10)
-                    {
-                        if (boss.getHp() > 0)
-                        {
-//                            paramGraphics.setColor(16711680); // FFFFFF
-//                            paramGraphics.fillRect(this.e_boss_x * 5 + 12, this.e_boss_y * 5 + 5, 3, 15);
-                            // draw boss hp bar
-//                            http://libgdx.badlogicgames.com/nightlies/docs/api/com/badlogic/gdx/graphics/glutils/ShapeRenderer.html
-                            batch.draw(boss.getBobTexture(), (boss.position.x* 5 + 12)*SGH_SCALE_RATIO, (boss.position.y* 5 + 5)*SGH_SCALE_RATIO, 3*SGH_SCALE_RATIO, 15*SGH_SCALE_RATIO);
-//                            paramGraphics.setColor(9672090); // 0093959A gray
-//                            paramGraphics.fillRect(this.e_boss_x * 5 + 12, this.e_boss_y * 5 + 5, 3, 15 - 15 * this.e_boss_hp / this.max_e_boss_hp);
-                        }
-                        if (al == 1) {
-                            batch.draw(imgAl, (hero.getItem().position.x * 5 + 6)*SGH_SCALE_RATIO, (hero.getItem().position.y * 7 - 10)*SGH_SCALE_RATIO);
-                        }
-                    }
-                    ppang += 1;
-                    if (ppang == 6)
-                    {
-                        ppang = 0;
-                        s_item = 0;
-                        al = -1;
-                    }
-                }
-                else if (ppang >= 50)
-                {
-//                    draw_sp_hyo(paramGraphics);
-                }
-                if (message != "") {
-                    draw_text();
-                }
-            }
-            else if (pw_up == -1)
-            {
-                pw_up = 0;
-            }
-            if (p_mode == 1)
-            {
-                try
-                {
-                    batch.draw(ui, 0, (109/160)*SCREEN_HEIGHT);
-                }
-                catch (Exception localException1) {}
-//                draw_item(paramGraphics);
-                p_mode = 2;
-            }
-            if (this.d_gauge != 0) {
-//                draw_gauge();
-            }
-            for (j = 0; j < e_num; j++) { // or count array elements enemies
-                if (enemies[j].e_behv != 100)
-                {
-//                    paramGraphics.drawImage(this.imgShadow, this.e_snow_x[j], this.e_snow_y[j] * 6 + 17, 0x2 | 0x1);
-//                    paramGraphics.drawImage(this.imgItem[this.e_wp[j]], this.e_snow_x[j], this.e_snow_y[j] * 6 + 13 - this.e_snow_gap[j], 0x2 | 0x1);
-                }
-            }
-            if ((boss.e_boss_behv != 100) && (e_boss > 0))
-            {
-//                paramGraphics.drawImage(this.imgShadow, this.e_boss_snow_x, this.e_boss_snow_y * 6 + 17, 0x2 | 0x1);
-//                paramGraphics.drawImage(this.imgItem[this.e_boss_wp], this.e_boss_snow_x, this.e_boss_snow_y * 6 + 13 - this.e_boss_snow_gap, 0x2 | 0x1);
-            }
-            if (del != -1) {
-//                draw_item();
-            }
-            if (hero.h_timer_p <= -1) {
-                if (hero.h_timer_p != -5)
-                {
-//                    paramGraphics.drawImage(this.imgH_ppang, this.h_x * 5 + 1, 81, 0x2 | 0x1);
-                    hero.h_timer_p -= 1;
-                }
-                else if (hero.h_timer_p == -5)
-                {
-                    hero.h_timer_p = 0;
-//                    paramGraphics.setColor(16711680);    // FFFFFF
-//                    paramGraphics.fillRect(5, 113, 9, 12);
-//                    paramGraphics.setColor(9342606); // 8E8E8E
-                    if (hero.getHp() > 0) {
-//                        paramGraphics.fillRect(5, 113, 9, 12 - 12 * this.hp / this.max_hp);
-                    }
-                    if (hero.getHp() <= 0)
-                    {
-                        state = 3;
-                        game_state = 1;
-                        gameOn = true;
-                    }
-                }
-            }
-            if (state == 2)
-            {
-                if (ani_step >= 3) {
-//                    paramGraphics.drawImage(imgStage[0], 20, 60, 20);
-                }
-                if (ani_step >= 6) {
-//                    paramGraphics.drawImage(imgStage[1], 35, 60, 20);
-                }
-                if (ani_step >= 9) {
-//                    paramGraphics.drawImage(imgStage[2], 50, 60, 20);
-                }
-                if (ani_step >= 12) {
-//                    paramGraphics.drawImage(imgStage[3], 65, 60, 20);
-                }
-                if (ani_step >= 15) {
-//                    paramGraphics.drawImage(imgStage[4], 80, 60, 20);
-                }
-                if (ani_step >= 19) {
-//                    paramGraphics.drawImage(imgStage_num, 95, 60, 20);
-                }
-            }
+            drawRunningScreen(batch);
         }
         else if (screen == 2)
         {
@@ -477,62 +271,7 @@ public class Screen1 extends DefaultScreen {
         }
         else if (screen == 9)
         {
-            if ((ani_step == 1) || (ani_step == 46))
-            {
-                if (ani_step == 46)
-                {
-//                    destroyImage(9);
-//                    loadImage(100);
-                    pw_up = -1;
-//                    paramGraphics.drawImage(imgBack, 0, 0, 20);
-                    screen = 6;
-                    ppang = 50;
-                    for (j = 0; j < e_num; j++)
-                    {
-                        enemies[j].e_move_dir = 0;
-//                        decs_e_hp(j);
-                    }
-                    if (e_boss > 0)
-                    {
-                        boss.e_boss_move_dir = 0;
-//                        decs_e_hp(10);
-                    }
-                    dem = 12;
-                    mana = 0;
-                }
-//                paramGraphics.setColor(16777215);
-//                paramGraphics.fillRect(0, 25, 128, 84);
-                for (j = 0; j < e_num; j++)
-                {
-                    if (enemies[j].position.x != -10) {
-                        batch.draw(enemies[j].getBobTexture(), enemies[j].position.x * 5*SGH_SCALE_RATIO, (enemies[j].position.y * 5 + 5)*SGH_SCALE_RATIO, enemies[j].getBobTexture().getWidth(), enemies[j].getBobTexture().getHeight());
-                    }
-                    if (enemies[j].e_behv != 100)
-                    {
-//                        paramGraphics.drawImage(imgShadow, e_snow_x[j], e_snow_y[j] * 6 + 17, 0x2 | 0x1);
-//                        paramGraphics.drawImage(imgItem[e_wp[j]], e_snow_x[j], e_snow_y[j] * 6 + 13 - e_snow_gap[j], 0x2 | 0x1);
-                    }
-                }
-                if (e_boss > 0) {
-//                    paramGraphics.drawImage(imgBoss[e_boss_idx], e_boss_x * 5, e_boss_y * 5, 0x10 | 0x1);
-                }
-            }
-            if (this.special == 1)
-            {
-                if (ani_step <= 45) {
-//                    paramGraphics.drawImage(imgSp, 158 - ani_step * 3, 0, 20);
-                }
-            }
-            else if (special == 2)
-            {
-                if (ani_step <= 45) {
-//                    paramGraphics.drawImage(imgSp, 158 - ani_step * 3, 0, 20);
-                }
-            }
-            else if ((special == 3) && (ani_step <= 45)) {
-//                paramGraphics.drawImage(imgSp, 168 - ani_step * 3, 30, 20);
-            }
-            batch.draw(hero.getBobTexture(), hero.position.x * 5 * SGH_SCALE_RATIO, (int)(83/160)*VIEW_PORT_HEIGHT+BOTTOM_SPACE, hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight());
+            drawSpecialScreen(batch);
         }
         else if (screen == 4)
         {
@@ -585,53 +324,8 @@ public class Screen1 extends DefaultScreen {
 
 //        batch.setProjectionMatrix(camera.combined);
 
-        for (int i = 0; i < e_num; i++)
-        {
-            if (enemies[i].getHp() >= 0)
-            {
-                if ((e_time == enemies[i].e_fire_time) && (boss.get_random(3) != 1) && (enemies[i].e_ppang_item != 2)) {
-                    enemies[i].e_attack_ai(hero, boss, enemies, i);
-                }
-                if (enemies[i].e_ppang_item != 2) {
-                    if (enemies[i].e_idx == 0) {
-                        enemies[i].e_idx = 1;
-                    } else if (enemies[i].e_idx == 1) {
-                        enemies[i].e_idx = 0;
-                    }
-                }
-            }
-            if (enemies[i].e_move_dir >= 100)
-            {
-                enemies[i].e_move_dir += 1;
-                if (enemies[i].e_move_dir == 120) {
-                    enemies[i].e_move_dir = 0;
-                }
-            }
-            else if ((enemies[i].e_move_dir == 0) && (enemies[i].getHp() > 0) && (enemies[i].e_ppang_item != 2))
-            {
-                enemies[i].e_move_ai(enemies, i);
-            }
-            else if ((enemies[i].e_move_dir < 100) && (enemies[i].e_move_dir != 0) && (enemies[i].getHp() > 0))
-            {
-                enemies[i].e_move(enemies, i);
-            }
-        } // End enemy attack n move ai
-
-        if (boss.e_boss_move_dir >= 100)
-        {
-            boss.e_boss_move_dir += 1;
-            if (boss.e_boss_move_dir == 115) {
-                boss.e_boss_move_dir = 0;
-            }
-        }
-        else if ((boss.e_boss_move_dir == 0) && (!boss.isDead()))
-        {
-            boss.boss_move_ai();
-        }
-        else if ((boss.e_boss_move_dir != 0) && (!boss.isDead()))
-        {
-            boss.boss_move();
-        }
+        state = 1;
+        run();
 
         batch.end();
 
@@ -699,7 +393,7 @@ public class Screen1 extends DefaultScreen {
 
     @Override
     public void pause() {
-
+        // TODO save game state
     }
 
     @Override
@@ -750,6 +444,41 @@ public class Screen1 extends DefaultScreen {
             enemies[i].setBobTexture("data/samsung-white/enemy0_0_106x.png");
             enemies[i].setBound(new Rectangle(enemies[i].position.x*CELL_WIDTH, enemies[i].position.y*CELL_WIDTH, enemies[i].getBobTexture().getWidth(), enemies[i].getBobTexture().getHeight()));
         }
+    }
+    public void init_game(int paramInt)
+    {
+        screen = 77;
+//        repaint();
+//        serviceRepaints();
+        game_state = 0;
+        p_mode = 1;
+        hero.position.x = 5;
+        hero.position.y = 8;
+        hero.h_idx = 0;
+        max_hp = 106;
+        hero.setHp(max_hp);
+        wp = 0;
+        pw_up = 0;
+        snow_pw = 0;
+        real_snow_pw = 0;
+        dem = 12;
+        ppang = 0;
+        al = -1;
+        ppang_time = 0;
+        ppang_item = 0;
+        make_enemy(paramInt);
+        d_gauge = 2;
+        screen = 6;
+        item_mode = 0;
+//        loadImage(6);
+//        loadImage(100);
+        if (e_boss > 0) {
+//            loadImage(7);
+        }
+        state = 2;
+        ani_step = 0;
+//        startThread();
+        gameOn = true;
     }
 
     protected void initBobItem() {
@@ -1798,6 +1527,57 @@ public class Screen1 extends DefaultScreen {
                                 boss.boss_move();
                             }
                         }
+
+                        /*
+                        for (int i = 0; i < e_num; i++)
+                        {
+                            if (enemies[i].getHp() >= 0)
+                            {
+                                if ((e_time == enemies[i].e_fire_time) && (boss.get_random(3) != 1) && (enemies[i].e_ppang_item != 2)) {
+                                    enemies[i].e_attack_ai(hero, boss, enemies, i);
+                                }
+                                if (enemies[i].e_ppang_item != 2) {
+                                    if (enemies[i].e_idx == 0) {
+                                        enemies[i].e_idx = 1;
+                                    } else if (enemies[i].e_idx == 1) {
+                                        enemies[i].e_idx = 0;
+                                    }
+                                }
+                            }
+                            if (enemies[i].e_move_dir >= 100)
+                            {
+                                enemies[i].e_move_dir += 1;
+                                if (enemies[i].e_move_dir == 120) {
+                                    enemies[i].e_move_dir = 0;
+                                }
+                            }
+                            else if ((enemies[i].e_move_dir == 0) && (enemies[i].getHp() > 0) && (enemies[i].e_ppang_item != 2))
+                            {
+                                enemies[i].e_move_ai(enemies, i);
+                            }
+                            else if ((enemies[i].e_move_dir < 100) && (enemies[i].e_move_dir != 0) && (enemies[i].getHp() > 0))
+                            {
+                                enemies[i].e_move(enemies, i);
+                            }
+                        } // End enemy attack n move ai
+
+                        if (boss.e_boss_move_dir >= 100)
+                        {
+                            boss.e_boss_move_dir += 1;
+                            if (boss.e_boss_move_dir == 115) {
+                                boss.e_boss_move_dir = 0;
+                            }
+                        }
+                        else if ((boss.e_boss_move_dir == 0) && (!boss.isDead()))
+                        {
+                            boss.boss_move_ai();
+                        }
+                        else if ((boss.e_boss_move_dir != 0) && (!boss.isDead()))
+                        {
+                            boss.boss_move();
+                        }
+                        */
+
                         if ((e_num == 3) || (e_num == 4))
                         {
                             if (e_time == 21) {
@@ -1807,7 +1587,7 @@ public class Screen1 extends DefaultScreen {
                         else if ((e_num == 2) && (e_time == 18)) {
                             e_time = 0;
                         }
-//                        e_snow();
+                        enemies[0].e_snow(e_num, e_boss, enemies, boss, hero);
                         if (gameOn)
                         {
 //                            repaint();
@@ -2042,5 +1822,435 @@ public class Screen1 extends DefaultScreen {
     public void setGameSpeed(int saved_gold) {
         getPrefs().putInteger(PREF_SPEED, saved_gold);
         getPrefs().flush();
+    }
+
+    public void drawRunningScreen(SpriteBatch batch) {
+        int j;
+        batch.draw(imgBack, 0, 0); // options|* button
+
+        batch.draw(hero.getBobTexture(), hero.position.x * 5 * SGH_SCALE_RATIO, (int)83/160*VIEW_PORT_HEIGHT , hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight());
+        if (ppang_time > 0)
+        {
+            if (ppang_item == 1) {
+//                    paramGraphics.drawImage(this.imgItem_hyo[0], this.h_x * 5, 74, 0x10 | 0x1);
+            } else {
+//                    paramGraphics.drawImage(this.imgItem_hyo[1], this.h_x * 5, 83, 0x10 | 0x1);
+            }
+            ppang_time -= 1;
+            if (ppang_time == 0) {
+                ppang_item = 0;
+            }
+        }
+//            draw_enemy(paramGraphics);
+        if (item_mode != 0)
+        {
+            if (message != "") {
+                draw_text();
+            }
+            for (int i = 1; i <= 5; i++) {
+//                    paramGraphics.drawRect(i * 12 + 23, 110, 10, 9);
+            }
+            if (item_mode != 100)
+            {
+//                    paramGraphics.setColor(16711680);
+//                    paramGraphics.drawRect(this.item_mode * 12 + 23, 110, 10, 9);
+                camera.update();
+                shapeRenderer.setProjectionMatrix(camera.combined);
+                shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+                shapeRenderer.setColor(Color.RED);
+                shapeRenderer.rect(0, 0, 300, 20); // TODO avoid hard code position, anchor point
+                shapeRenderer.end();
+            }
+            else if (item_mode == 100)
+            {
+                item_mode = 0;
+            }
+        }
+        if (pw_up == 2)
+        {
+            batch.draw(imgShadow, hero.getItem().position.x * 5*SGH_SCALE_RATIO, (hero.getItem().position.y * 7 + 4)*SGH_SCALE_RATIO);
+//                paramGraphics.drawImage(this.imgItem[this.wp], this.snow_x * 5, this.snow_y * 7 - this.snow_gap + 4, 0x2 | 0x1);
+        }
+        else if (pw_up == 1)
+        {
+            if ((real_snow_pw > 0) && (ppang_item != 1))
+            {
+//                    paramGraphics.setColor(7196662); // 6DCFF6 light_blue
+                if ((int)hero.position.x >= 13)
+                {
+//                        paramGraphics.fillRect(this.h_x * 5 - 16, 106 - this.real_snow_pw * 3, 3, this.real_snow_pw * 3);
+                    batch.draw(imgPwd, (hero.position.x * 5 - 15)*SGH_SCALE_RATIO, 83/160*SCREEN_HEIGHT);
+                }
+                else
+                {
+//                        paramGraphics.fillRect(this.h_x * 5 + 14, 106 - this.real_snow_pw * 3, 3, this.real_snow_pw * 3);
+                    batch.draw(imgPwd, (hero.position.x * + 15)*SGH_SCALE_RATIO, 83/160*SCREEN_HEIGHT);
+                }
+            }
+        }
+        else if (pw_up == 0)
+        {
+            if (ppang <= -1)
+            {
+                batch.draw(imgPok, hero.getItem().position.x* 5* SGH_SCALE_RATIO, (hero.getItem().position.y * 7 - 3)*SGH_SCALE_RATIO);
+                ppang -= 1;
+                if (ppang == -3) {
+                    ppang = 0;
+                }
+            }
+            else if ((ppang >= 1) && (ppang <= 10))
+            {
+                if (s_item != -10)
+                {
+                    if (ppang < 3) {
+                        batch.draw(imgPPang, hero.getItem().position.x * 5*SGH_SCALE_RATIO, (hero.getItem().position.y * 7 - 6)*SGH_SCALE_RATIO );
+                    } else {
+                        batch.draw(imgPPang1, hero.getItem().position.x * 5* SGH_SCALE_RATIO, (hero.getItem().position.y * 7 - 6)*SGH_SCALE_RATIO );
+                    }
+                }
+                else if (ppang < 4) {
+//                        paramGraphics.drawImage(this.imgEffect[0], this.snow_x * 5, this.snow_y * 7 - 2, 0x2 | 0x1);
+                } else {
+//                        paramGraphics.drawImage(this.imgEffect[1], this.snow_x * 5, this.snow_y * 7 - 2, 0x2 | 0x1);
+                }
+                if (this.hit_idx != 10)
+                {
+                    if (enemies[hit_idx].getHp() > 0)
+                    {
+//                            paramGraphics.setColor(16711680); // FFFFFF
+//                            paramGraphics.fillRect(this.e_x[this.hit_idx] * 5 + 8, this.e_y[this.hit_idx] * 5 + 5, 3, 15);
+
+//                            paramGraphics.setColor(9672090);
+//                            paramGraphics.fillRect(this.e_x[this.hit_idx] * 5 + 8, this.e_y[this.hit_idx] * 5 + 5, 3, 15 - 15 * this.e_hp[this.hit_idx] / this.max_e_hp[this.hit_idx]);
+
+                    }
+                }
+                else if (hit_idx == 10)
+                {
+                    if (boss.getHp() > 0)
+                    {
+//                            paramGraphics.setColor(16711680); // FFFFFF
+//                            paramGraphics.fillRect(this.e_boss_x * 5 + 12, this.e_boss_y * 5 + 5, 3, 15);
+                        // draw boss hp bar
+//                            http://libgdx.badlogicgames.com/nightlies/docs/api/com/badlogic/gdx/graphics/glutils/ShapeRenderer.html
+                        batch.draw(boss.getBobTexture(), (boss.position.x* 5 + 12)*SGH_SCALE_RATIO, (boss.position.y* 5 + 5)*SGH_SCALE_RATIO, 3*SGH_SCALE_RATIO, 15*SGH_SCALE_RATIO);
+//                            paramGraphics.setColor(9672090); // 0093959A gray
+//                            paramGraphics.fillRect(this.e_boss_x * 5 + 12, this.e_boss_y * 5 + 5, 3, 15 - 15 * this.e_boss_hp / this.max_e_boss_hp);
+                    }
+                    if (al == 1) {
+                        batch.draw(imgAl, (hero.getItem().position.x * 5 + 6)*SGH_SCALE_RATIO, (hero.getItem().position.y * 7 - 10)*SGH_SCALE_RATIO);
+                    }
+                }
+                ppang += 1;
+                if (ppang == 6)
+                {
+                    ppang = 0;
+                    s_item = 0;
+                    al = -1;
+                }
+            }
+            else if (ppang >= 50)
+            {
+//                    draw_sp_hyo(paramGraphics);
+            }
+            if (message != "") {
+                draw_text();
+            }
+        }
+        else if (pw_up == -1)
+        {
+            pw_up = 0;
+        }
+        if (p_mode == 1)
+        {
+            try
+            {
+                batch.draw(ui, 0, (109/160)*SCREEN_HEIGHT);
+            }
+            catch (Exception localException1) {}
+//                draw_item(paramGraphics);
+            p_mode = 2;
+        }
+        if (this.d_gauge != 0) {
+//                draw_gauge();
+        }
+        for (j = 0; j < e_num; j++) { // or count array elements enemies
+            if (enemies[j].e_behv != 100)
+            {
+//                    paramGraphics.drawImage(this.imgShadow, this.e_snow_x[j], this.e_snow_y[j] * 6 + 17, 0x2 | 0x1);
+//                    paramGraphics.drawImage(this.imgItem[this.e_wp[j]], this.e_snow_x[j], this.e_snow_y[j] * 6 + 13 - this.e_snow_gap[j], 0x2 | 0x1);
+            }
+        }
+        if ((boss.e_boss_behv != 100) && (e_boss > 0))
+        {
+//                paramGraphics.drawImage(this.imgShadow, this.e_boss_snow_x, this.e_boss_snow_y * 6 + 17, 0x2 | 0x1);
+//                paramGraphics.drawImage(this.imgItem[this.e_boss_wp], this.e_boss_snow_x, this.e_boss_snow_y * 6 + 13 - this.e_boss_snow_gap, 0x2 | 0x1);
+        }
+        if (del != -1) {
+//                draw_item();
+        }
+        if (hero.h_timer_p <= -1) {
+            if (hero.h_timer_p != -5)
+            {
+//                    paramGraphics.drawImage(this.imgH_ppang, this.h_x * 5 + 1, 81, 0x2 | 0x1);
+                hero.h_timer_p -= 1;
+            }
+            else if (hero.h_timer_p == -5)
+            {
+                hero.h_timer_p = 0;
+//                    paramGraphics.setColor(16711680);    // FFFFFF
+//                    paramGraphics.fillRect(5, 113, 9, 12);
+//                    paramGraphics.setColor(9342606); // 8E8E8E
+                if (hero.getHp() > 0) {
+//                        paramGraphics.fillRect(5, 113, 9, 12 - 12 * this.hp / this.max_hp);
+                }
+                if (hero.getHp() <= 0)
+                {
+                    state = 3;
+                    game_state = 1;
+                    gameOn = true;
+                }
+            }
+        }
+        if (state == 2)
+        {
+            if (ani_step >= 3) {
+//                    paramGraphics.drawImage(imgStage[0], 20, 60, 20);
+            }
+            if (ani_step >= 6) {
+//                    paramGraphics.drawImage(imgStage[1], 35, 60, 20);
+            }
+            if (ani_step >= 9) {
+//                    paramGraphics.drawImage(imgStage[2], 50, 60, 20);
+            }
+            if (ani_step >= 12) {
+//                    paramGraphics.drawImage(imgStage[3], 65, 60, 20);
+            }
+            if (ani_step >= 15) {
+//                    paramGraphics.drawImage(imgStage[4], 80, 60, 20);
+            }
+            if (ani_step >= 19) {
+//                    paramGraphics.drawImage(imgStage_num, 95, 60, 20);
+            }
+        }
+    }
+
+    public void drawSpecialScreen(SpriteBatch batch) {
+        int j;
+        if ((ani_step == 1) || (ani_step == 46))
+        {
+            if (ani_step == 46)
+            {
+//                    destroyImage(9);
+//                    loadImage(100);
+                pw_up = -1;
+//                    paramGraphics.drawImage(imgBack, 0, 0, 20);
+                screen = 6;
+                ppang = 50;
+                for (j = 0; j < e_num; j++)
+                {
+                    enemies[j].e_move_dir = 0;
+//                        decs_e_hp(j);
+                }
+                if (e_boss > 0)
+                {
+                    boss.e_boss_move_dir = 0;
+//                        decs_e_hp(10);
+                }
+                dem = 12;
+                mana = 0;
+            }
+//                paramGraphics.setColor(16777215);
+//                paramGraphics.fillRect(0, 25, 128, 84);
+            for (j = 0; j < e_num; j++)
+            {
+                if (enemies[j].position.x != -10) {
+                    batch.draw(enemies[j].getBobTexture(), enemies[j].position.x * 5*SGH_SCALE_RATIO, (enemies[j].position.y * 5 + 5)*SGH_SCALE_RATIO, enemies[j].getBobTexture().getWidth(), enemies[j].getBobTexture().getHeight());
+                }
+                if (enemies[j].e_behv != 100)
+                {
+//                        paramGraphics.drawImage(imgShadow, e_snow_x[j], e_snow_y[j] * 6 + 17, 0x2 | 0x1);
+//                        paramGraphics.drawImage(imgItem[e_wp[j]], e_snow_x[j], e_snow_y[j] * 6 + 13 - e_snow_gap[j], 0x2 | 0x1);
+                }
+            }
+            if (e_boss > 0) {
+//                    paramGraphics.drawImage(imgBoss[e_boss_idx], e_boss_x * 5, e_boss_y * 5, 0x10 | 0x1);
+            }
+        }
+        if (this.special == 1)
+        {
+            if (ani_step <= 45) {
+//                    paramGraphics.drawImage(imgSp, 158 - ani_step * 3, 0, 20);
+            }
+        }
+        else if (special == 2)
+        {
+            if (ani_step <= 45) {
+//                    paramGraphics.drawImage(imgSp, 158 - ani_step * 3, 0, 20);
+            }
+        }
+        else if ((special == 3) && (ani_step <= 45)) {
+//                paramGraphics.drawImage(imgSp, 168 - ani_step * 3, 30, 20);
+        }
+        batch.draw(hero.getBobTexture(), hero.position.x * 5 * SGH_SCALE_RATIO, (int)(83/160)*VIEW_PORT_HEIGHT+BOTTOM_SPACE, hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight());
+    }
+
+    public void make_e_num(int paramInt1, int paramInt2)
+    {
+        if (paramInt2 == 1)
+        {
+            if (paramInt1 == 1)
+            {
+                this.e_boss = 0;
+                this.e_num = 2;
+            }
+            else if (paramInt1 == 2)
+            {
+                this.e_boss = 0;
+                this.e_num = 2;
+            }
+            else if (paramInt1 == 3)
+            {
+                this.e_boss = 1;
+                this.e_num = 2;
+            }
+            else if (paramInt1 == 4)
+            {
+                this.e_boss = 3;
+                this.e_num = 2;
+            }
+        }
+        else if (paramInt2 == 2)
+        {
+            if (paramInt1 == 1)
+            {
+                this.e_boss = 0;
+                this.e_num = 2;
+            }
+            else if (paramInt1 == 2)
+            {
+                this.e_boss = 0;
+                this.e_num = 3;
+            }
+            else if (paramInt1 == 3)
+            {
+                this.e_boss = 2;
+                this.e_num = 2;
+            }
+            else if (paramInt1 == 4)
+            {
+                this.e_boss = 3;
+                this.e_num = 3;
+            }
+        }
+        else if (paramInt2 == 3)
+        {
+            if (paramInt1 == 1)
+            {
+                this.e_boss = 0;
+                this.e_num = 3;
+            }
+            else if (paramInt1 == 2)
+            {
+                this.e_boss = 2;
+                this.e_num = 2;
+            }
+            else if (paramInt1 == 3)
+            {
+                this.e_boss = 0;
+                this.e_num = 4;
+            }
+            else if (paramInt1 == 4)
+            {
+                this.e_boss = 3;
+                this.e_num = 4;
+            }
+        }
+        else if (paramInt2 == 4) {
+            if (paramInt1 == 1)
+            {
+                this.e_boss = 1;
+                this.e_num = 3;
+            }
+            else if (paramInt1 == 2)
+            {
+                this.e_boss = 2;
+                this.e_num = 3;
+            }
+            else if (paramInt1 == 3)
+            {
+                this.e_boss = 3;
+                this.e_num = 4;
+            }
+            else if (paramInt1 == 4)
+            {
+                this.e_boss = 4;
+                this.e_num = 4;
+            }
+        }
+        this.e_t_num = this.e_num;
+        this.tmp_stage = paramInt1;
+    }
+
+    public void make_enemy(int paramInt)
+    {
+        if (paramInt < 0) {
+            make_e_num(boss.get_random(2) + 2, this.school);
+        } else {
+            make_e_num(this.last_stage % 10, this.school);
+        }
+
+        e_time = 0;
+        for (int i = 0; i < this.e_num; i++)
+        {
+            if ((this.school == 1) || (this.school == 2)) {
+                enemies[i].setHp(20 + this.school * 10);
+            } else if (this.school == 3) {
+                enemies[i].setHp(54);
+            } else if (this.school == 4) {
+                enemies[i].setHp(66);
+            }
+            enemies[i].max_e_hp = enemies[i].getHp();
+            enemies[i].e_snow_y = -10;
+            enemies[i].e_behv = 100;
+            enemies[i].e_wp = 0;
+        }
+        if (this.school < 3) {
+            this.e_dem = (this.school + 7);
+        } else if (this.school == 3) {
+            this.e_dem = (this.school + 9);
+        } else {
+            this.e_dem = 14;
+        }
+        enemies[0].position.x = (3 + boss.get_random(3));
+        enemies[0].position.y = (1 + boss.get_random(3));
+        enemies[0].e_lv = 3;
+        enemies[0].e_fire_time = 8;
+        enemies[1].position.x = (18 + boss.get_random(3));
+        enemies[1].position.y = (1 + boss.get_random(3));
+        enemies[1].e_lv = 3;
+        enemies[1].e_fire_time = 17;
+        if (this.e_t_num >= 3)
+        {
+            enemies[2].position.x = (13 + boss.get_random(3));
+            enemies[2].position.y = (3 + boss.get_random(2));
+            enemies[2].e_lv = 3;
+            enemies[2].e_fire_time = 20;
+        }
+        if (this.e_t_num == 4)
+        {
+            enemies[3].position.x = 8;
+            enemies[3].position.y = 5;
+            enemies[3].e_lv = 3;
+            enemies[3].e_fire_time = 4;
+        }
+        boss.e_boss_behv = 100;
+        boss.e_boss_snow_y = -10;
+        boss.position.x = 10;
+        boss.position.y = 6;
+        boss.e_boss_idx = 0;
+        boss.e_boss_hp = (this.e_boss * 10 + 30 + (this.school - 1) * 10);
+        boss.max_e_boss_hp = boss.e_boss_hp;
+        boss.e_boss_fire_time = 2;
     }
 }
