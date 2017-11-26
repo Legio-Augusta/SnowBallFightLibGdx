@@ -31,9 +31,9 @@ public class Screen1 extends DefaultScreen {
     OrthographicCamera camera;
     SpriteBatch batch;
     Texture ttrSplash;
+    Texture snowWhiteBg;
     Texture heroTexture;
     Texture fireBtnTexture;
-    Texture snowShadowTexture;
 
     float heroSpeed = 0.3f; // 1 cell step (screen width devided to about 24 cell).
 
@@ -130,13 +130,13 @@ public class Screen1 extends DefaultScreen {
     private int item_d_num;
     private int b_item;
     private int s_item;
-    private int e_num = 2; // set dafaut value for debug avoid eceed 2 item size
+    private int e_num = 2; // set dafaut value for debug avoid eceed 2 item size TODO init then remove this
     private int e_t_num;
 
     private int e_time;
     private int e_dem; // enemy damage
     private int hit_idx;
-    private int e_boss;
+    private int e_boss = 1; // TODO init this and remove debug. The flag (and/or number) of boss enemy
     private int al;
     private int d_gauge; // gauge rule (power fire)
     private int game_action = 0;
@@ -189,15 +189,14 @@ public class Screen1 extends DefaultScreen {
 
         camera = newOrthographicCamera(SCREEN_WIDTH, SCREEN_HEIGHT);
         // Calculate global var width/height, view port ...
-        initSpriteBatchAndHeroTexture();
-        initBobItem();
-        initEnemy();
-        loadTextures();
+        init_game(-1);
         create();
     }
 
     public void create () {
         batch = new SpriteBatch();
+        shapeRenderer = new ShapeRenderer();
+
         //Create camera
         float aspectRatio = (float) SCREEN_WIDTH / (float) SCREEN_HEIGHT;
         camera = new OrthographicCamera();
@@ -225,6 +224,8 @@ public class Screen1 extends DefaultScreen {
         touch_stage = new Stage(new StretchViewport(SCREEN_WIDTH, SCREEN_HEIGHT), batch);
         touch_stage.addActor(touchpad);
         Gdx.input.setInputProcessor(touch_stage);
+
+        loadTextures();
     }
 
     public void update() {
@@ -243,7 +244,7 @@ public class Screen1 extends DefaultScreen {
         int j;
         if (screen == 6)        // normal playing screen, TODO may be use constants name
         {
-            drawRunningScreen(batch);
+            drawRunningScreen();
         }
         else if (screen == 2)
         {
@@ -271,7 +272,7 @@ public class Screen1 extends DefaultScreen {
         }
         else if (screen == 9)
         {
-            drawSpecialScreen(batch);
+            drawSpecialScreen();
         }
         else if (screen == 4)
         {
@@ -447,6 +448,10 @@ public class Screen1 extends DefaultScreen {
     }
     public void init_game(int paramInt)
     {
+        initSpriteBatchAndHeroTexture();
+        initBobItem();
+        initEnemy();
+
         screen = 77;
 //        repaint();
 //        serviceRepaints();
@@ -493,6 +498,7 @@ public class Screen1 extends DefaultScreen {
     protected void initSpriteBatchAndHeroTexture () {
         batch = new SpriteBatch();
         ttrSplash = new Texture("data/samsung-white/menu_bg.png");
+        snowWhiteBg = new Texture("data/samsung-white/white_bg.png");
         heroTexture = new Texture("data/samsung-white/hero3_1_120x.png");
         hero = new Hero(new Sprite());
         hero.position.x = SCREEN_WIDTH/2/CELL_WIDTH;
@@ -506,7 +512,8 @@ public class Screen1 extends DefaultScreen {
     protected void drawSplashBatch() {
         batch.disableBlending();
         batch.begin();
-        batch.draw(ttrSplash, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+//        batch.draw(ttrSplash, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        batch.draw(snowWhiteBg, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
         batch.end();
     }
 
@@ -1135,7 +1142,7 @@ public class Screen1 extends DefaultScreen {
                     }
 //                    destroyImage(3);
                     message = "Loading";
-//                    init_game(k);
+                    init_game(k);
                 }
             }
             else if ((paramInt == 42) || (paramInt == -6))
@@ -1418,18 +1425,18 @@ public class Screen1 extends DefaultScreen {
 
     public void run()
     {
-//        for (;;) {
             if (gameOn)
             {
-                if (screen == 6)
+                if (screen == 6) // Game running screen
                 {
                     if (state == 1)
                     {
-                        try
+/*                        try
                         {
-                            Thread.sleep(game_speed);
+                            Thread.sleep(game_speed); // TODO use this for level and game speed control.
+                            // Or use gdx way to auto change speed based on device CPU power
                         }
-                        catch (Exception localException1) {}
+                        catch (Exception localException1) {}*/
                         if (pw_up == 1)
                         {
 //                            setPower();
@@ -1493,7 +1500,7 @@ public class Screen1 extends DefaultScreen {
                             {
                                 enemies[i].e_move(enemies, i);
                             }
-                        }
+                        } // End enemy attack n move ai
                         if (e_boss > 0)
                         {
                             if (boss.getHp() >= 0)
@@ -1527,56 +1534,6 @@ public class Screen1 extends DefaultScreen {
                                 boss.boss_move();
                             }
                         }
-
-                        /*
-                        for (int i = 0; i < e_num; i++)
-                        {
-                            if (enemies[i].getHp() >= 0)
-                            {
-                                if ((e_time == enemies[i].e_fire_time) && (boss.get_random(3) != 1) && (enemies[i].e_ppang_item != 2)) {
-                                    enemies[i].e_attack_ai(hero, boss, enemies, i);
-                                }
-                                if (enemies[i].e_ppang_item != 2) {
-                                    if (enemies[i].e_idx == 0) {
-                                        enemies[i].e_idx = 1;
-                                    } else if (enemies[i].e_idx == 1) {
-                                        enemies[i].e_idx = 0;
-                                    }
-                                }
-                            }
-                            if (enemies[i].e_move_dir >= 100)
-                            {
-                                enemies[i].e_move_dir += 1;
-                                if (enemies[i].e_move_dir == 120) {
-                                    enemies[i].e_move_dir = 0;
-                                }
-                            }
-                            else if ((enemies[i].e_move_dir == 0) && (enemies[i].getHp() > 0) && (enemies[i].e_ppang_item != 2))
-                            {
-                                enemies[i].e_move_ai(enemies, i);
-                            }
-                            else if ((enemies[i].e_move_dir < 100) && (enemies[i].e_move_dir != 0) && (enemies[i].getHp() > 0))
-                            {
-                                enemies[i].e_move(enemies, i);
-                            }
-                        } // End enemy attack n move ai
-
-                        if (boss.e_boss_move_dir >= 100)
-                        {
-                            boss.e_boss_move_dir += 1;
-                            if (boss.e_boss_move_dir == 115) {
-                                boss.e_boss_move_dir = 0;
-                            }
-                        }
-                        else if ((boss.e_boss_move_dir == 0) && (!boss.isDead()))
-                        {
-                            boss.boss_move_ai();
-                        }
-                        else if ((boss.e_boss_move_dir != 0) && (!boss.isDead()))
-                        {
-                            boss.boss_move();
-                        }
-                        */
 
                         if ((e_num == 3) || (e_num == 4))
                         {
@@ -1726,8 +1683,7 @@ public class Screen1 extends DefaultScreen {
                 }
                 catch (Exception localException2) {}
             }
-//        } // for(;;) we call run() in render() or update() so do not need loop thread as J2ME does.
-    }
+    } // End run()
 
     public int input_item(int paramInt) {
         for (int i = 0; i < 5; i++) {
@@ -1824,9 +1780,13 @@ public class Screen1 extends DefaultScreen {
         getPrefs().flush();
     }
 
-    public void drawRunningScreen(SpriteBatch batch) {
+    public void drawRunningScreen() {
         int j;
-        batch.draw(imgBack, 0, 0); // options|* button
+        batch.draw(imgBack, 0, VIEW_PORT_HEIGHT); // options|* button
+
+        // ShapeRenderer has drawback, so do not use it.
+        // TODO use TextureRegion to draw rectangle with color, pixel (mattdesl/lwjgl-basics)
+        batch.draw(snowWhiteBg, 0, VIEW_PORT_HEIGHT);
 
         batch.draw(hero.getBobTexture(), hero.position.x * 5 * SGH_SCALE_RATIO, (int)83/160*VIEW_PORT_HEIGHT , hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight());
         if (ppang_time > 0)
@@ -1841,7 +1801,8 @@ public class Screen1 extends DefaultScreen {
                 ppang_item = 0;
             }
         }
-//            draw_enemy(paramGraphics);
+//        draw_enemy();
+
         if (item_mode != 0)
         {
             if (message != "") {
@@ -2035,7 +1996,7 @@ public class Screen1 extends DefaultScreen {
         }
     }
 
-    public void drawSpecialScreen(SpriteBatch batch) {
+    public void drawSpecialScreen() {
         int j;
         if ((ani_step == 1) || (ani_step == 46))
         {
@@ -2194,7 +2155,7 @@ public class Screen1 extends DefaultScreen {
 
     public void make_enemy(int paramInt)
     {
-        if (paramInt < 0) {
+        if (paramInt < 0) { // new game ?
             make_e_num(boss.get_random(2) + 2, this.school);
         } else {
             make_e_num(this.last_stage % 10, this.school);
