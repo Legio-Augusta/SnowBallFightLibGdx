@@ -27,6 +27,7 @@ public class Item extends Sprite {
 	public Vector2 position = new Vector2();
 	public Vector2 velocity = new Vector2();
 	public Vector2 facing = new Vector2();
+	public int top_y = 0;
 	
 	public Vector2 collisionCenter = new Vector2();
 	public Array<Vector2> collisionPoints = new Array<Vector2>();

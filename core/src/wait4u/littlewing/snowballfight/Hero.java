@@ -21,6 +21,8 @@ public class Hero {
     public int h_idx;
     public int h_timer;
     public int h_timer_p;
+    public int snow_pw;
+    public int real_snow_pw;
 
     static final float SPEED = 2f; // unit per second
     static final float JUMP_VELOCITY = 1f;
@@ -34,8 +36,12 @@ public class Hero {
     public boolean  facingLeft = true;
 
     private int hp = 12; // 120
+    private int max_hp = 106;
     // TODO private e_move_dir
     public int e_move_dir = 1; // Default e_move_dir = 1 to avoid init() and/or e_move_ai() call in original J2ME.
+    public int snow_gap = 0;
+    public int pw_up = 0;
+
     private Texture bobTexture;
     private Sprite sprite;
     // snow or stone item used in firing
@@ -93,9 +99,18 @@ public class Hero {
     public int getHp() {
         return this.hp;
     }
+    public int getMaxHp() {
+        return this.max_hp;
+    }
 
     public void loseHp(int damage) {
         this.hp -= damage;
+    }
+    public void setPower() {
+        if (snow_pw < 22) {
+            snow_pw += 1;
+            real_snow_pw = (snow_pw / 3);
+        }
     }
 
     public boolean isDead() {
@@ -146,6 +161,21 @@ public class Hero {
     }
     public void check_hero(int paramInt1, int paramInt2) {
 
+    }
+
+    public void make_attack() {
+        item.position.y = 12;
+        item.position.x = position.x;
+        item.position.y = (9 - real_snow_pw);
+        if (real_snow_pw % 2 == 0) {
+            item.top_y = (10 - real_snow_pw / 2);
+        } else {
+            item.top_y = (9 - real_snow_pw / 2);
+        }
+        snow_gap = 3;
+        h_timer = 0;
+        pw_up = 2;
+//        MPlay(2);
     }
 
 }

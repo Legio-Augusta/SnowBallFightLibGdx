@@ -73,6 +73,7 @@ public class Screen1 extends DefaultScreen {
     // On 380px space, place 180 or 200px for fire, move btn. 200px on top is space.
     // So on J2ME original enemy seem to move on 1/4 of screen height (3 cell +1 /32 cell 5px).
     // That mean enemy should move on 1080 to 1440 on 360px vertical distance.
+    private static int SMALL_GAP = 32; // 32px for gap
 
     private static final String PREF_VIBRATION = "vibration";
     private static final String PREF_SOUND_ENABLED = "soundenabled";
@@ -189,8 +190,8 @@ public class Screen1 extends DefaultScreen {
 
         camera = newOrthographicCamera(SCREEN_WIDTH, SCREEN_HEIGHT);
         // Calculate global var width/height, view port ...
-        init_game(-1);
         create();
+        init_game(-1);
     }
 
     public void create () {
@@ -236,9 +237,10 @@ public class Screen1 extends DefaultScreen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         camera.update();
-        generalUpdate();
+//        monitorEnemyPosition();
 
         batch.enableBlending();
+
         batch.begin();
 
         int j;
@@ -246,81 +248,62 @@ public class Screen1 extends DefaultScreen {
         {
             drawRunningScreen();
         }
-        else if (screen == 2)
-        {
-
+        else if (screen == 2) {
+            drawInstructionScreen();
         }
-        else if (screen == 3)
-        {
-
+        else if (screen == 3) {
+            drawVillageScreen();
         }
-        else if (screen == 31)
-        {
-
+        else if (screen == 31) {
+            drawShopScreen();
         }
-        else if (screen == 100)
-        {
-
+        else if (screen == 100) {
+            drawSoundSettingScreen();
         }
-        else if (screen == -88)
-        {
-
+        else if (screen == -88) {
+            drawNewOrSavedGame();
         }
-        else if (screen == 8)
-        {
-
+        else if (screen == 8) {
+            drawSpecialAnimation();
         }
-        else if (screen == 9)
-        {
+        else if (screen == 9) {
             drawSpecialScreen();
         }
-        else if (screen == 4)
-        {
-
+        else if (screen == 4) {
+            drawSoundSpeedSetting();
         }
-        else if (screen == 5)
-        {
-
+        else if (screen == 5) {
+            drawGuideMenu();
         }
-        else if (screen == -33)
-        {
-
+        else if (screen == -33) {
+            drawListItems();
         }
-        else if (screen == 200)
-        {
-
+        else if (screen == 200) {
+            drawVictoryScreen();
         }
-        else if (screen == 65335)
-        {
-
+        else if (screen == 65335) {
+            drawLoseScreen();
         }
-        else if (screen == 300)
-        {
-
+        else if (screen == 300) {
+            drawGoodJob();
         }
-        else if (screen == 77)
-        {
-
+        else if (screen == 77) {
+            drawTextScreen();
         }
-        else if (screen == -1)
-        {
-
+        else if (screen == -1) {
+            drawLogoScreen();
         }
-        else if (screen == -2)
-        {
-
+        else if (screen == -2) {
+            drawSamsungLogo();
         }
-        else if (screen == 1000)
-        {
-
+        else if (screen == 1000) {
+            drawAllClear();
         }
-        else if (screen == -5)
-        {
-
+        else if (screen == -5) {
+            drawManualScreen();
         }
-        else if (screen == 1)
-        {
-
+        else if (screen == 1) {
+            drawTitleScreen();
         }
 
 //        batch.setProjectionMatrix(camera.combined);
@@ -330,7 +313,6 @@ public class Screen1 extends DefaultScreen {
 
         batch.end();
 
-        drawSplashBatch();
         drawTouchPad();
 
         batch.begin();
@@ -359,12 +341,21 @@ public class Screen1 extends DefaultScreen {
         imgH_ppang = new Texture("data/samsung-white/h_bbang.png");
         imgSnow_g = new Texture("data/samsung-white/snow_gauge.png");
         imgPwd = new Texture("data/samsung-white/power.png");
-        //    private Texture [] imgItem;
-        //    private Texture [] imgItem_hyo;
+        imgItem = new Texture[9];
+        for (int m = 0; m < 9; m++) {
+            imgItem[m] = new Texture("data/samsung-white/item" + m + ".png");
+        }
+        imgItem_hyo = new Texture[2];
+        imgItem_hyo[0] = new Texture("data/samsung-white/hyo0.png");
+        imgItem_hyo[1] = new Texture("data/samsung-white/hyo1.png");
+
         imgVill = new Texture("data/samsung-white/village.png");
         imgSchool = new Texture("data/samsung-white/school.png");
         imgShop = new Texture("data/samsung-white/shop0.png");
-        //    private Texture [] imgSpecial;
+        imgSpecial = new Texture[3];
+        for (int i = 0; i < 3; i++) {
+            imgSpecial[i] = new Texture("data/samsung-white/special" + i + ".png");
+        }
         imgSp = new Texture("data/samsung-white/sp1.png");
         // TODO use texture region
         imgEffect = new Texture[2];
@@ -377,12 +368,15 @@ public class Screen1 extends DefaultScreen {
         imgLose = new Texture("data/samsung-white/lose.png");
         imgHero_l = new Texture("data/samsung-white/hero-lose.png");
         imgStage_num = new Texture("data/samsung-white/word-1.png");
-        ui = new Texture("data/samsung-white/ui.png");
-        //    private Texture [] imgStage;
+        ui = new Texture("data/samsung-white/ui.png");  // h:160p (1080p)
+        imgStage = new Texture[5];
+        for (int i = 0; i < 5; i++) {
+            imgStage[i] = new Texture("data/samsung-white/word-" + i + ".png");
+        }
 
     }
 
-    public void generalUpdate() {
+    public void monitorEnemyPosition() {
         enemyMoving();
         updateEnemyBound();
     }
@@ -458,14 +452,13 @@ public class Screen1 extends DefaultScreen {
         game_state = 0;
         p_mode = 1;
         hero.position.x = 5;
-        hero.position.y = 8;
+        hero.position.y = 8 + (int)((BOTTOM_SPACE+ui.getHeight())/CELL_WIDTH); // orig 8
         hero.h_idx = 0;
-        max_hp = 106;
-        hero.setHp(max_hp);
+        hero.setHp(hero.getMaxHp()); //106
         wp = 0;
-        pw_up = 0;
-        snow_pw = 0;
-        real_snow_pw = 0;
+        hero.pw_up = 0;
+        hero.snow_pw = 0;
+        hero.real_snow_pw = 0;
         dem = 12;
         ppang = 0;
         al = -1;
@@ -496,28 +489,24 @@ public class Screen1 extends DefaultScreen {
     }
 
     protected void initSpriteBatchAndHeroTexture () {
-        batch = new SpriteBatch();
-        ttrSplash = new Texture("data/samsung-white/menu_bg.png");
+//        batch = new SpriteBatch();
         snowWhiteBg = new Texture("data/samsung-white/white_bg.png");
         heroTexture = new Texture("data/samsung-white/hero3_1_120x.png");
         hero = new Hero(new Sprite());
         hero.position.x = SCREEN_WIDTH/2/CELL_WIDTH;
         hero.setBobTexture(new Texture("data/samsung-white/hero3_1_120x.png"));
-        hero.position.y = (SCREEN_HEIGHT/5)/CELL_WIDTH;
+        hero.position.y = (BOTTOM_SPACE+ui.getHeight()+SMALL_GAP)/CELL_WIDTH;
 
         fireBtnTexture = new Texture("data/samsung-white/fire.png");
         initBobItem();
     }
 
     protected void drawSplashBatch() {
-        batch.disableBlending();
+//        batch.disableBlending();
         batch.begin();
 //        batch.draw(ttrSplash, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-        batch.draw(snowWhiteBg, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        batch.draw(snowWhiteBg, 0, BOTTOM_SPACE, SCREEN_WIDTH, VIEW_PORT_HEIGHT+BOTTOM_SPACE);
         batch.end();
-    }
-
-    protected void handleKeyMoveHero() {
     }
 
     /*
@@ -622,6 +611,12 @@ public class Screen1 extends DefaultScreen {
 
         boss.check_move_outof_bound(0, rightBoundBoss, bottomBoundInCell-7, topBoundInCell);
     }
+    protected void updateEnemyBound() {
+        for(int i = 0; i < e_num; i++) {
+            enemies[i].setBound(new Rectangle(enemies[i].position.x * CELL_WIDTH, enemies[i].position.y * CELL_WIDTH, enemies[i].getBobTexture().getWidth(), enemies[i].getBobTexture().getHeight()));
+        }
+        boss.setBound(new Rectangle(boss.position.x*CELL_WIDTH, boss.position.y*CELL_WIDTH, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight()));
+    }
 
     protected void drawFireBtn() {
         batch.draw(fireBtnTexture, SCREEN_WIDTH-50-fireBtnTexture.getWidth(), 50, fireBtnTexture.getWidth(), fireBtnTexture.getHeight());
@@ -635,13 +630,13 @@ public class Screen1 extends DefaultScreen {
 
         //Draw
         batch.enableBlending();
-        batch.begin();
+//        batch.begin();
         //blockSprite.draw(batch);
 
-        batch.draw(hero.getBobTexture(), hero.position.x*CELL_WIDTH, hero.position.y*CELL_WIDTH, 0, 0, heroTexture.getWidth(), heroTexture.getHeight(), 1, 1, 0, 0, 0, heroTexture.getWidth(), heroTexture.getHeight(), hero.facingLeft, false);
-        hero.facingLeft = !hero.facingLeft;
+//        batch.draw(hero.getBobTexture(), hero.position.x*CELL_WIDTH, hero.position.y*CELL_WIDTH, 0, 0, heroTexture.getWidth(), heroTexture.getHeight(), 1, 1, 0, 0, 0, heroTexture.getWidth(), heroTexture.getHeight(), hero.facingLeft, false);
+//        hero.facingLeft = !hero.facingLeft;
 
-        batch.end();
+//        batch.end();
         touch_stage.act(Gdx.graphics.getDeltaTime());
         touch_stage.draw();
     }
@@ -768,12 +763,6 @@ public class Screen1 extends DefaultScreen {
     protected void updateHeroBullet() {
         hero.setBound(new Rectangle(hero.position.x * CELL_WIDTH, hero.position.y * CELL_WIDTH, hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight()));
     }
-    protected void updateEnemyBound() {
-        for(int i = 0; i < e_num; i++) {
-            enemies[i].setBound(new Rectangle(enemies[i].position.x * CELL_WIDTH, enemies[i].position.y * CELL_WIDTH, enemies[i].getBobTexture().getWidth(), enemies[i].getBobTexture().getHeight()));
-        }
-        boss.setBound(new Rectangle(boss.position.x*CELL_WIDTH, boss.position.y*CELL_WIDTH, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight()));
-    }
 
     public void check_building(int paramInt1, int paramInt2) {
         if ((paramInt1 == 43) && (paramInt2 == 22))
@@ -847,9 +836,6 @@ public class Screen1 extends DefaultScreen {
         return 1;
     }
     public void draw_text() {
-
-    }
-    public void draw_text_box() {
 
     }
 
@@ -940,7 +926,7 @@ public class Screen1 extends DefaultScreen {
                     else if ((pw_up == 1) && (real_snow_pw > 0))
                     {
                         hero.h_idx = 4;
-//                        make_attack();
+                        hero.make_attack();
                     }
                 }
                 else
@@ -1354,7 +1340,7 @@ public class Screen1 extends DefaultScreen {
 //                loadImage(3);
                 // Vile screen, so do not need cell width ratio
                 hero.position.x = (57/120)*SCREEN_WIDTH;
-                hero.position.y = (46/160)*VIEW_PORT_HEIGHT; // TODO reverse top/down of geometry
+                hero.position.y = (46/160)*VIEW_PORT_HEIGHT; // TODO reverse top/down of geometry, fix redundant by double or float ?
                 m_mode = -1;
                 screen = 3;
             }
@@ -1439,7 +1425,7 @@ public class Screen1 extends DefaultScreen {
                         catch (Exception localException1) {}*/
                         if (pw_up == 1)
                         {
-//                            setPower();
+                            hero.setPower();
                             if (hero.h_idx == 2) {
                                 hero.h_idx = 3;
                             } else if (hero.h_idx == 3) {
@@ -1551,8 +1537,7 @@ public class Screen1 extends DefaultScreen {
 //                            serviceRepaints();
                         }
                     }
-                    else if (state == 2)
-                    {
+                    else if (state == 2) {
                         if ((ani_step >= 1) && (ani_step <= 20)) {
                             ani_step += 1;
                         }
@@ -1572,8 +1557,7 @@ public class Screen1 extends DefaultScreen {
                             state = 1;
                         }
                     }
-                    else if (state == 3)
-                    {
+                    else if (state == 3) {
                         if (game_state == 2)
                         {
                             screen = 201;
@@ -1587,24 +1571,21 @@ public class Screen1 extends DefaultScreen {
                         }
                     }
                 }
-                else if (screen == 8)
-                {
+                else if (screen == 8) {
                     if ((ani_step < 50) && (ani_step > 0)) {
                         ani_step += 1;
                     }
 //                    repaint();
 //                    serviceRepaints();
                 }
-                else if (screen == 9)
-                {
+                else if (screen == 9) {
                     if ((ani_step < 46) && (ani_step >= 0)) {
                         ani_step += 1;
                     }
 //                    repaint();
 //                    serviceRepaints();
                 }
-                else if (screen == 200)
-                {
+                else if (screen == 200) {
                     if ((ani_step < 51) && (ani_step >= 0))
                     {
                         ani_step += 1;
@@ -1627,8 +1608,7 @@ public class Screen1 extends DefaultScreen {
 //                        repaint();
                     }
                 }
-                else if (screen == 201)
-                {
+                else if (screen == 201) {
                     ani_step = 0;
                     if (last_stage / 10 == school)
                     {
@@ -1650,9 +1630,8 @@ public class Screen1 extends DefaultScreen {
                     }
 
                     screen = 200;
-                }
-                else if (screen == 65336)
-                {
+                } // end screen 201
+                else if (screen == 65336) {
                     item_mode = 0;
                     ani_step = 0;
 //                    loadImage(65336);
@@ -1675,13 +1654,13 @@ public class Screen1 extends DefaultScreen {
 //                        repaint();
                     }
                 }
-            }
+            } // end is GameOn
             else {
-                try
+                /*try
                 {
                     Thread.sleep(100L);
                 }
-                catch (Exception localException2) {}
+                catch (Exception localException2) {}*/
             }
     } // End run()
 
@@ -1781,30 +1760,34 @@ public class Screen1 extends DefaultScreen {
     }
 
     public void drawRunningScreen() {
+        monitorEnemyPosition(); // custom inject function to correct enemy position. TODO figure out do we have to match all thing together or just inject simple "guard" method
+
         int j;
-        batch.draw(imgBack, 0, VIEW_PORT_HEIGHT); // options|* button
+        batch.draw(imgBack, 0, VIEW_PORT_HEIGHT+BOTTOM_SPACE); // options|* button
 
         // ShapeRenderer has drawback, so do not use it.
         // TODO use TextureRegion to draw rectangle with color, pixel (mattdesl/lwjgl-basics)
-        batch.draw(snowWhiteBg, 0, VIEW_PORT_HEIGHT);
-
-        batch.draw(hero.getBobTexture(), hero.position.x * 5 * SGH_SCALE_RATIO, (int)83/160*VIEW_PORT_HEIGHT , hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight());
+        // The order of render in original J2ME is bk1 to white snow board. This way require exactly position draw of bk1 and whiteboard.
+        // In order easier to draw batch, we need change order of image draw ie. bk1 will be overlaped by white bg if white bg not scale and draw propertly by its position.
+        int snowBoardHeight = VIEW_PORT_HEIGHT - ui.getHeight();
+        // Scale by Y vertically, bg is in square ratio.
+        batch.draw(snowWhiteBg, 0, BOTTOM_SPACE+ui.getHeight(), snowBoardHeight, snowBoardHeight); // VIEW_PORT_HEIGHT
+        batch.draw(hero.getBobTexture(), hero.position.x * 5 * SGH_SCALE_RATIO, BOTTOM_SPACE+ui.getHeight()+SMALL_GAP , hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight()); // orig 83
         if (ppang_time > 0)
         {
             if (ppang_item == 1) {
-//                    paramGraphics.drawImage(this.imgItem_hyo[0], this.h_x * 5, 74, 0x10 | 0x1);
+                batch.draw(imgItem_hyo[0], hero.position.x * CELL_WIDTH, (74/160*VIEW_PORT_HEIGHT)+BOTTOM_SPACE); // orig y:74 TODO may be use relative position by hero.y
             } else {
-//                    paramGraphics.drawImage(this.imgItem_hyo[1], this.h_x * 5, 83, 0x10 | 0x1);
+                batch.draw(imgItem_hyo[1], hero.position.x * CELL_WIDTH, (83/160*VIEW_PORT_HEIGHT)+BOTTOM_SPACE); // orig y:83
             }
             ppang_time -= 1;
             if (ppang_time == 0) {
                 ppang_item = 0;
             }
         }
-//        draw_enemy();
+        draw_enemy();
 
-        if (item_mode != 0)
-        {
+        if (item_mode != 0) {
             if (message != "") {
                 draw_text();
             }
@@ -1813,44 +1796,35 @@ public class Screen1 extends DefaultScreen {
             }
             if (item_mode != 100)
             {
-//                    paramGraphics.setColor(16711680);
-//                    paramGraphics.drawRect(this.item_mode * 12 + 23, 110, 10, 9);
-                camera.update();
-                shapeRenderer.setProjectionMatrix(camera.combined);
-                shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-                shapeRenderer.setColor(Color.RED);
-                shapeRenderer.rect(0, 0, 300, 20); // TODO avoid hard code position, anchor point
-                shapeRenderer.end();
+//                    paramGraphics.setColor(16711680); // red ? white ?
+//                    paramGraphics.drawRect(this.item_mode * 12 + 23, 110, 10, 9); // TODO avoid hard code position, anchor point
             }
             else if (item_mode == 100)
             {
                 item_mode = 0;
             }
-        }
-        if (pw_up == 2)
-        {
+        } // end item_mode
+        if (pw_up == 2) {
             batch.draw(imgShadow, hero.getItem().position.x * 5*SGH_SCALE_RATIO, (hero.getItem().position.y * 7 + 4)*SGH_SCALE_RATIO);
 //                paramGraphics.drawImage(this.imgItem[this.wp], this.snow_x * 5, this.snow_y * 7 - this.snow_gap + 4, 0x2 | 0x1);
         }
-        else if (pw_up == 1)
-        {
+        else if (pw_up == 1) {
             if ((real_snow_pw > 0) && (ppang_item != 1))
             {
 //                    paramGraphics.setColor(7196662); // 6DCFF6 light_blue
                 if ((int)hero.position.x >= 13)
                 {
 //                        paramGraphics.fillRect(this.h_x * 5 - 16, 106 - this.real_snow_pw * 3, 3, this.real_snow_pw * 3);
-                    batch.draw(imgPwd, (hero.position.x * 5 - 15)*SGH_SCALE_RATIO, 83/160*SCREEN_HEIGHT);
+                    batch.draw(imgPwd, (hero.position.x * 5 - 15)*SGH_SCALE_RATIO, SCREEN_HEIGHT/2); // orig 83/160. TODO why this calc return 0, can .0f fix this ?
                 }
                 else
                 {
 //                        paramGraphics.fillRect(this.h_x * 5 + 14, 106 - this.real_snow_pw * 3, 3, this.real_snow_pw * 3);
-                    batch.draw(imgPwd, (hero.position.x * + 15)*SGH_SCALE_RATIO, 83/160*SCREEN_HEIGHT);
+                    batch.draw(imgPwd, (hero.position.x * + 15)*SGH_SCALE_RATIO, SCREEN_HEIGHT/2); // orig 83/160
                 }
             }
-        }
-        else if (pw_up == 0)
-        {
+        } // end pw_up = 1
+        else if (pw_up == 0) {
             if (ppang <= -1)
             {
                 batch.draw(imgPok, hero.getItem().position.x* 5* SGH_SCALE_RATIO, (hero.getItem().position.y * 7 - 3)*SGH_SCALE_RATIO);
@@ -1917,7 +1891,7 @@ public class Screen1 extends DefaultScreen {
             if (message != "") {
                 draw_text();
             }
-        }
+        } // end pw_up = 0
         else if (pw_up == -1)
         {
             pw_up = 0;
@@ -1926,14 +1900,15 @@ public class Screen1 extends DefaultScreen {
         {
             try
             {
-                batch.draw(ui, 0, (109/160)*SCREEN_HEIGHT);
+                Gdx.app.log("INFO", "UI- " + (int)(BOTTOM_SPACE + ui.getHeight()));
+                batch.draw(ui, 0, BOTTOM_SPACE); // orig: y:109
             }
             catch (Exception localException1) {}
 //                draw_item(paramGraphics);
-            p_mode = 2;
+//            p_mode = 2; // Change p_mode may be cause it draw only 1st time.
         }
         if (this.d_gauge != 0) {
-//                draw_gauge();
+                draw_gauge();
         }
         for (j = 0; j < e_num; j++) { // or count array elements enemies
             if (enemies[j].e_behv != 100)
@@ -2184,7 +2159,8 @@ public class Screen1 extends DefaultScreen {
             this.e_dem = 14;
         }
         enemies[0].position.x = (3 + boss.get_random(3));
-        enemies[0].position.y = (1 + boss.get_random(3));
+        // We have to change because of different projection and/or screen size. Collision may be affected but we can use GDX way not manual calc.
+        enemies[0].position.y = (1 + boss.get_random(3)); // orig: 1 + get_random(3).
         enemies[0].e_lv = 3;
         enemies[0].e_fire_time = 8;
         enemies[1].position.x = (18 + boss.get_random(3));
@@ -2214,4 +2190,535 @@ public class Screen1 extends DefaultScreen {
         boss.max_e_boss_hp = boss.e_boss_hp;
         boss.e_boss_fire_time = 2;
     }
+
+    /*
+      Simulate fillRect in ShapeRenderer or J2ME Canvas. TODO color HEX, TextureRegion store cells color.
+     */
+    public void fillRect(int x, int y, int width, int height) {
+        batch.draw(snowWhiteBg, 0, BOTTOM_SPACE, SCREEN_WIDTH, VIEW_PORT_HEIGHT+BOTTOM_SPACE);
+    }
+
+    public void drawInstructionScreen() { // screen = 2
+        /*batch.drawImage(this.imgMM, 0, 0, 20);
+        batch.setColor(16777164);
+        batch.drawString("1.Play", 13, 23, 20);
+        batch.drawString("2.Instructions", 13, 38, 20);
+        batch.drawString("3.Configuration", 13, 53, 20);
+        batch.drawString("4.Quit", 13, 68, 20);
+        batch.drawImage(this.imgSl, 68, 115, 20);
+        batch.drawImage(this.imgCh, 3, this.m_mode * 15 + 11, 20);*/
+    }
+    public void drawVillageScreen() { // screen = 3
+        /*paramGraphics.drawImage(this.imgVill, 0, 0, 20);
+        paramGraphics.setColor(14994350);
+        if (this.last_stage / 10 == 1)
+        {
+            paramGraphics.drawImage(this.imgSchool, 78, 87, 3);
+            paramGraphics.drawImage(this.imgSchool, 49, 87, 3);
+            paramGraphics.drawImage(this.imgSchool, 19, 58, 3);
+            paramGraphics.fillRect(76, 73, 6, 5);
+            paramGraphics.fillRect(47, 73, 6, 5);
+            paramGraphics.setColor(15132390);
+            paramGraphics.fillRect(17, 44, 6, 5);
+        }
+        else if (this.last_stage / 10 == 2)
+        {
+            paramGraphics.drawImage(this.imgSchool, 49, 87, 3);
+            paramGraphics.drawImage(this.imgSchool, 19, 58, 3);
+            paramGraphics.setColor(14994350);
+            paramGraphics.fillRect(47, 73, 6, 5);
+            paramGraphics.setColor(15132390);
+            paramGraphics.fillRect(17, 44, 6, 5);
+        }
+        else if (this.last_stage / 10 == 3)
+        {
+            paramGraphics.drawImage(this.imgSchool, 19, 58, 3);
+            paramGraphics.setColor(15132390);
+            paramGraphics.fillRect(17, 44, 6, 5);
+        }
+        paramGraphics.drawImage(this.imgCh, this.h_x, this.h_y, 20);
+        if (this.m_mode != -1)
+        {
+            if (this.m_mode == 0) {
+                this.message = "Drugstore";
+            } else if (this.m_mode == 1) {
+                this.message = "Item Shop";
+            } else if (this.m_mode == 2) {
+                this.message = "Eastern Boys";
+            } else if (this.m_mode == 3) {
+                this.message = "Southern Boys";
+            } else if (this.m_mode == 4) {
+                this.message = "Western Boys";
+            } else if (this.m_mode == 5) {
+                this.message = "Northern Boys";
+            } else if (this.m_mode == 100) {
+                this.message = "No Admittance";
+            }
+            if (this.message != "") {
+                draw_text(paramGraphics);
+            }
+        }
+        if ((this.ani_step == 0) && (this.last_stage > 20))
+        {
+            if (this.last_stage == 31) {
+                draw_text_box(paramGraphics, "Western Boys");
+            } else if (this.last_stage == 41) {
+                draw_text_box(paramGraphics, "Northern Boys");
+            } else if (this.last_stage == 21) {
+                draw_text_box(paramGraphics, "Southern Boys");
+            }
+            this.ani_step += 1;
+        }*/
+    }
+    public void drawShopScreen() { // screen = 31
+/*        paramGraphics.drawImage(this.imgShop, 24, 20, 20);
+        paramGraphics.setColor(16777062);
+        paramGraphics.drawRect(27, this.s_item * 13 + 30, 29, 10);
+        paramGraphics.drawRect(28, this.s_item * 13 + 31, 27, 8);
+        paramGraphics.setColor(13434777);
+        paramGraphics.drawRect(this.b_item * 16 + 32, 70, 15, 15);
+        paramGraphics.drawRect(this.b_item * 16 + 33, 71, 13, 13);
+        draw_int(paramGraphics, this.saved_gold, 84, 96);
+        if (this.m_mode == 1) {
+            draw_int(paramGraphics, this.item_price[this.b_item], 42, 96);
+        } else if (this.m_mode == 0) {
+            draw_int(paramGraphics, this.item_price[(this.b_item + 4)], 42, 96);
+        }
+        if (this.message != "") {
+            draw_text(paramGraphics);
+        }*/
+    }
+    public void drawSoundSettingScreen() { // screen 100
+        /*paramGraphics.setColor(16777215);
+        paramGraphics.fillRect(1, 20, 126, 90);
+        paramGraphics.setColor(0);
+        paramGraphics.drawRect(0, 19, 127, 90);
+        paramGraphics.drawRect(0, 21, 127, 86);
+        paramGraphics.drawImage(this.imgCh, 3, this.m_mode * 14 + 18, 20);
+        paramGraphics.drawString("Resume", 15, 28, 20);
+        paramGraphics.drawString("MainMenu", 15, 42, 20);
+        paramGraphics.drawString("Sound", 15, 56, 20);
+        if (this.s_play == 1)
+        {
+            paramGraphics.setColor(255);
+            paramGraphics.drawString("On/", 69, 56, 20);
+            paramGraphics.setColor(8421504);
+            paramGraphics.drawString("off", 96, 56, 20);
+        }
+        else
+        {
+            paramGraphics.setColor(8421504);
+            paramGraphics.drawString("on/", 69, 56, 20);
+            paramGraphics.setColor(255);
+            paramGraphics.drawString("OFF", 93, 56, 20);
+        }
+        paramGraphics.setColor(0);
+        paramGraphics.drawString("Instructions", 15, 70, 20);
+        paramGraphics.drawString("Quit", 15, 84, 20);*/
+    }
+    public void drawNewOrSavedGame() { // screen -88
+/*        paramGraphics.drawImage(this.imgMM, 0, 0, 20);
+        paramGraphics.setColor(16777164);
+        paramGraphics.drawString("1.New Game", 13, 27, 20);
+        paramGraphics.drawString("2.Saved Game", 13, 44, 20);
+        paramGraphics.drawImage(this.imgSl, 68, 115, 20);
+        paramGraphics.drawImage(this.imgBk, 2, 115, 20);
+        paramGraphics.drawImage(this.imgCh, 4, this.m_mode * 17 + 14, 20);*/
+    }
+    public void drawSpecialAnimation() { // screen 8
+/*        if ((this.ani_step == 1) || (this.ani_step == 2))
+        {
+            paramGraphics.setColor(10173);
+            paramGraphics.fillRect(0, 40, 128, 60);
+            paramGraphics.drawImage(this.imgSpecial[0], 44, 70, 3);
+            paramGraphics.drawImage(this.imgSpecial[1], 44, 89, 3);
+        }
+        else if (this.ani_step == 8)
+        {
+            paramGraphics.drawImage(this.imgSpecial[0], 44, 70, 3);
+            paramGraphics.drawImage(this.imgSpecial[1], 48, 89, 3);
+        }
+        else if (this.ani_step == 16)
+        {
+            paramGraphics.drawImage(this.imgSpecial[0], 44, 70, 3);
+            paramGraphics.drawImage(this.imgSpecial[1], 51, 89, 3);
+        }
+        else if (this.ani_step == 23)
+        {
+            paramGraphics.drawImage(this.imgSpecial[0], 44, 70, 3);
+            paramGraphics.drawImage(this.imgSpecial[1], 54, 89, 3);
+        }
+        else if (this.ani_step == 30)
+        {
+            paramGraphics.drawImage(this.imgSpecial[0], 44, 70, 3);
+            paramGraphics.drawImage(this.imgSpecial[1], 55, 89, 3);
+        }
+        else if (this.ani_step == 37)
+        {
+            paramGraphics.drawImage(this.imgSpecial[2], 58, 88, 3);
+        }
+        else if (this.ani_step == 50)
+        {
+            destroyImage(8);
+            loadImage(9);
+            this.ani_step = 0;
+            this.screen = 9;
+        }*/
+    }
+    public void drawSoundSpeedSetting() { // screen 4
+/*        paramGraphics.drawImage(this.imgMM, 0, 0, 20);
+        paramGraphics.setColor(16777164);
+        paramGraphics.drawString("Sound", 12, 23, 20);
+        if (this.s_play == 1)
+        {
+            paramGraphics.drawString("ON /", 62, 23, 20);
+            paramGraphics.setColor(10790052);
+            paramGraphics.drawString("off", 95, 23, 20);
+            paramGraphics.setColor(16777164);
+        }
+        if (this.s_play == 2)
+        {
+            paramGraphics.setColor(10790052);
+            paramGraphics.drawString("on /", 62, 23, 20);
+            paramGraphics.setColor(16777164);
+            paramGraphics.drawString("OFF", 94, 23, 20);
+        }
+        paramGraphics.drawString("Vibration ", 12, 41, 20);
+        if (this.v_mode == 1)
+        {
+            paramGraphics.drawString("ON /", 62, 59, 20);
+            paramGraphics.setColor(10790052);
+            paramGraphics.drawString("off", 95, 59, 20);
+            paramGraphics.setColor(16777164);
+        }
+        if (this.v_mode == 2)
+        {
+            paramGraphics.setColor(10790052);
+            paramGraphics.drawString("on /", 62, 59, 20);
+            paramGraphics.setColor(16777164);
+            paramGraphics.drawString("OFF", 94, 59, 20);
+        }
+        paramGraphics.drawString("Speed ", 14, 77, 20);
+        paramGraphics.drawString("[ " + String.valueOf(this.speed) + " ]", 68, 77, 20);
+        paramGraphics.drawImage(this.imgBk, 2, 115, 20);
+        if (this.m_mode < 3) {
+            paramGraphics.drawImage(this.imgCh, 4, this.m_mode * 18 + 9, 20);
+        } else {
+            paramGraphics.drawImage(this.imgCh, 4, this.m_mode * 18 + 27, 20);
+        }*/
+    }
+    public void drawGuideMenu() { // screen 5
+        /*paramGraphics.drawImage(this.imgMM, 0, 0, 20);
+        paramGraphics.setColor(16777164);
+        paramGraphics.drawString("1.Control Keys", 10, 25, 20);
+        paramGraphics.drawString("2.Offense items", 10, 42, 20);
+        paramGraphics.drawString("3.Defense items", 10, 59, 20);
+        paramGraphics.drawImage(this.imgCh, 3, this.m_mode * 17 + 12, 20);
+        paramGraphics.drawImage(this.imgSl, 68, 115, 20);
+        paramGraphics.drawImage(this.imgBk, 2, 115, 20);*/
+    }
+    public void drawListItems() { // screen -33
+        /*paramGraphics.drawImage(this.imgMM, 0, 0, 20);
+        paramGraphics.drawImage(this.imgBk, 2, 115, 20);
+        destroyImage(2);
+        paramGraphics.setColor(16777164);
+        try
+        {
+            if (this.m_mode == 1) {
+                paramGraphics.drawImage(Image.createImage("/txt4.png"), 5, 25, 20);
+            }
+            if (this.m_mode == 2)
+            {
+                paramGraphics.fillRect(6, 23, 10, 10);
+                paramGraphics.fillRect(6, 45, 10, 10);
+                paramGraphics.fillRect(6, 61, 10, 10);
+                paramGraphics.fillRect(6, 84, 10, 10);
+                paramGraphics.drawImage(Image.createImage("/item1.png"), 7, 24, 20);
+                paramGraphics.drawImage(Image.createImage("/item2.png"), 7, 46, 20);
+                paramGraphics.drawImage(Image.createImage("/item3.png"), 7, 62, 20);
+                paramGraphics.drawImage(Image.createImage("/item4.png"), 7, 85, 20);
+                paramGraphics.drawImage(Image.createImage("/txt2.png"), 23, 25, 20);
+            }
+            if (this.m_mode == 3)
+            {
+                paramGraphics.fillRect(6, 23, 10, 10);
+                paramGraphics.fillRect(6, 38, 10, 10);
+                paramGraphics.fillRect(6, 53, 10, 10);
+                paramGraphics.fillRect(6, 67, 10, 10);
+                paramGraphics.drawImage(Image.createImage("/item5.png"), 7, 24, 20);
+                paramGraphics.drawImage(Image.createImage("/item6.png"), 7, 39, 20);
+                paramGraphics.drawImage(Image.createImage("/item7.png"), 7, 54, 20);
+                paramGraphics.drawImage(Image.createImage("/item8.png"), 7, 68, 20);
+                paramGraphics.drawImage(Image.createImage("/txt1.png"), 23, 25, 20);
+            }
+        }
+        catch (Exception localException2) {}
+        System.gc();*/
+    }
+    public void drawVictoryScreen() { // screen 200
+        /*if ((this.ani_step >= 13) && (this.ani_step < 27))
+        {
+            paramGraphics.setColor(16777215);
+            paramGraphics.fillRect(0, 60, 128, 47);
+            paramGraphics.drawImage(this.imgHero_v, this.h_x * 5, 83, 0x10 | 0x1);
+        }
+        else if ((this.ani_step >= 28) && (this.ani_step < 50))
+        {
+            paramGraphics.drawImage(this.imgV, this.h_x * 5 + 8, 87, 0x10 | 0x1);
+            if (this.ani_step > 41) {
+                paramGraphics.drawImage(this.imgVictory, 60, 60, 0x10 | 0x1);
+            }
+        }
+        else if (this.ani_step == 50)
+        {
+            this.ani_step = -1;
+        }*/
+    }
+    public void drawLoseScreen() { // screen 65335
+/*        int k;
+        if (this.ani_step < 30)
+        {
+            paramGraphics.setColor(0);
+            for (k = 0; k < 11; k++) {
+                paramGraphics.fillRect(0, k * 10, this.ani_step * 4 + 12, 5);
+            }
+        }
+        else if (this.ani_step < 65)
+        {
+            paramGraphics.setColor(0);
+            for (k = 0; k < 11; k++) {
+                paramGraphics.fillRect(0, k * 10 + 5, (this.ani_step - 30) * 7 - k * 10, 5);
+            }
+        }
+        else if ((this.ani_step >= 65) && (this.ani_step <= 100))
+        {
+            if (this.ani_step > 90) {
+                paramGraphics.drawImage(this.imgLose, 60, 60, 0x10 | 0x1);
+            }
+            paramGraphics.drawImage(this.imgHero_l, this.h_x * 5, 87, 0x10 | 0x1);
+        }*/
+    }
+    public void drawGoodJob() { // screen 300
+        /*paramGraphics.drawImage(this.imgMM, 0, 0, 20);
+        paramGraphics.setColor(16777164);
+        paramGraphics.drawString("Good Job!", 15, 23, 20);
+        paramGraphics.setColor(13434726); // CCFF66
+        paramGraphics.drawString("Acquired", 15, 41, 20);
+        paramGraphics.drawString("Gold:", 48, 57, 20);
+        paramGraphics.drawString(String.valueOf(this.gold), 92, 57, 20);
+        paramGraphics.setColor(16777164);
+        paramGraphics.drawString("press any key", 10, 83, 20);
+        paramGraphics.drawString("to continue", 37, 97, 20);*/
+    }
+    public void drawTextScreen() { // screen 77
+//        draw_text(paramGraphics);
+    }
+    public void drawLogoScreen() { // screen -1
+        /*loadImage(1);
+        paramGraphics.drawImage(this.imgLogo, 0, 0, 20);
+        MPlay(0);
+        destroyImage(1);*/
+    }
+    public void drawSamsungLogo() { // screen -2
+/*        paramGraphics.setColor(16777215);
+        paramGraphics.fillRect(0, 0, 128, 135);
+        paramGraphics.setColor(25054);
+        paramGraphics.fillRect(0, 0, 128, 22);
+        paramGraphics.fillRect(0, 71, 128, 84);
+        try
+        {
+            paramGraphics.drawImage(Image.createImage("/present.png"), 64, 5, 0x10 | 0x1);
+            paramGraphics.drawImage(Image.createImage("/sam_logo.png"), 64, 28, 0x10 | 0x1);
+            paramGraphics.drawImage(Image.createImage("/http1.png"), 7, 77, 20);
+            paramGraphics.drawImage(Image.createImage("/http2.png"), 7, 103, 20);
+        }
+        catch (Exception localException3) {}
+        System.gc();*/
+    }
+    public void drawAllClear() {
+/*        paramGraphics.setColor(16777215);
+        paramGraphics.fillRect(0, 25, 120, 85);
+        try
+        {
+            paramGraphics.drawImage(Image.createImage("/allClear.png"), 64, 10, 0x10 | 0x1);
+        }
+        catch (Exception localException4) {}*/
+    }
+    public void drawManualScreen() { // screen -5
+/*        paramGraphics.setColor(16777215);
+        paramGraphics.fillRect(1, 20, 126, 90);
+        paramGraphics.setColor(0);
+        paramGraphics.drawRect(0, 19, 127, 90);
+        paramGraphics.drawRect(0, 21, 127, 86);
+        try
+        {
+            paramGraphics.drawImage(Image.createImage("/txt4b.png"), 4, 30, 20);
+        }
+        catch (Exception localException5) {}
+        System.gc();*/
+    }
+    public void drawTitleScreen() { // screen 1
+/*        paramGraphics.drawImage(this.imgMM, 0, 0, 20);
+        try
+        {
+            paramGraphics.drawImage(Image.createImage("/title.png"), 64, 35, 0x10 | 0x1);
+        }
+        catch (Exception localException6) {}
+        paramGraphics.drawImage(this.imgPl, 68, 115, 20);
+        paramGraphics.drawImage(this.imgBk, 2, 115, 20);
+        System.gc();*/
+    }
+
+    public void draw_gauge()
+    {
+        /*if (this.d_gauge == 2)
+        {
+            paramGraphics.setColor(16775065);
+            paramGraphics.fillRect(118, 111, 8, 8);
+            if (this.wp != 0) {
+                paramGraphics.drawImage(this.imgItem[this.wp], 122, 111, 0x10 | 0x1);
+            }
+        }
+        if (this.mana != 0)
+        {
+            paramGraphics.setColor(16711680);
+            paramGraphics.fillRect(30, 124, this.mana, 1);
+            if (this.mana == 36)
+            {
+                paramGraphics.fillRect(39, 123, 3, 3);
+                paramGraphics.fillRect(51, 123, 3, 3);
+                paramGraphics.fillRect(63, 123, 3, 3);
+            }
+            else if (this.mana >= 24)
+            {
+                paramGraphics.fillRect(39, 123, 3, 3);
+                paramGraphics.fillRect(51, 123, 3, 3);
+            }
+            else if (this.mana >= 12)
+            {
+                paramGraphics.fillRect(39, 123, 3, 3);
+            }
+        }
+        else if (this.mana == 0)
+        {
+            paramGraphics.setColor(4960985);
+            paramGraphics.fillRect(30, 124, 36, 1);
+            paramGraphics.fillRect(39, 123, 3, 3);
+            paramGraphics.fillRect(51, 123, 3, 3);
+            paramGraphics.fillRect(63, 123, 3, 3);
+        }
+        this.d_gauge = 0;*/
+    }
+
+    public void check_ppang() {
+        d_gauge = 2;
+        int j;
+        for (int i = 0; i < e_num; i++)
+        {
+            j = (int)enemies[i].position.x;
+            if ((j - snow_x >= -1) && (j - snow_x <= 1))
+            {
+                int k = (int)enemies[i].position.y;
+                if ((k >= 0) && (k <= 4))
+                {
+                    if ((k + real_snow_pw == 7) || (k + real_snow_pw == 8))
+                    {
+                        ppang = 1;
+                        decs_e_hp(i);
+                        break;
+                    }
+                }
+                else if ((k + real_snow_pw == 8) || (k + real_snow_pw == 9))
+                {
+                    ppang = 1;
+                    decs_e_hp(i);
+                    break;
+                }
+            }
+            ppang = -1;
+        }
+        if ((e_boss > 0) && (boss.position.x - snow_x >= -1) && (boss.position.x - snow_x <= 1))
+        {
+            j = (int)(boss.position.y + real_snow_pw - 1);
+            if ((j == 9) || (j == 7) || (j == 8))
+            {
+                if (j == 7) {
+                    al = 1;
+                }
+                ppang = 1;
+                decs_e_hp(10);
+            }
+        }
+        pw_up = -1;
+        if (wp != 0) {
+            wp = 0;
+        }
+    }
+    public void decs_e_hp(int paramInt)
+    {
+        hit_idx = paramInt;
+        if (mana != 36) {
+            if (mana <= 10) {
+                mana += 2;
+            } else {
+                mana += 1;
+            }
+        }
+        if (paramInt != 10)
+        {
+            if (wp == 0) {
+                enemies[paramInt].setHp(enemies[paramInt].getHp()-dem);
+            }
+            else if (wp == 1) {
+                enemies[paramInt].e_ppang_time = 70;
+                enemies[paramInt].e_ppang_item = 1;
+                enemies[paramInt].e_lv = (-enemies[paramInt].e_lv);
+                enemies[paramInt].setHp(enemies[paramInt].getHp() - dem);
+            }
+            else if (wp == 2) {
+                s_item = -10;
+                enemies[paramInt].setHp(enemies[paramInt].getHp() - 19);
+            }
+            else if (wp == 3) {
+                enemies[paramInt].e_ppang_time = 65;
+                enemies[paramInt].e_ppang_item = 2;
+                enemies[paramInt].setHp(enemies[paramInt].e_lv - dem / 2);
+                enemies[paramInt].e_move_dir = 0;
+            }
+            else if (wp == 4) {
+                enemies[paramInt].e_ppang_time = 75;
+                enemies[paramInt].e_ppang_item = 1;
+                enemies[paramInt].e_lv = (-enemies[paramInt].e_lv);
+                s_item = -10;
+                enemies[paramInt].setHp(enemies[paramInt].e_lv -= dem * 2);
+            }
+            if (enemies[paramInt].getHp() < 0) {
+                enemies[paramInt].e_idx = 2;
+                enemies[paramInt].dis_count = -1;
+            }
+        }
+        else if (paramInt == 10)
+        {
+            if (wp == 4) {
+                s_item = -10;
+                boss.e_boss_hp -= dem * 2;
+            }
+            else if (wp == 2) {
+                s_item = -10;
+                boss.e_boss_hp -= 19;
+            }
+            else {
+                boss.e_boss_hp -= dem;
+            }
+            if (boss.e_boss_hp < 0) {
+                boss.e_boss_idx = 2;
+                boss.boss_dis_count = -1;
+            }
+            if (al == 1) {
+                boss.e_boss_hp -= 5;
+            }
+        }
+//        MPlay(3);
+    }
+
 }
