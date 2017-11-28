@@ -30,7 +30,7 @@ public class Enemy {
     public int e_lv;
     public int e_fire_time;
     public int e_wp;
-    public int e_behv;
+    public int e_behv; // Use in enemy attack
     public int dis_count;
 
     static final float SPEED = 2f; // unit per second
@@ -50,7 +50,7 @@ public class Enemy {
     private Texture bobTexture;
     private Sprite sprite;
     // snow or stone item used in firing
-    private Item item;
+    public Item item;
 
     public Enemy(Vector2 position) {
         this.position = position;

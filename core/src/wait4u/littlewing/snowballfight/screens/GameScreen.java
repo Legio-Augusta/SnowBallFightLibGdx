@@ -27,7 +27,7 @@ import wait4u.littlewing.snowballfight.Hero;
  * Created by nickfarow on 13/10/2016.
  */
 
-public class Screen1 extends DefaultScreen {
+public class GameScreen extends DefaultScreen {
     OrthographicCamera camera;
     SpriteBatch batch;
     Texture ttrSplash;
@@ -88,7 +88,7 @@ public class Screen1 extends DefaultScreen {
     private int saved_gold = 10;
     private int speed = 4;
     private int game_speed = 17;
-    private int screen = 6; //-1;
+    private int screen = -1; //-1; 6 = running
     private boolean gameOn = true;
     private String message;
     private int m_mode = 1;
@@ -137,7 +137,7 @@ public class Screen1 extends DefaultScreen {
     private int e_time;
     private int e_dem; // enemy damage
     private int hit_idx;
-    private int e_boss = 1; // TODO init this and remove debug. The flag (and/or number) of boss enemy
+    private int e_boss; // TODO init this and remove debug. The flag (and/or number) of boss enemy
     private int al;
     private int d_gauge; // gauge rule (power fire)
     private int game_action = 0;
@@ -185,8 +185,21 @@ public class Screen1 extends DefaultScreen {
     private Texture ui;
     private Texture [] imgStage;
 
-    public Screen1(Game game) {
+    public GameScreen(Game game) {
         super(game);
+        item_price[0] = 5;
+        item_price[1] = 8;
+        item_price[2] = 8;
+        item_price[3] = 14;
+        item_price[4] = 6;
+        item_price[5] = 12;
+        item_price[6] = 10;
+        item_price[7] = 12;
+//        printScore("hero", 0);
+//        printScore("config", 1);
+        item_slot[0] = 3;
+        item_slot[1] = 5;
+        stage = last_stage = 11; // TODO use sharedPreference
 
         camera = newOrthographicCamera(SCREEN_WIDTH, SCREEN_HEIGHT);
         // Calculate global var width/height, view port ...
@@ -291,10 +304,10 @@ public class Screen1 extends DefaultScreen {
             drawTextScreen();
         }
         else if (screen == -1) {
-            drawLogoScreen();
+//            drawLogoScreen();
         }
         else if (screen == -2) {
-            drawSamsungLogo();
+//            drawSamsungLogo();
         }
         else if (screen == 1000) {
             drawAllClear();
@@ -303,7 +316,7 @@ public class Screen1 extends DefaultScreen {
             drawManualScreen();
         }
         else if (screen == 1) {
-            drawTitleScreen();
+//            drawTitleScreen();
         }
 
 //        batch.setProjectionMatrix(camera.combined);
@@ -319,7 +332,7 @@ public class Screen1 extends DefaultScreen {
         drawFireBtn();
         handleFireTouch();
 
-        drawInitPositionEnermy();
+//        drawInitPositionEnermy();
         batch.end();
 
         handleVictoryOrLose();
@@ -341,6 +354,8 @@ public class Screen1 extends DefaultScreen {
         imgH_ppang = new Texture("data/samsung-white/h_bbang.png");
         imgSnow_g = new Texture("data/samsung-white/snow_gauge.png");
         imgPwd = new Texture("data/samsung-white/power.png");
+
+        // TODO init Item object item value, not just Texture
         imgItem = new Texture[9];
         for (int m = 0; m < 9; m++) {
             imgItem[m] = new Texture("data/samsung-white/item" + m + ".png");
@@ -439,15 +454,29 @@ public class Screen1 extends DefaultScreen {
             enemies[i].setBobTexture("data/samsung-white/enemy0_0_106x.png");
             enemies[i].setBound(new Rectangle(enemies[i].position.x*CELL_WIDTH, enemies[i].position.y*CELL_WIDTH, enemies[i].getBobTexture().getWidth(), enemies[i].getBobTexture().getHeight()));
         }
+
+        for(int i=0; i < e_num; i++) {
+            Vector2 e_facing = new Vector2(enemies[i].position.x, enemies[i].position.y);
+            Item e_item = new Item(0, enemies[i].position, e_facing);
+            e_item.setTexture(new Texture("data/samsung-white/item3_0_36x.png"));
+            enemies[i].setItem(e_item);
+            enemies[i].getItem().setBound(new Rectangle(e_item.getX(), e_item.getY(), e_item.getWidth(), e_item.getHeight()) );
+        }
+
+        Vector2 boss_facing = new Vector2(boss.position.x, boss.position.y);
+        Item boss_item = new Item(0, boss.position, boss_facing);
+        boss_item.setTexture(new Texture("data/samsung-white/item3_0_36x.png"));
+        boss.setItem(boss_item);
+        boss.getItem().setBound(new Rectangle(boss_item.getX(), boss_item.getY(), boss_item.getWidth(), boss_item.getHeight()) );
     }
     public void init_game(int paramInt)
     {
         initSpriteBatchAndHeroTexture();
-        initBobItem();
         initEnemy();
+        initBobItem();
 
         screen = 77;
-//        repaint();
+//        repaint(); // TODO find gdx equivalent method or handle this function. May be multi Screen help ? Does global vars remain ?
 //        serviceRepaints();
         game_state = 0;
         p_mode = 1;
@@ -521,6 +550,57 @@ public class Screen1 extends DefaultScreen {
         if(!boss.isDead()) {
             batch.draw(boss.getBobTexture(), (int)boss.position.x*CELL_WIDTH, (int)boss.position.y*CELL_WIDTH, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), 1, 1, 0, 0, 0, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight(), boss.facingLeft, false);
             boss.facingLeft = !boss.facingLeft;
+        }
+    }
+
+    public void draw_sp_hyo() {
+        for (int i = 0; i < e_num; i++) {
+            if (hero.getHp() >= 0)
+            {
+//                batch.setColor(16711680);
+//                batch.fillRect(this.e_x[i] * 5 + 8, this.e_y[i] * 5 + 5, 3, 15);
+//                batch.setColor(9672090);
+//                batch.fillRect(this.e_x[i] * 5 + 8, this.e_y[i] * 5 + 5, 3, 15 - 15 * this.e_hp[i] / this.max_e_hp[i]);
+                if (ppang <= 51) {
+                    batch.draw(imgEffect[0], enemies[i].position.x * 5 * SGH_SCALE_RATIO, (enemies[i].position.y * 5 + 5)*SGH_SCALE_RATIO );
+                } else if (ppang <= 54) {
+                    batch.draw(imgEffect[1], enemies[i].position.x * 5 * SGH_SCALE_RATIO, (enemies[i].position.y * 5 + 5)*SGH_SCALE_RATIO ) ;
+                }
+            }
+        }
+        if ((boss.getHp() >= 0) && (e_boss > 0))
+        {
+//            paramGraphics.setColor(16711680);
+//            paramGraphics.fillRect(this.e_boss_x * 5 + 12, this.e_boss_y * 5 + 5, 3, 15);
+//            paramGraphics.setColor(9672090);
+//            paramGraphics.fillRect(this.e_boss_x * 5 + 12, this.e_boss_y * 5 + 5, 3, 15 - 15 * this.e_boss_hp / this.max_e_boss_hp);
+            if (ppang <= 51) {
+                batch.draw(imgEffect[0], boss.position.x * 5 * SGH_SCALE_RATIO, (boss.position.y * 5 + 5)*SGH_SCALE_RATIO );
+            } else if (ppang <= 54) {
+                batch.draw(imgEffect[1], boss.position.x * 5 * SGH_SCALE_RATIO, (boss.position.y * 5 + 6)*SGH_SCALE_RATIO );
+            }
+        }
+        if (ppang != 55) {
+            ppang += 1;
+        }
+        else {
+            for (int j = 0; j < e_num; j++) {
+                if (enemies[j].getHp() > 0)
+                {
+                    if (special == 2) {
+                        enemies[j].e_ppang_time = 65;
+                        enemies[j].e_ppang_item = 2;
+                    }
+                    else if (special == 3) {
+                        enemies[j].e_ppang_time = 80;
+                        enemies[j].e_ppang_item = 1;
+                        enemies[j].e_lv = (-enemies[j].e_lv);
+                    }
+                    enemies[j].e_move_dir = 0;
+                }
+            }
+            ppang = 0;
+            special = 0;
         }
     }
 
@@ -831,12 +911,25 @@ public class Screen1 extends DefaultScreen {
                 check_building(paramInt1, paramInt2);
                 return 1;
             }
-            return 0;
         }
         return 1;
     }
     public void draw_text() {
 
+    }
+    public void draw_item() {
+        if (del == -1) {
+            for (int i = 0; i < 5; i++) {
+                if (item_slot[i] != 0) {
+                    batch.draw(imgItem[item_slot[i]], 12 * i + 37, 111); // 20 as J2ME canvas anchor
+                }
+            }
+        }
+        else {
+//            batch.setColor(6974058);
+//            batch.fillRect(this.del * 12 + 37, 111, 8, 8);
+            this.del = -1;
+        }
     }
 
     /*
@@ -1423,7 +1516,7 @@ public class Screen1 extends DefaultScreen {
                             // Or use gdx way to auto change speed based on device CPU power
                         }
                         catch (Exception localException1) {}*/
-                        if (pw_up == 1)
+                        if (pw_up == 1) // hero fire
                         {
                             hero.setPower();
                             if (hero.h_idx == 2) {
@@ -1806,7 +1899,7 @@ public class Screen1 extends DefaultScreen {
         } // end item_mode
         if (pw_up == 2) {
             batch.draw(imgShadow, hero.getItem().position.x * 5*SGH_SCALE_RATIO, (hero.getItem().position.y * 7 + 4)*SGH_SCALE_RATIO);
-//                paramGraphics.drawImage(this.imgItem[this.wp], this.snow_x * 5, this.snow_y * 7 - this.snow_gap + 4, 0x2 | 0x1);
+                batch.draw(imgItem[wp], hero.position.x * 5 * SGH_SCALE_RATIO, (hero.position.y * 7 - snow_gap + 4)*SGH_SCALE_RATIO );
         }
         else if (pw_up == 1) {
             if ((real_snow_pw > 0) && (ppang_item != 1))
@@ -1857,7 +1950,6 @@ public class Screen1 extends DefaultScreen {
 
 //                            paramGraphics.setColor(9672090);
 //                            paramGraphics.fillRect(this.e_x[this.hit_idx] * 5 + 8, this.e_y[this.hit_idx] * 5 + 5, 3, 15 - 15 * this.e_hp[this.hit_idx] / this.max_e_hp[this.hit_idx]);
-
                     }
                 }
                 else if (hit_idx == 10)
@@ -1867,7 +1959,6 @@ public class Screen1 extends DefaultScreen {
 //                            paramGraphics.setColor(16711680); // FFFFFF
 //                            paramGraphics.fillRect(this.e_boss_x * 5 + 12, this.e_boss_y * 5 + 5, 3, 15);
                         // draw boss hp bar
-//                            http://libgdx.badlogicgames.com/nightlies/docs/api/com/badlogic/gdx/graphics/glutils/ShapeRenderer.html
                         batch.draw(boss.getBobTexture(), (boss.position.x* 5 + 12)*SGH_SCALE_RATIO, (boss.position.y* 5 + 5)*SGH_SCALE_RATIO, 3*SGH_SCALE_RATIO, 15*SGH_SCALE_RATIO);
 //                            paramGraphics.setColor(9672090); // 0093959A gray
 //                            paramGraphics.fillRect(this.e_boss_x * 5 + 12, this.e_boss_y * 5 + 5, 3, 15 - 15 * this.e_boss_hp / this.max_e_boss_hp);
@@ -1884,28 +1975,24 @@ public class Screen1 extends DefaultScreen {
                     al = -1;
                 }
             }
-            else if (ppang >= 50)
-            {
-//                    draw_sp_hyo(paramGraphics);
+            else if (ppang >= 50) {
+                draw_sp_hyo();
             }
             if (message != "") {
                 draw_text();
             }
         } // end pw_up = 0
-        else if (pw_up == -1)
-        {
+        else if (pw_up == -1) {
             pw_up = 0;
         }
-        if (p_mode == 1)
-        {
+        if (p_mode == 1) {
             try
             {
-                Gdx.app.log("INFO", "UI- " + (int)(BOTTOM_SPACE + ui.getHeight()));
                 batch.draw(ui, 0, BOTTOM_SPACE); // orig: y:109
             }
             catch (Exception localException1) {}
-//                draw_item(paramGraphics);
-//            p_mode = 2; // Change p_mode may be cause it draw only 1st time.
+            draw_item();
+            p_mode = 2; // Change p_mode may be cause it draw only 1st time.
         }
         if (this.d_gauge != 0) {
                 draw_gauge();
@@ -1913,22 +2000,22 @@ public class Screen1 extends DefaultScreen {
         for (j = 0; j < e_num; j++) { // or count array elements enemies
             if (enemies[j].e_behv != 100)
             {
-//                    paramGraphics.drawImage(this.imgShadow, this.e_snow_x[j], this.e_snow_y[j] * 6 + 17, 0x2 | 0x1);
-//                    paramGraphics.drawImage(this.imgItem[this.e_wp[j]], this.e_snow_x[j], this.e_snow_y[j] * 6 + 13 - this.e_snow_gap[j], 0x2 | 0x1);
+                batch.draw(imgShadow, enemies[j].getItem().position.x, (enemies[j].getItem().position.y * 6 + 17)*SGH_SCALE_RATIO );
+                batch.draw(imgItem[enemies[j].e_wp], enemies[j].getItem().position.x, (enemies[j].getItem().position.y * 6 + 13 - enemies[j].e_snow_gap)*SGH_SCALE_RATIO );
             }
         }
         if ((boss.e_boss_behv != 100) && (e_boss > 0))
         {
-//                paramGraphics.drawImage(this.imgShadow, this.e_boss_snow_x, this.e_boss_snow_y * 6 + 17, 0x2 | 0x1);
-//                paramGraphics.drawImage(this.imgItem[this.e_boss_wp], this.e_boss_snow_x, this.e_boss_snow_y * 6 + 13 - this.e_boss_snow_gap, 0x2 | 0x1);
+            batch.draw(imgShadow, boss.e_boss_snow_x, boss.e_boss_snow_y * 6 + 17); // TODO change to item.position
+            batch.draw(imgItem[boss.e_boss_wp], boss.e_boss_snow_x, (boss.e_boss_snow_y * 6 + 13 - boss.e_boss_snow_gap)*SGH_SCALE_RATIO );
         }
         if (del != -1) {
-//                draw_item();
+            draw_item();
         }
         if (hero.h_timer_p <= -1) {
             if (hero.h_timer_p != -5)
             {
-//                    paramGraphics.drawImage(this.imgH_ppang, this.h_x * 5 + 1, 81, 0x2 | 0x1);
+                batch.draw(imgH_ppang, (hero.position.x * 5 + 1)*SGH_SCALE_RATIO, 81*SGH_SCALE_RATIO); // Update geometry J2ME different
                 hero.h_timer_p -= 1;
             }
             else if (hero.h_timer_p == -5)
@@ -1948,25 +2035,25 @@ public class Screen1 extends DefaultScreen {
                 }
             }
         }
-        if (state == 2)
+        if (state == 2) // Draw s-t-a-g-e 1/2/3 etc animation
         {
             if (ani_step >= 3) {
-//                    paramGraphics.drawImage(imgStage[0], 20, 60, 20);
+                batch.draw(imgStage[0], 20*SGH_SCALE_RATIO, 60*SGH_SCALE_RATIO);  // Anchor 20, below same value
             }
             if (ani_step >= 6) {
-//                    paramGraphics.drawImage(imgStage[1], 35, 60, 20);
+                batch.draw(imgStage[1], 35*SGH_SCALE_RATIO, 60*SGH_SCALE_RATIO);
             }
             if (ani_step >= 9) {
-//                    paramGraphics.drawImage(imgStage[2], 50, 60, 20);
+                batch.draw(imgStage[2], 50*SGH_SCALE_RATIO, 60*SGH_SCALE_RATIO);
             }
             if (ani_step >= 12) {
-//                    paramGraphics.drawImage(imgStage[3], 65, 60, 20);
+                batch.draw(imgStage[3], 65*SGH_SCALE_RATIO, 60*SGH_SCALE_RATIO);
             }
             if (ani_step >= 15) {
-//                    paramGraphics.drawImage(imgStage[4], 80, 60, 20);
+                batch.draw(imgStage[4], 80*SGH_SCALE_RATIO, 60*SGH_SCALE_RATIO);
             }
             if (ani_step >= 19) {
-//                    paramGraphics.drawImage(imgStage_num, 95, 60, 20);
+                batch.draw(imgStage_num, 95*SGH_SCALE_RATIO, 60*SGH_SCALE_RATIO);
             }
         }
     }

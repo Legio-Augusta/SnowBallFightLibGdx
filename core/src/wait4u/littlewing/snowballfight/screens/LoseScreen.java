@@ -38,7 +38,7 @@ public class LoseScreen extends DefaultScreen {
         time += delta;
         if (time > 1) {
             if (Gdx.input.isKeyPressed(Input.Keys.ANY_KEY) || Gdx.input.justTouched()) {
-                game.setScreen(new Screen1(game));
+                game.setScreen(new GameScreen(game));
             }
         }
     }

@@ -9,30 +9,41 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
- * Created by Admin on 12/21/2016.
+ * Created by Admin on 11/28/2017.
  */
 
-public class VictoryScreen extends DefaultScreen {
-    TextureRegion victory;
+public class TitleMenuScreen extends DefaultScreen {
+    // TODO handle touch event in button like position
+    Texture imgMM;
+    Texture title;
+    Texture imgSl;
+    Texture imgBk;
+
     SpriteBatch batch;
     float time = 0;
 
-    public VictoryScreen(Game game) {
+    public TitleMenuScreen(Game game) {
         super(game);
     }
 
     @Override
     public void show() {
-        victory = new TextureRegion(new Texture(Gdx.files.internal("data/samsung-white/king_victory.png")), 0, 0, 432, 360);
+        // TODO handle screen ratio
+        imgMM = new Texture(Gdx.files.internal("data/samsung-white/mm.png"));
+        title = new Texture(Gdx.files.internal("data/samsung-white/title.png"));
+        imgSl = new Texture(Gdx.files.internal("data/samsung-white/sl.png"));
+        imgBk = new Texture(Gdx.files.internal("data/samsung-white/bk.png"));
         batch = new SpriteBatch();
-        batch.getProjectionMatrix().setToOrtho2D(0, 0, 432, 360);
     }
 
     @Override
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
-        batch.draw(victory, 0, 0);
+        batch.draw(imgMM, 0, 480);
+        batch.draw(title, 120, 515);
+        batch.draw(imgSl, 10, 320);
+        batch.draw(imgBk, 560, 320);
         batch.end();
 
         time += delta;
@@ -47,7 +58,9 @@ public class VictoryScreen extends DefaultScreen {
     public void hide() {
         Gdx.app.debug("Snow Ball Fight", "dispose intro");
         batch.dispose();
-        victory.getTexture().dispose();
+        imgMM.dispose();
+        title.dispose();
+        imgSl.dispose();
+        imgBk.dispose();
     }
-
 }
