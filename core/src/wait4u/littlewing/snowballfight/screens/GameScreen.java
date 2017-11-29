@@ -185,7 +185,7 @@ public class GameScreen extends DefaultScreen {
     private Texture ui;
     private Texture [] imgStage;
 
-    public GameScreen(Game game) {
+/*    public GameScreen(Game game) {
         super(game);
         item_price[0] = 5;
         item_price[1] = 8;
@@ -204,6 +204,30 @@ public class GameScreen extends DefaultScreen {
         camera = newOrthographicCamera(SCREEN_WIDTH, SCREEN_HEIGHT);
         // Calculate global var width/height, view port ...
         create();
+        init_game(-1);
+    }*/
+    public GameScreen(Game game, int screen) {
+        super(game);
+        item_price[0] = 5;
+        item_price[1] = 8;
+        item_price[2] = 8;
+        item_price[3] = 14;
+        item_price[4] = 6;
+        item_price[5] = 12;
+        item_price[6] = 10;
+        item_price[7] = 12;
+//        printScore("hero", 0);
+//        printScore("config", 1);
+        item_slot[0] = 3;
+        item_slot[1] = 5;
+        stage = last_stage = 11; // TODO use sharedPreference
+
+        camera = newOrthographicCamera(SCREEN_WIDTH, SCREEN_HEIGHT);
+        // Calculate global var width/height, view port ...
+        create();
+        screen = screen;
+
+        Gdx.app.log("INFO", "Inside screen = " + screen);
         init_game(-1);
     }
 
@@ -274,7 +298,7 @@ public class GameScreen extends DefaultScreen {
             drawSoundSettingScreen();
         }
         else if (screen == -88) {
-            drawNewOrSavedGame();
+            drawNewGameMenu();
         }
         else if (screen == 8) {
             drawSpecialAnimation();
@@ -305,6 +329,8 @@ public class GameScreen extends DefaultScreen {
         }
         else if (screen == -1) {
 //            drawLogoScreen();
+            game.setScreen(new LogoScreen(game));
+            screen = 6;
         }
         else if (screen == -2) {
 //            drawSamsungLogo();
@@ -398,7 +424,8 @@ public class GameScreen extends DefaultScreen {
 
     @Override
     public void show() {
-
+        Gdx.app.log("INFO", "Screen = " + screen);
+        Gdx.app.log("INFO", "Debug Item prices = " + item_price[0]);
     }
 
     @Override
@@ -473,9 +500,9 @@ public class GameScreen extends DefaultScreen {
     {
         initSpriteBatchAndHeroTexture();
         initEnemy();
-        initBobItem();
-        game.setScreen(new LogoScreen(game));
-        screen = 77;
+//        game.setScreen(new LogoScreen(game));
+
+//        screen = 77;
 
 //        repaint(); // TODO find gdx equivalent method or handle this function. May be multi Screen help ? Does global vars remain ?
 //        serviceRepaints();
@@ -496,7 +523,8 @@ public class GameScreen extends DefaultScreen {
         ppang_item = 0;
         make_enemy(paramInt);
         d_gauge = 2;
-        screen = 6;
+
+//        screen = 6;
         item_mode = 0;
 //        loadImage(6);
 //        loadImage(100);
@@ -507,6 +535,8 @@ public class GameScreen extends DefaultScreen {
         ani_step = 0;
 //        startThread();
         gameOn = true;
+
+        Gdx.app.log("INFO", "inside init screen= " + screen);
     }
 
     protected void initBobItem() {
@@ -2297,66 +2327,6 @@ public class GameScreen extends DefaultScreen {
         batch.drawImage(this.imgCh, 3, this.m_mode * 15 + 11, 20);*/
     }
     public void drawVillageScreen() { // screen = 3
-        /*paramGraphics.drawImage(this.imgVill, 0, 0, 20);
-        paramGraphics.setColor(14994350);
-        if (this.last_stage / 10 == 1)
-        {
-            paramGraphics.drawImage(this.imgSchool, 78, 87, 3);
-            paramGraphics.drawImage(this.imgSchool, 49, 87, 3);
-            paramGraphics.drawImage(this.imgSchool, 19, 58, 3);
-            paramGraphics.fillRect(76, 73, 6, 5);
-            paramGraphics.fillRect(47, 73, 6, 5);
-            paramGraphics.setColor(15132390);
-            paramGraphics.fillRect(17, 44, 6, 5);
-        }
-        else if (this.last_stage / 10 == 2)
-        {
-            paramGraphics.drawImage(this.imgSchool, 49, 87, 3);
-            paramGraphics.drawImage(this.imgSchool, 19, 58, 3);
-            paramGraphics.setColor(14994350);
-            paramGraphics.fillRect(47, 73, 6, 5);
-            paramGraphics.setColor(15132390);
-            paramGraphics.fillRect(17, 44, 6, 5);
-        }
-        else if (this.last_stage / 10 == 3)
-        {
-            paramGraphics.drawImage(this.imgSchool, 19, 58, 3);
-            paramGraphics.setColor(15132390);
-            paramGraphics.fillRect(17, 44, 6, 5);
-        }
-        paramGraphics.drawImage(this.imgCh, this.h_x, this.h_y, 20);
-        if (this.m_mode != -1)
-        {
-            if (this.m_mode == 0) {
-                this.message = "Drugstore";
-            } else if (this.m_mode == 1) {
-                this.message = "Item Shop";
-            } else if (this.m_mode == 2) {
-                this.message = "Eastern Boys";
-            } else if (this.m_mode == 3) {
-                this.message = "Southern Boys";
-            } else if (this.m_mode == 4) {
-                this.message = "Western Boys";
-            } else if (this.m_mode == 5) {
-                this.message = "Northern Boys";
-            } else if (this.m_mode == 100) {
-                this.message = "No Admittance";
-            }
-            if (this.message != "") {
-                draw_text(paramGraphics);
-            }
-        }
-        if ((this.ani_step == 0) && (this.last_stage > 20))
-        {
-            if (this.last_stage == 31) {
-                draw_text_box(paramGraphics, "Western Boys");
-            } else if (this.last_stage == 41) {
-                draw_text_box(paramGraphics, "Northern Boys");
-            } else if (this.last_stage == 21) {
-                draw_text_box(paramGraphics, "Southern Boys");
-            }
-            this.ani_step += 1;
-        }*/
     }
     public void drawShopScreen() { // screen = 31
 /*        paramGraphics.drawImage(this.imgShop, 24, 20, 20);
@@ -2404,14 +2374,8 @@ public class GameScreen extends DefaultScreen {
         paramGraphics.drawString("Instructions", 15, 70, 20);
         paramGraphics.drawString("Quit", 15, 84, 20);*/
     }
-    public void drawNewOrSavedGame() { // screen -88
-/*        paramGraphics.drawImage(this.imgMM, 0, 0, 20);
-        paramGraphics.setColor(16777164);
-        paramGraphics.drawString("1.New Game", 13, 27, 20);
-        paramGraphics.drawString("2.Saved Game", 13, 44, 20);
-        paramGraphics.drawImage(this.imgSl, 68, 115, 20);
-        paramGraphics.drawImage(this.imgBk, 2, 115, 20);
-        paramGraphics.drawImage(this.imgCh, 4, this.m_mode * 17 + 14, 20);*/
+    public void drawNewGameMenu() { // screen -88
+
     }
     public void drawSpecialAnimation() { // screen 8
 /*        if ((this.ani_step == 1) || (this.ani_step == 2))
@@ -2544,47 +2508,10 @@ public class GameScreen extends DefaultScreen {
         System.gc();*/
     }
     public void drawVictoryScreen() { // screen 200
-        /*if ((this.ani_step >= 13) && (this.ani_step < 27))
-        {
-            paramGraphics.setColor(16777215);
-            paramGraphics.fillRect(0, 60, 128, 47);
-            paramGraphics.drawImage(this.imgHero_v, this.h_x * 5, 83, 0x10 | 0x1);
-        }
-        else if ((this.ani_step >= 28) && (this.ani_step < 50))
-        {
-            paramGraphics.drawImage(this.imgV, this.h_x * 5 + 8, 87, 0x10 | 0x1);
-            if (this.ani_step > 41) {
-                paramGraphics.drawImage(this.imgVictory, 60, 60, 0x10 | 0x1);
-            }
-        }
-        else if (this.ani_step == 50)
-        {
-            this.ani_step = -1;
-        }*/
+
     }
     public void drawLoseScreen() { // screen 65335
-/*        int k;
-        if (this.ani_step < 30)
-        {
-            paramGraphics.setColor(0);
-            for (k = 0; k < 11; k++) {
-                paramGraphics.fillRect(0, k * 10, this.ani_step * 4 + 12, 5);
-            }
-        }
-        else if (this.ani_step < 65)
-        {
-            paramGraphics.setColor(0);
-            for (k = 0; k < 11; k++) {
-                paramGraphics.fillRect(0, k * 10 + 5, (this.ani_step - 30) * 7 - k * 10, 5);
-            }
-        }
-        else if ((this.ani_step >= 65) && (this.ani_step <= 100))
-        {
-            if (this.ani_step > 90) {
-                paramGraphics.drawImage(this.imgLose, 60, 60, 0x10 | 0x1);
-            }
-            paramGraphics.drawImage(this.imgHero_l, this.h_x * 5, 87, 0x10 | 0x1);
-        }*/
+
     }
     public void drawGoodJob() { // screen 300
         /*paramGraphics.drawImage(this.imgMM, 0, 0, 20);
@@ -2602,26 +2529,10 @@ public class GameScreen extends DefaultScreen {
 //        draw_text(paramGraphics);
     }
     public void drawLogoScreen() { // screen -1
-        /*loadImage(1);
-        paramGraphics.drawImage(this.imgLogo, 0, 0, 20);
-        MPlay(0);
-        destroyImage(1);*/
+
     }
     public void drawSamsungLogo() { // screen -2
-/*        paramGraphics.setColor(16777215);
-        paramGraphics.fillRect(0, 0, 128, 135);
-        paramGraphics.setColor(25054);
-        paramGraphics.fillRect(0, 0, 128, 22);
-        paramGraphics.fillRect(0, 71, 128, 84);
-        try
-        {
-            paramGraphics.drawImage(Image.createImage("/present.png"), 64, 5, 0x10 | 0x1);
-            paramGraphics.drawImage(Image.createImage("/sam_logo.png"), 64, 28, 0x10 | 0x1);
-            paramGraphics.drawImage(Image.createImage("/http1.png"), 7, 77, 20);
-            paramGraphics.drawImage(Image.createImage("/http2.png"), 7, 103, 20);
-        }
-        catch (Exception localException3) {}
-        System.gc();*/
+
     }
     public void drawAllClear() {
 /*        paramGraphics.setColor(16777215);
@@ -2646,15 +2557,7 @@ public class GameScreen extends DefaultScreen {
         System.gc();*/
     }
     public void drawTitleScreen() { // screen 1
-/*        paramGraphics.drawImage(this.imgMM, 0, 0, 20);
-        try
-        {
-            paramGraphics.drawImage(Image.createImage("/title.png"), 64, 35, 0x10 | 0x1);
-        }
-        catch (Exception localException6) {}
-        paramGraphics.drawImage(this.imgPl, 68, 115, 20);
-        paramGraphics.drawImage(this.imgBk, 2, 115, 20);
-        System.gc();*/
+
     }
 
     public void draw_gauge()

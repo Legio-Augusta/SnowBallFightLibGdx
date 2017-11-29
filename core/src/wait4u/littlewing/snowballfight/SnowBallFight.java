@@ -15,7 +15,7 @@ public class SnowBallFight extends Game {
         // Can put global var here ?
 //        setScreen(new LogoScreen(this));
 //        setScreen(new GameScreen(new SnowBallFight()));
-        setScreen(new GameScreen(this));
+        setScreen(new GameScreen(this, -1));
 //        setScreen(new VictoryScreen(this));
     }
 

@@ -38,7 +38,7 @@ public class VictoryScreen extends DefaultScreen {
         time += delta;
         if (time > 1) {
             if (Gdx.input.isKeyPressed(Input.Keys.ANY_KEY) || Gdx.input.justTouched()) {
-                game.setScreen(new GameScreen(game));
+                game.setScreen(new GameScreen(game, 6));
             }
         }
     }
@@ -48,6 +48,23 @@ public class VictoryScreen extends DefaultScreen {
         Gdx.app.debug("Snow Ball Fight", "dispose intro");
         batch.dispose();
         victory.getTexture().dispose();
+        /*if ((this.ani_step >= 13) && (this.ani_step < 27))
+        {
+            paramGraphics.setColor(16777215);
+            paramGraphics.fillRect(0, 60, 128, 47);
+            paramGraphics.drawImage(this.imgHero_v, this.h_x * 5, 83, 0x10 | 0x1);
+        }
+        else if ((this.ani_step >= 28) && (this.ani_step < 50))
+        {
+            paramGraphics.drawImage(this.imgV, this.h_x * 5 + 8, 87, 0x10 | 0x1);
+            if (this.ani_step > 41) {
+                paramGraphics.drawImage(this.imgVictory, 60, 60, 0x10 | 0x1);
+            }
+        }
+        else if (this.ani_step == 50)
+        {
+            this.ani_step = -1;
+        }*/
     }
 
 }

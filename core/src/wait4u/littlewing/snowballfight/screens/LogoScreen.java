@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -15,7 +16,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class LogoScreen extends DefaultScreen {
     // TODO do we need use InputProcessor or just texture ?
-    TextureRegion logo;
+    TextureRegion logo2;
+    Texture logo;
     SpriteBatch batch;
     float time = 0;
 
@@ -26,16 +28,19 @@ public class LogoScreen extends DefaultScreen {
     @Override
     public void show() {
         // TODO handle screen ratio
-        logo = new TextureRegion(new Texture(Gdx.files.internal("data/samsung-white/logo.png")), 0, 0, 1080, 1122);
+//        logo = new TextureRegion(new Texture(Gdx.files.internal("data/samsung-white/logo.png")), 0, 0, 1080, 1122);
         batch = new SpriteBatch();
-        batch.getProjectionMatrix().setToOrtho2D(0, 0, 1080, 1122);
+//        batch.getProjectionMatrix().setToOrtho2D(0, 0, 1080, 1122);
+        logo = new Texture(Gdx.files.internal("data/samsung-white/logo.png"));
     }
 
     @Override
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        int SCREEN_HEIGHT = Gdx.graphics.getHeight();
+
         batch.begin();
-        batch.draw(logo, 0, 0);
+        batch.draw(logo, 0, 400);
         batch.end();
 
         time += delta;
@@ -50,30 +55,11 @@ public class LogoScreen extends DefaultScreen {
     public void hide() {
         Gdx.app.debug("Snow Ball Fight", "dispose intro");
         batch.dispose();
-        logo.getTexture().dispose();
+        logo.dispose();
+        /*loadImage(1);
+        paramGraphics.drawImage(this.imgLogo, 0, 0, 20);
+        MPlay(0);
+        destroyImage(1);*/
     }
 
-    @Override
-    public boolean touchUp(int x, int y, int pointer, int button) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean touchDragged(int x, int y, int pointer) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean scrolled(int amount) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean mouseMoved(int screenX, int screenY) {
-        // TODO Auto-generated method stub
-        return false;
-    }
 }
