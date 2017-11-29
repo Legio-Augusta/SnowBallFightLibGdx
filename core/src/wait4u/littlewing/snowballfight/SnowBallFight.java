@@ -13,8 +13,9 @@ public class SnowBallFight extends Game {
     public void create () {
         // TODO handle global vars in GameScreen. setScreen as repaint J2ME
         // Can put global var here ?
-        setScreen(new LogoScreen(this));
+//        setScreen(new LogoScreen(this));
 //        setScreen(new GameScreen(new SnowBallFight()));
+        setScreen(new GameScreen(this));
 //        setScreen(new VictoryScreen(this));
     }
 

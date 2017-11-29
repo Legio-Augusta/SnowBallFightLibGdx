@@ -474,8 +474,9 @@ public class GameScreen extends DefaultScreen {
         initSpriteBatchAndHeroTexture();
         initEnemy();
         initBobItem();
-
+        game.setScreen(new LogoScreen(game));
         screen = 77;
+
 //        repaint(); // TODO find gdx equivalent method or handle this function. May be multi Screen help ? Does global vars remain ?
 //        serviceRepaints();
         game_state = 0;

@@ -3,6 +3,7 @@ package wait4u.littlewing.snowballfight.screens;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -13,6 +14,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
  */
 
 public class LogoScreen extends DefaultScreen {
+    // TODO do we need use InputProcessor or just texture ?
     TextureRegion logo;
     SpriteBatch batch;
     float time = 0;
@@ -39,7 +41,7 @@ public class LogoScreen extends DefaultScreen {
         time += delta;
         if (time > 1) {
             if (Gdx.input.isKeyPressed(Input.Keys.ANY_KEY) || Gdx.input.justTouched()) {
-                game.setScreen(new wait4u.littlewing.snowballfight.screens.SamsungFunclubScreen(game));
+                game.setScreen(new SamsungFunclubScreen(game));
             }
         }
     }
@@ -51,4 +53,27 @@ public class LogoScreen extends DefaultScreen {
         logo.getTexture().dispose();
     }
 
+    @Override
+    public boolean touchUp(int x, int y, int pointer, int button) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean touchDragged(int x, int y, int pointer) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean scrolled(int amount) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean mouseMoved(int screenX, int screenY) {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }
