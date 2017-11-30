@@ -206,7 +206,7 @@ public class GameScreen extends DefaultScreen {
         create();
         init_game(-1);
     }*/
-    public GameScreen(Game game, int screen) {
+    public GameScreen(Game game, int param_screen) {
         super(game);
         item_price[0] = 5;
         item_price[1] = 8;
@@ -225,7 +225,7 @@ public class GameScreen extends DefaultScreen {
         camera = newOrthographicCamera(SCREEN_WIDTH, SCREEN_HEIGHT);
         // Calculate global var width/height, view port ...
         create();
-        screen = screen;
+        this.screen = param_screen;
 
         Gdx.app.log("INFO", "Inside screen = " + screen);
         init_game(-1);
@@ -271,6 +271,7 @@ public class GameScreen extends DefaultScreen {
     }
 
     public void render(float delta) {
+        Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         camera.update();
@@ -1895,7 +1896,7 @@ public class GameScreen extends DefaultScreen {
         // In order easier to draw batch, we need change order of image draw ie. bk1 will be overlaped by white bg if white bg not scale and draw propertly by its position.
         int snowBoardHeight = VIEW_PORT_HEIGHT - ui.getHeight();
         // Scale by Y vertically, bg is in square ratio.
-        batch.draw(snowWhiteBg, 0, BOTTOM_SPACE+ui.getHeight(), snowBoardHeight, snowBoardHeight); // VIEW_PORT_HEIGHT
+//        batch.draw(snowWhiteBg, 0, BOTTOM_SPACE+ui.getHeight(), snowBoardHeight, snowBoardHeight); // VIEW_PORT_HEIGHT
         batch.draw(hero.getBobTexture(), hero.position.x * 5 * SGH_SCALE_RATIO, BOTTOM_SPACE+ui.getHeight()+SMALL_GAP , hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight()); // orig 83
         if (ppang_time > 0)
         {
@@ -2029,11 +2030,11 @@ public class GameScreen extends DefaultScreen {
                 draw_gauge();
         }
         for (j = 0; j < e_num; j++) { // or count array elements enemies
-            if (enemies[j].e_behv != 100)
-            {
-                batch.draw(imgShadow, enemies[j].getItem().position.x, (enemies[j].getItem().position.y * 6 + 17)*SGH_SCALE_RATIO );
-                batch.draw(imgItem[enemies[j].e_wp], enemies[j].getItem().position.x, (enemies[j].getItem().position.y * 6 + 13 - enemies[j].e_snow_gap)*SGH_SCALE_RATIO );
-            }
+//            if (enemies[j].e_behv != 100)
+//            {
+                batch.draw(imgShadow, enemies[j].getItem().position.x*CELL_WIDTH, (enemies[j].getItem().position.y * 5-5)*SGH_SCALE_RATIO ); // orig: y*6+17
+                batch.draw(imgItem[enemies[j].e_wp], enemies[j].getItem().position.x*CELL_WIDTH, (enemies[j].getItem().position.y * 6 + 13 - enemies[j].e_snow_gap)*SGH_SCALE_RATIO );
+//            }
         }
         if ((boss.e_boss_behv != 100) && (e_boss > 0))
         {
@@ -2317,195 +2318,30 @@ public class GameScreen extends DefaultScreen {
     }
 
     public void drawInstructionScreen() { // screen = 2
-        /*batch.drawImage(this.imgMM, 0, 0, 20);
-        batch.setColor(16777164);
-        batch.drawString("1.Play", 13, 23, 20);
-        batch.drawString("2.Instructions", 13, 38, 20);
-        batch.drawString("3.Configuration", 13, 53, 20);
-        batch.drawString("4.Quit", 13, 68, 20);
-        batch.drawImage(this.imgSl, 68, 115, 20);
-        batch.drawImage(this.imgCh, 3, this.m_mode * 15 + 11, 20);*/
+
     }
     public void drawVillageScreen() { // screen = 3
     }
     public void drawShopScreen() { // screen = 31
-/*        paramGraphics.drawImage(this.imgShop, 24, 20, 20);
-        paramGraphics.setColor(16777062);
-        paramGraphics.drawRect(27, this.s_item * 13 + 30, 29, 10);
-        paramGraphics.drawRect(28, this.s_item * 13 + 31, 27, 8);
-        paramGraphics.setColor(13434777);
-        paramGraphics.drawRect(this.b_item * 16 + 32, 70, 15, 15);
-        paramGraphics.drawRect(this.b_item * 16 + 33, 71, 13, 13);
-        draw_int(paramGraphics, this.saved_gold, 84, 96);
-        if (this.m_mode == 1) {
-            draw_int(paramGraphics, this.item_price[this.b_item], 42, 96);
-        } else if (this.m_mode == 0) {
-            draw_int(paramGraphics, this.item_price[(this.b_item + 4)], 42, 96);
-        }
-        if (this.message != "") {
-            draw_text(paramGraphics);
-        }*/
+
     }
     public void drawSoundSettingScreen() { // screen 100
-        /*paramGraphics.setColor(16777215);
-        paramGraphics.fillRect(1, 20, 126, 90);
-        paramGraphics.setColor(0);
-        paramGraphics.drawRect(0, 19, 127, 90);
-        paramGraphics.drawRect(0, 21, 127, 86);
-        paramGraphics.drawImage(this.imgCh, 3, this.m_mode * 14 + 18, 20);
-        paramGraphics.drawString("Resume", 15, 28, 20);
-        paramGraphics.drawString("MainMenu", 15, 42, 20);
-        paramGraphics.drawString("Sound", 15, 56, 20);
-        if (this.s_play == 1)
-        {
-            paramGraphics.setColor(255);
-            paramGraphics.drawString("On/", 69, 56, 20);
-            paramGraphics.setColor(8421504);
-            paramGraphics.drawString("off", 96, 56, 20);
-        }
-        else
-        {
-            paramGraphics.setColor(8421504);
-            paramGraphics.drawString("on/", 69, 56, 20);
-            paramGraphics.setColor(255);
-            paramGraphics.drawString("OFF", 93, 56, 20);
-        }
-        paramGraphics.setColor(0);
-        paramGraphics.drawString("Instructions", 15, 70, 20);
-        paramGraphics.drawString("Quit", 15, 84, 20);*/
+
     }
     public void drawNewGameMenu() { // screen -88
 
     }
     public void drawSpecialAnimation() { // screen 8
-/*        if ((this.ani_step == 1) || (this.ani_step == 2))
-        {
-            paramGraphics.setColor(10173);
-            paramGraphics.fillRect(0, 40, 128, 60);
-            paramGraphics.drawImage(this.imgSpecial[0], 44, 70, 3);
-            paramGraphics.drawImage(this.imgSpecial[1], 44, 89, 3);
-        }
-        else if (this.ani_step == 8)
-        {
-            paramGraphics.drawImage(this.imgSpecial[0], 44, 70, 3);
-            paramGraphics.drawImage(this.imgSpecial[1], 48, 89, 3);
-        }
-        else if (this.ani_step == 16)
-        {
-            paramGraphics.drawImage(this.imgSpecial[0], 44, 70, 3);
-            paramGraphics.drawImage(this.imgSpecial[1], 51, 89, 3);
-        }
-        else if (this.ani_step == 23)
-        {
-            paramGraphics.drawImage(this.imgSpecial[0], 44, 70, 3);
-            paramGraphics.drawImage(this.imgSpecial[1], 54, 89, 3);
-        }
-        else if (this.ani_step == 30)
-        {
-            paramGraphics.drawImage(this.imgSpecial[0], 44, 70, 3);
-            paramGraphics.drawImage(this.imgSpecial[1], 55, 89, 3);
-        }
-        else if (this.ani_step == 37)
-        {
-            paramGraphics.drawImage(this.imgSpecial[2], 58, 88, 3);
-        }
-        else if (this.ani_step == 50)
-        {
-            destroyImage(8);
-            loadImage(9);
-            this.ani_step = 0;
-            this.screen = 9;
-        }*/
+
     }
     public void drawSoundSpeedSetting() { // screen 4
-/*        paramGraphics.drawImage(this.imgMM, 0, 0, 20);
-        paramGraphics.setColor(16777164);
-        paramGraphics.drawString("Sound", 12, 23, 20);
-        if (this.s_play == 1)
-        {
-            paramGraphics.drawString("ON /", 62, 23, 20);
-            paramGraphics.setColor(10790052);
-            paramGraphics.drawString("off", 95, 23, 20);
-            paramGraphics.setColor(16777164);
-        }
-        if (this.s_play == 2)
-        {
-            paramGraphics.setColor(10790052);
-            paramGraphics.drawString("on /", 62, 23, 20);
-            paramGraphics.setColor(16777164);
-            paramGraphics.drawString("OFF", 94, 23, 20);
-        }
-        paramGraphics.drawString("Vibration ", 12, 41, 20);
-        if (this.v_mode == 1)
-        {
-            paramGraphics.drawString("ON /", 62, 59, 20);
-            paramGraphics.setColor(10790052);
-            paramGraphics.drawString("off", 95, 59, 20);
-            paramGraphics.setColor(16777164);
-        }
-        if (this.v_mode == 2)
-        {
-            paramGraphics.setColor(10790052);
-            paramGraphics.drawString("on /", 62, 59, 20);
-            paramGraphics.setColor(16777164);
-            paramGraphics.drawString("OFF", 94, 59, 20);
-        }
-        paramGraphics.drawString("Speed ", 14, 77, 20);
-        paramGraphics.drawString("[ " + String.valueOf(this.speed) + " ]", 68, 77, 20);
-        paramGraphics.drawImage(this.imgBk, 2, 115, 20);
-        if (this.m_mode < 3) {
-            paramGraphics.drawImage(this.imgCh, 4, this.m_mode * 18 + 9, 20);
-        } else {
-            paramGraphics.drawImage(this.imgCh, 4, this.m_mode * 18 + 27, 20);
-        }*/
+
     }
     public void drawGuideMenu() { // screen 5
-        /*paramGraphics.drawImage(this.imgMM, 0, 0, 20);
-        paramGraphics.setColor(16777164);
-        paramGraphics.drawString("1.Control Keys", 10, 25, 20);
-        paramGraphics.drawString("2.Offense items", 10, 42, 20);
-        paramGraphics.drawString("3.Defense items", 10, 59, 20);
-        paramGraphics.drawImage(this.imgCh, 3, this.m_mode * 17 + 12, 20);
-        paramGraphics.drawImage(this.imgSl, 68, 115, 20);
-        paramGraphics.drawImage(this.imgBk, 2, 115, 20);*/
+
     }
     public void drawListItems() { // screen -33
-        /*paramGraphics.drawImage(this.imgMM, 0, 0, 20);
-        paramGraphics.drawImage(this.imgBk, 2, 115, 20);
-        destroyImage(2);
-        paramGraphics.setColor(16777164);
-        try
-        {
-            if (this.m_mode == 1) {
-                paramGraphics.drawImage(Image.createImage("/txt4.png"), 5, 25, 20);
-            }
-            if (this.m_mode == 2)
-            {
-                paramGraphics.fillRect(6, 23, 10, 10);
-                paramGraphics.fillRect(6, 45, 10, 10);
-                paramGraphics.fillRect(6, 61, 10, 10);
-                paramGraphics.fillRect(6, 84, 10, 10);
-                paramGraphics.drawImage(Image.createImage("/item1.png"), 7, 24, 20);
-                paramGraphics.drawImage(Image.createImage("/item2.png"), 7, 46, 20);
-                paramGraphics.drawImage(Image.createImage("/item3.png"), 7, 62, 20);
-                paramGraphics.drawImage(Image.createImage("/item4.png"), 7, 85, 20);
-                paramGraphics.drawImage(Image.createImage("/txt2.png"), 23, 25, 20);
-            }
-            if (this.m_mode == 3)
-            {
-                paramGraphics.fillRect(6, 23, 10, 10);
-                paramGraphics.fillRect(6, 38, 10, 10);
-                paramGraphics.fillRect(6, 53, 10, 10);
-                paramGraphics.fillRect(6, 67, 10, 10);
-                paramGraphics.drawImage(Image.createImage("/item5.png"), 7, 24, 20);
-                paramGraphics.drawImage(Image.createImage("/item6.png"), 7, 39, 20);
-                paramGraphics.drawImage(Image.createImage("/item7.png"), 7, 54, 20);
-                paramGraphics.drawImage(Image.createImage("/item8.png"), 7, 68, 20);
-                paramGraphics.drawImage(Image.createImage("/txt1.png"), 23, 25, 20);
-            }
-        }
-        catch (Exception localException2) {}
-        System.gc();*/
+
     }
     public void drawVictoryScreen() { // screen 200
 
@@ -2514,16 +2350,7 @@ public class GameScreen extends DefaultScreen {
 
     }
     public void drawGoodJob() { // screen 300
-        /*paramGraphics.drawImage(this.imgMM, 0, 0, 20);
-        paramGraphics.setColor(16777164);
-        paramGraphics.drawString("Good Job!", 15, 23, 20);
-        paramGraphics.setColor(13434726); // CCFF66
-        paramGraphics.drawString("Acquired", 15, 41, 20);
-        paramGraphics.drawString("Gold:", 48, 57, 20);
-        paramGraphics.drawString(String.valueOf(this.gold), 92, 57, 20);
-        paramGraphics.setColor(16777164);
-        paramGraphics.drawString("press any key", 10, 83, 20);
-        paramGraphics.drawString("to continue", 37, 97, 20);*/
+
     }
     public void drawTextScreen() { // screen 77
 //        draw_text(paramGraphics);
@@ -2535,26 +2362,10 @@ public class GameScreen extends DefaultScreen {
 
     }
     public void drawAllClear() {
-/*        paramGraphics.setColor(16777215);
-        paramGraphics.fillRect(0, 25, 120, 85);
-        try
-        {
-            paramGraphics.drawImage(Image.createImage("/allClear.png"), 64, 10, 0x10 | 0x1);
-        }
-        catch (Exception localException4) {}*/
+
     }
     public void drawManualScreen() { // screen -5
-/*        paramGraphics.setColor(16777215);
-        paramGraphics.fillRect(1, 20, 126, 90);
-        paramGraphics.setColor(0);
-        paramGraphics.drawRect(0, 19, 127, 90);
-        paramGraphics.drawRect(0, 21, 127, 86);
-        try
-        {
-            paramGraphics.drawImage(Image.createImage("/txt4b.png"), 4, 30, 20);
-        }
-        catch (Exception localException5) {}
-        System.gc();*/
+
     }
     public void drawTitleScreen() { // screen 1
 
@@ -2562,43 +2373,7 @@ public class GameScreen extends DefaultScreen {
 
     public void draw_gauge()
     {
-        /*if (this.d_gauge == 2)
-        {
-            paramGraphics.setColor(16775065);
-            paramGraphics.fillRect(118, 111, 8, 8);
-            if (this.wp != 0) {
-                paramGraphics.drawImage(this.imgItem[this.wp], 122, 111, 0x10 | 0x1);
-            }
-        }
-        if (this.mana != 0)
-        {
-            paramGraphics.setColor(16711680);
-            paramGraphics.fillRect(30, 124, this.mana, 1);
-            if (this.mana == 36)
-            {
-                paramGraphics.fillRect(39, 123, 3, 3);
-                paramGraphics.fillRect(51, 123, 3, 3);
-                paramGraphics.fillRect(63, 123, 3, 3);
-            }
-            else if (this.mana >= 24)
-            {
-                paramGraphics.fillRect(39, 123, 3, 3);
-                paramGraphics.fillRect(51, 123, 3, 3);
-            }
-            else if (this.mana >= 12)
-            {
-                paramGraphics.fillRect(39, 123, 3, 3);
-            }
-        }
-        else if (this.mana == 0)
-        {
-            paramGraphics.setColor(4960985);
-            paramGraphics.fillRect(30, 124, 36, 1);
-            paramGraphics.fillRect(39, 123, 3, 3);
-            paramGraphics.fillRect(51, 123, 3, 3);
-            paramGraphics.fillRect(63, 123, 3, 3);
-        }
-        this.d_gauge = 0;*/
+
     }
 
     public void check_ppang() {

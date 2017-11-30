@@ -53,11 +53,11 @@ public class VillageScreen extends DefaultScreen {
         if (Gdx.input.isKeyPressed(Input.Keys.ANY_KEY) || Gdx.input.justTouched()) {
             // Can not use font getBound(), so hard code position of text Bitmap.
             touchPoint.set(Gdx.input.getX(),Gdx.input.getY(), 0);
-            Rectangle newGameTextBound = new Rectangle(110, 1300, SCREEN_WIDTH-200, 160);
-            Rectangle savedGameTextBound = new Rectangle(110, 1160, SCREEN_WIDTH-200, 140);
-            if(OverlapTester.pointInRectangle(newGameTextBound, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
+            Rectangle selectButtonBound = new Rectangle(10, 480, SCREEN_WIDTH/2-32, 100);
+            Rectangle optionsButtonBound = new Rectangle(SCREEN_WIDTH/2+12, 480, SCREEN_WIDTH/2-12, 100);
+            if(OverlapTester.pointInRectangle(selectButtonBound, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
                 game.setScreen(new GameScreen(game, 6));
-            } else if(OverlapTester.pointInRectangle(savedGameTextBound, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
+            } else if(OverlapTester.pointInRectangle(optionsButtonBound, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
                 game.setScreen(new GameScreen(game, 6));
             }
         }
