@@ -471,7 +471,7 @@ public class GameScreen extends DefaultScreen {
         enemies = new Enemy[e_num];
         for (int i = 0; i < enemies.length; i++) {
             // Add some random on start position of enemies
-            int enemyPosY = TOP_BOUND - 3*CELL_WIDTH;
+            int enemyPosY = (TOP_BOUND/CELL_WIDTH)-3;
             int enemyStartPositionX = (int) SCREEN_WIDTH / 2 / CELL_WIDTH;
             if(i%2 == 0) {
                 enemyStartPositionX += boss.get_random(6);
@@ -560,14 +560,6 @@ public class GameScreen extends DefaultScreen {
 
         fireBtnTexture = new Texture("data/samsung-white/fire.png");
         initBobItem();
-    }
-
-    protected void drawSplashBatch() {
-//        batch.disableBlending();
-        batch.begin();
-//        batch.draw(ttrSplash, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-        batch.draw(snowWhiteBg, 0, BOTTOM_SPACE, SCREEN_WIDTH, VIEW_PORT_HEIGHT+BOTTOM_SPACE);
-        batch.end();
     }
 
     /*
@@ -1536,257 +1528,257 @@ public class GameScreen extends DefaultScreen {
 
     public void run()
     {
-            if (gameOn)
+        if (gameOn) {
+            if (screen == 6) // Game running screen
             {
-                if (screen == 6) // Game running screen
+                if (state == 1)
                 {
-                    if (state == 1)
-                    {
 /*                        try
-                        {
-                            Thread.sleep(game_speed); // TODO use this for level and game speed control.
-                            // Or use gdx way to auto change speed based on device CPU power
+                    {
+                        Thread.sleep(game_speed); // TODO use this for level and game speed control.
+                        // Or use gdx way to auto change speed based on device CPU power
+                    }
+                    catch (Exception localException1) {}*/
+                    if (pw_up == 1) // hero fire
+                    {
+                        hero.setPower();
+                        if (hero.h_idx == 2) {
+                            hero.h_idx = 3;
+                        } else if (hero.h_idx == 3) {
+                            hero.h_idx = 2;
                         }
-                        catch (Exception localException1) {}*/
-                        if (pw_up == 1) // hero fire
+                    }
+                    else if (pw_up == 2)
+                    {
+                        if (hero.h_timer < 4)
                         {
-                            hero.setPower();
-                            if (hero.h_idx == 2) {
-                                hero.h_idx = 3;
-                            } else if (hero.h_idx == 3) {
-                                hero.h_idx = 2;
+                            hero.h_timer += 1;
+                            if (hero.h_timer == 4) {
+                                hero.h_idx = 0;
                             }
                         }
-                        else if (pw_up == 2)
+                        if (snow_y > snow_last_y)
                         {
-                            if (hero.h_timer < 4)
-                            {
-                                hero.h_timer += 1;
-                                if (hero.h_timer == 4) {
-                                    hero.h_idx = 0;
-                                }
+                            snow_y -= 1;
+                            if (snow_y > snow_top_y) {
+                                snow_gap += 3;
+                            } else if (snow_y < snow_top_y) {
+                                snow_gap -= 3;
                             }
-                            if (snow_y > snow_last_y)
-                            {
-                                snow_y -= 1;
-                                if (snow_y > snow_top_y) {
-                                    snow_gap += 3;
-                                } else if (snow_y < snow_top_y) {
-                                    snow_gap -= 3;
-                                }
-                            }
-                            else
-                            {
+                        }
+                        else
+                        {
 //                                check_ppang();
+                        }
+                    }
+                    this.e_time += 1;
+                    for (int i = 0; i < e_num; i++)
+                    {
+                        if (enemies[i].getHp() >= 0)
+                        {
+                            if ((e_time == enemies[i].e_fire_time) && (boss.get_random(3) != 1) && (enemies[i].e_ppang_item != 2)) {
+                                enemies[i].e_attack_ai(hero, boss, enemies, i);
+                            }
+                            if (enemies[i].e_ppang_item != 2) {
+                                if (enemies[i].e_idx == 0) {
+                                    enemies[i].e_idx = 1;
+                                } else if (enemies[i].e_idx == 1) {
+                                    enemies[i].e_idx = 0;
+                                }
                             }
                         }
-                        this.e_time += 1;
-                        for (int i = 0; i < e_num; i++)
+                        if (enemies[i].e_move_dir >= 100)
                         {
-                            if (enemies[i].getHp() >= 0)
-                            {
-                                if ((e_time == enemies[i].e_fire_time) && (boss.get_random(3) != 1) && (enemies[i].e_ppang_item != 2)) {
-                                    enemies[i].e_attack_ai(hero, boss, enemies, i);
-                                }
-                                if (enemies[i].e_ppang_item != 2) {
-                                    if (enemies[i].e_idx == 0) {
-                                        enemies[i].e_idx = 1;
-                                    } else if (enemies[i].e_idx == 1) {
-                                        enemies[i].e_idx = 0;
-                                    }
-                                }
-                            }
-                            if (enemies[i].e_move_dir >= 100)
-                            {
-                                enemies[i].e_move_dir += 1;
-                                if (enemies[i].e_move_dir == 120) {
-                                    enemies[i].e_move_dir = 0;
-                                }
-                            }
-                            else if ((enemies[i].e_move_dir == 0) && (enemies[i].getHp() > 0) && (enemies[i].e_ppang_item != 2))
-                            {
-                                enemies[i].e_move_ai(enemies, i);
-                            }
-                            else if ((enemies[i].e_move_dir < 100) && (enemies[i].e_move_dir != 0) && (enemies[i].getHp() > 0))
-                            {
-                                enemies[i].e_move(enemies, i);
-                            }
-                        } // End enemy attack n move ai
-                        if (e_boss > 0)
-                        {
-                            if (boss.getHp() >= 0)
-                            {
-                                if ((e_time == boss.e_boss_fire_time) && (boss.get_random(3) != 1)) {
-                                    if ((this.e_boss == 1) || (this.e_boss == 2)) {
-                                        enemies[0].e_attack_ai(hero, boss, enemies, 101);
-                                    } else {
-                                        enemies[0].e_attack_ai(hero, boss, enemies, 102);
-                                    }
-                                }
-                                if (boss.e_boss_idx == 0) {
-                                    boss.e_boss_idx = 1;
-                                } else if (boss.e_boss_idx == 1) {
-                                    boss.e_boss_idx = 0;
-                                }
-                            }
-                            if (boss.e_boss_move_dir >= 100)
-                            {
-                                boss.e_boss_move_dir += 1;
-                                if (boss.e_boss_move_dir == 115) {
-                                    boss.e_boss_move_dir = 0;
-                                }
-                            }
-                            else if ((boss.e_boss_move_dir == 0) && (boss.getHp() > 0))
-                            {
-                                boss.boss_move_ai();
-                            }
-                            else if ((boss.e_boss_move_dir != 0) && (boss.getHp() > 0))
-                            {
-                                boss.boss_move();
+                            enemies[i].e_move_dir += 1;
+                            if (enemies[i].e_move_dir == 120) {
+                                enemies[i].e_move_dir = 0;
                             }
                         }
+                        else if ((enemies[i].e_move_dir == 0) && (enemies[i].getHp() > 0) && (enemies[i].e_ppang_item != 2))
+                        {
+                            enemies[i].e_move_ai(enemies, i);
+                        }
+                        else if ((enemies[i].e_move_dir < 100) && (enemies[i].e_move_dir != 0) && (enemies[i].getHp() > 0))
+                        {
+                            enemies[i].e_move(enemies, i);
+                        }
+                    } // End enemy attack n move ai
+                    if (e_boss > 0)
+                    {
+                        if (boss.getHp() >= 0)
+                        {
+                            if ((e_time == boss.e_boss_fire_time) && (boss.get_random(3) != 1)) {
+                                if ((this.e_boss == 1) || (this.e_boss == 2)) {
+                                    enemies[0].e_attack_ai(hero, boss, enemies, 101);
+                                } else {
+                                    enemies[0].e_attack_ai(hero, boss, enemies, 102);
+                                }
+                            }
+                            if (boss.e_boss_idx == 0) {
+                                boss.e_boss_idx = 1;
+                            } else if (boss.e_boss_idx == 1) {
+                                boss.e_boss_idx = 0;
+                            }
+                        }
+                        if (boss.e_boss_move_dir >= 100)
+                        {
+                            boss.e_boss_move_dir += 1;
+                            if (boss.e_boss_move_dir == 115) {
+                                boss.e_boss_move_dir = 0;
+                            }
+                        }
+                        else if ((boss.e_boss_move_dir == 0) && (boss.getHp() > 0))
+                        {
+                            boss.boss_move_ai();
+                        }
+                        else if ((boss.e_boss_move_dir != 0) && (boss.getHp() > 0))
+                        {
+                            boss.boss_move();
+                        }
+                    }
 
-                        if ((e_num == 3) || (e_num == 4))
-                        {
-                            if (e_time == 21) {
-                                e_time = 0;
-                            }
-                        }
-                        else if ((e_num == 2) && (e_time == 18)) {
+                    if ((e_num == 3) || (e_num == 4))
+                    {
+                        if (e_time == 21) {
                             e_time = 0;
                         }
-                        enemies[0].e_snow(e_num, e_boss, enemies, boss, hero);
-                        if (gameOn)
-                        {
-//                            repaint();
-//                            serviceRepaints();
-                        }
                     }
-                    else if (state == 2) {
-                        if ((ani_step >= 1) && (ani_step <= 20)) {
-                            ani_step += 1;
-                        }
-                        if (ani_step == 0)
-                        {
-//                            loadImage(-6);
-                            ani_step = 1;
-                        }
-                        else if ((ani_step >= 1) && (ani_step <= 19))
-                        {
-//                            repaint();
-//                            serviceRepaints();
-                        }
-                        else if (ani_step == 20)
-                        {
-//                            destroyImage(-6);
-                            state = 1;
-                        }
+                    else if ((e_num == 2) && (e_time == 18)) {
+                        e_time = 0;
                     }
-                    else if (state == 3) {
-                        if (game_state == 2)
-                        {
-                            screen = 201;
-//                            MPlay(7);
-                            gold = (school * 6 + boss.get_random(7) + 5);
-                        }
-                        else if (game_state == 1)
-                        {
-                            screen = 65336;
-                            gold = 3;
-                        }
-                    }
-                }
-                else if (screen == 8) {
-                    if ((ani_step < 50) && (ani_step > 0)) {
-                        ani_step += 1;
-                    }
-//                    repaint();
-//                    serviceRepaints();
-                }
-                else if (screen == 9) {
-                    if ((ani_step < 46) && (ani_step >= 0)) {
-                        ani_step += 1;
-                    }
-//                    repaint();
-//                    serviceRepaints();
-                }
-                else if (screen == 200) {
-                    if ((ani_step < 51) && (ani_step >= 0))
+                    enemies[0].e_snow(e_num, e_boss, enemies, boss, hero);
+                    if (gameOn)
                     {
+//                            repaint();
+//                            serviceRepaints();
+                    }
+                }
+                // ani_step used in many screen, ie. draw STAGE ani. Tempory run over this case to avoid drawScreen ?
+                else if (state == 2) {
+                    if ((ani_step >= 1) && (ani_step <= 20)) {
                         ani_step += 1;
+                    }
+                    if (ani_step == 0)
+                    {
+//                            loadImage(-6);
+                        ani_step = 1;
+                    }
+                    else if ((ani_step >= 1) && (ani_step <= 19))
+                    {
+//                            repaint();
+//                            serviceRepaints();
+                    }
+                    else if (ani_step == 20)
+                    {
+//                            destroyImage(-6);
+                        state = 1;
+                    }
+                }
+                else if (state == 3) {
+                    if (game_state == 2)
+                    {
+                        screen = 201;
+//                            MPlay(7);
+                        gold = (school * 6 + boss.get_random(7) + 5);
+                    }
+                    else if (game_state == 1)
+                    {
+                        screen = 65336;
+                        gold = 3;
+                    }
+                }
+            }
+            else if (screen == 8) {
+                if ((ani_step < 50) && (ani_step > 0)) {
+                    ani_step += 1;
+                }
+//                    repaint();
+//                    serviceRepaints();
+            }
+            else if (screen == 9) {
+                if ((ani_step < 46) && (ani_step >= 0)) {
+                    ani_step += 1;
+                }
+//                    repaint();
+//                    serviceRepaints();
+            }
+            else if (screen == 200) {
+                if ((ani_step < 51) && (ani_step >= 0))
+                {
+                    ani_step += 1;
 //                        repaint();
 //                        serviceRepaints();
+                }
+                else
+                {
+                    gameOn = false;
+//                        destroyImage(200);
+                    if (state != 10)
+                    {
+//                            loadImage(2);
+                        screen = 300;
                     }
                     else
                     {
-                        gameOn = false;
-//                        destroyImage(200);
-                        if (state != 10)
-                        {
-//                            loadImage(2);
-                            screen = 300;
-                        }
-                        else
-                        {
-                            screen = 1000;
-                        }
+                        screen = 1000;
+                    }
 //                        repaint();
-                    }
                 }
-                else if (screen == 201) {
-                    ani_step = 0;
-                    if (last_stage / 10 == school)
+            }
+            else if (screen == 201) {
+                ani_step = 0;
+                if (last_stage / 10 == school)
+                {
+                    if (stage % 10 != 4)
                     {
-                        if (stage % 10 != 4)
-                        {
-                            stage += 1;
-                        }
-                        else if (stage != 44)
-                        {
-                            stage += 10;
-                            stage = (stage - stage % 10 + 1);
-                        }
-                        else
-                        {
-                            stage = 45;
-                            state = 10;
-                        }
-                        last_stage = stage;
+                        stage += 1;
                     }
+                    else if (stage != 44)
+                    {
+                        stage += 10;
+                        stage = (stage - stage % 10 + 1);
+                    }
+                    else
+                    {
+                        stage = 45;
+                        state = 10;
+                    }
+                    last_stage = stage;
+                }
 
-                    screen = 200;
-                } // end screen 201
-                else if (screen == 65336) {
-                    item_mode = 0;
-                    ani_step = 0;
+                screen = 200;
+            } // end screen 201
+            else if (screen == 65336) {
+                item_mode = 0;
+                ani_step = 0;
 //                    loadImage(65336);
 //                    MPlay(6);
-                    screen = 65335;
-                }
-                else if (screen == 65335)
+                screen = 65335;
+            }
+            else if (screen == 65335)
+            {
+                if (ani_step <= 100)
                 {
-                    if (ani_step <= 100)
-                    {
-                        ani_step += 1;
+                    ani_step += 1;
 //                        repaint();
 //                        serviceRepaints();
-                    }
-                    else
-                    {
-                        gameOn = false;
-//                        loadImage(2);
-                        screen = 300;
-//                        repaint();
-                    }
                 }
-            } // end is GameOn
-            else {
-                /*try
+                else
                 {
-                    Thread.sleep(100L);
+                    gameOn = false;
+//                        loadImage(2);
+                    screen = 300;
+//                        repaint();
                 }
-                catch (Exception localException2) {}*/
             }
+        } // end is GameOn
+        else {
+            /*try
+            {
+                Thread.sleep(100L);
+            }
+            catch (Exception localException2) {}*/
+        }
     } // End run()
 
     public int input_item(int paramInt) {
@@ -1896,7 +1888,7 @@ public class GameScreen extends DefaultScreen {
         // In order easier to draw batch, we need change order of image draw ie. bk1 will be overlaped by white bg if white bg not scale and draw propertly by its position.
         int snowBoardHeight = VIEW_PORT_HEIGHT - ui.getHeight();
         // Scale by Y vertically, bg is in square ratio.
-//        batch.draw(snowWhiteBg, 0, BOTTOM_SPACE+ui.getHeight(), snowBoardHeight, snowBoardHeight); // VIEW_PORT_HEIGHT
+        batch.draw(snowWhiteBg, 0, BOTTOM_SPACE+ui.getHeight(), snowBoardHeight, snowBoardHeight); // VIEW_PORT_HEIGHT
         batch.draw(hero.getBobTexture(), hero.position.x * 5 * SGH_SCALE_RATIO, BOTTOM_SPACE+ui.getHeight()+SMALL_GAP , hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight()); // orig 83
         if (ppang_time > 0)
         {
@@ -2030,11 +2022,11 @@ public class GameScreen extends DefaultScreen {
                 draw_gauge();
         }
         for (j = 0; j < e_num; j++) { // or count array elements enemies
-//            if (enemies[j].e_behv != 100)
-//            {
-                batch.draw(imgShadow, enemies[j].getItem().position.x*CELL_WIDTH, (enemies[j].getItem().position.y * 5-5)*SGH_SCALE_RATIO ); // orig: y*6+17
-                batch.draw(imgItem[enemies[j].e_wp], enemies[j].getItem().position.x*CELL_WIDTH, (enemies[j].getItem().position.y * 6 + 13 - enemies[j].e_snow_gap)*SGH_SCALE_RATIO );
-//            }
+            if (enemies[j].e_behv != 100)
+            {
+                batch.draw(imgShadow, enemies[j].getItem().position.x*CELL_WIDTH, (enemies[j].getItem().position.y * 5-5)*SGH_SCALE_RATIO ); // orig: y*6+17;
+                batch.draw(imgItem[enemies[j].e_wp], enemies[j].getItem().position.x*CELL_WIDTH, (enemies[j].getItem().position.y * 5 + 13 - enemies[j].e_snow_gap)*SGH_SCALE_RATIO ); // orig *6 + 13
+            }
         }
         if ((boss.e_boss_behv != 100) && (e_boss > 0))
         {
@@ -2067,7 +2059,8 @@ public class GameScreen extends DefaultScreen {
                 }
             }
         }
-        if (state == 2) // Draw s-t-a-g-e 1/2/3 etc animation
+        // tempory run over this case
+/*        if (state == 2) // Draw s-t-a-g-e 1/2/3 etc animation
         {
             if (ani_step >= 3) {
                 batch.draw(imgStage[0], 20*SGH_SCALE_RATIO, 60*SGH_SCALE_RATIO);  // Anchor 20, below same value
@@ -2087,7 +2080,7 @@ public class GameScreen extends DefaultScreen {
             if (ani_step >= 19) {
                 batch.draw(imgStage_num, 95*SGH_SCALE_RATIO, 60*SGH_SCALE_RATIO);
             }
-        }
+        }*/
     }
 
     public void drawSpecialScreen() {

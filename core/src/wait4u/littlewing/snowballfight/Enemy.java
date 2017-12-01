@@ -622,8 +622,8 @@ public class Enemy {
                 }
             }
             enemies[k].e_behv = i;
-            enemies[k].e_snow_y = (int)enemies[k].position.y; // TODO why y do not multiple by cell (5)
-            enemies[k].e_snow_x = (int)(enemies[k].position.x * 5);
+            enemies[k].item.position.y = (int)enemies[k].position.y; // TODO why y do not multiple by cell (5)
+            enemies[k].item.position.x = (int)(enemies[k].position.x); // orig: *5
             enemies[k].e_snow_gap = 0;
             enemies[k].e_snow_dx = i;
             enemies[k].e_snow_top = 1;
@@ -663,8 +663,8 @@ public class Enemy {
                 }
             }
             boss.e_boss_behv = i;
-            boss.e_boss_snow_y = (int)boss.position.y;
-            boss.e_boss_snow_x = (int)(boss.position.x * 5);
+            boss.item.position.y = (int)boss.position.y;
+            boss.item.position.x = (int)(boss.position.x * 5);
             boss.e_boss_snow_gap = 0;
             boss.e_boss_snow_dx = i;
             boss.e_boss_snow_top = 1;
@@ -678,8 +678,8 @@ public class Enemy {
         for (int i = 0; i < e_num; i++) {
             if ( enemies[i].e_behv != 100)
             {
-                enemies[i].e_snow_y += 1;
-                enemies[i].e_snow_x += enemies[i].e_snow_dx;
+                enemies[i].item.position.y += 1; // e_snow_y
+                enemies[i].item.position.x += enemies[i].e_snow_dx;
                 if ((enemies[i].e_snow_gap < 10) && (enemies[i].e_snow_top == 1))
                 {
                     enemies[i].e_snow_gap += 2;
@@ -691,17 +691,17 @@ public class Enemy {
                 {
                     enemies[i].e_snow_gap -= 1;
                 }
-                if (enemies[i].e_snow_y == 13) {
-                    hero.check_hero(enemies[i].e_snow_x, i);
-                } else if (enemies[i].e_snow_y >= 16) {
+                if ((int)enemies[i].item.position.y == 13) {
+                    hero.check_hero((int)enemies[i].item.position.x, i);
+                } else if (enemies[i].item.position.y >= 16) {
                     enemies[i].e_behv = 100;
                 }
             }
         }
         if ((e_boss > 0) && (boss.e_boss_behv != 100))
         {
-            boss.e_boss_snow_y += 1;
-            boss.e_boss_snow_x += boss.e_boss_snow_dx;
+            boss.getItem().position.y += 1; // currently use public Item
+            boss.item.position.x += boss.e_boss_snow_dx;
             if ((boss.e_boss_snow_gap < 10) && (boss.e_boss_snow_top == 1))
             {
                 boss.e_boss_snow_gap += 2;
@@ -713,9 +713,9 @@ public class Enemy {
             {
                 boss.e_boss_snow_gap -= 1;
             }
-            if (boss.e_boss_snow_y == 13) {
-                hero.check_hero(boss.e_boss_snow_x, 100);
-            } else if (boss.e_boss_snow_y >= 16) {
+            if ((int)boss.item.position.y == 13) {
+                hero.check_hero((int)boss.item.position.x, 100);
+            } else if ((int)boss.item.position.y >= 16) {
                 boss.e_boss_behv = 100;
             }
         }

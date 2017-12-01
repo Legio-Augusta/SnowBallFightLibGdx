@@ -49,7 +49,7 @@ public class Boss {
     private Texture bobTexture;
     private Sprite sprite;
     // snow or stone item used in firing
-    private Item item;
+    public Item item;
 
     public Boss(Vector2 position) {
         this.position = position;

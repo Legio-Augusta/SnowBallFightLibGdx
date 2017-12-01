@@ -5,6 +5,7 @@
 
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="19" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.SET_DEBUG_APP"></uses-permission>
     <uses-feature android:glEsVersion="0x00020000" android:required="true" />
     
     <application
@@ -18,12 +19,12 @@
             android:screenOrientation="portrait" >
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER" />
-                <action android:name="android.intent.action.MAIN" />
+                <!--<action android:name="android.intent.action.MAIN" />-->
             </intent-filter>
         </activity>
 
         <activity
-            android:name="wait4u.littlewing.paxbritan.android.AndroidLauncher2"
+            android:name="wait4u.littlewing.paxbritan.android.SnowBallFightLauncher"
             android:label="SnowBallFight"
             android:configChanges="keyboard|keyboardHidden|orientation"
             android:screenOrientation="portrait" >
