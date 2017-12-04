@@ -2,7 +2,6 @@ package wait4u.littlewing.snowballfight.screens;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -22,6 +21,8 @@ import wait4u.littlewing.snowballfight.Item;
 import wait4u.littlewing.snowballfight.Enemy;
 import wait4u.littlewing.snowballfight.Boss;
 import wait4u.littlewing.snowballfight.Hero;
+
+import wait4u.littlewing.snowballfight.OverlapTester;
 
 /**
  * Created by nickfarow on 13/10/2016.
@@ -48,6 +49,7 @@ public class GameScreen extends DefaultScreen {
     private Stage touch_stage;
     private Touchpad touchpad;
     private Touchpad.TouchpadStyle touchpadStyle;
+    Vector3 touchPoint;
     private Skin touchpadSkin;
     private Drawable touchBackground;
     private Drawable touchKnob;
@@ -227,7 +229,7 @@ public class GameScreen extends DefaultScreen {
         create();
         this.screen = param_screen;
 
-        Gdx.app.log("INFO", "Inside screen = " + screen);
+        touchPoint = new Vector3();
         init_game(-1);
     }
 
@@ -776,6 +778,17 @@ public class GameScreen extends DefaultScreen {
         }
         // TODO find where touch event (dragged) call, can it be overrided ?
         // convert touch event to key event (getGameAction)
+
+        touchPoint.set(Gdx.input.getX(),Gdx.input.getY(), 0);
+        Rectangle upBtnRect = new Rectangle(110, 1300-160, SCREEN_WIDTH-200, 160);
+        Rectangle downBtnRect = new Rectangle(110, 1160-140, SCREEN_WIDTH-200, 140);
+        Rectangle leftBtnRect = new Rectangle(SCREEN_WIDTH-imgSl.getWidth(), 480, imgSl.getWidth(), imgSl.getHeight());
+        Rectangle rightBtnRect = new Rectangle(15, 480, imgBk.getWidth(), imgBk.getHeight());
+
+        Gdx.app.log("INFO", "touch " + touchPoint.x + " y "+ (SCREEN_HEIGHT-touchPoint.y) + " bound x "+ upBtnRect.toString() + " saved "+ downBtnRect.toString());
+        if(OverlapTester.pointInRectangle(upBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
+
+        }
         if(touchpad.getKnobPercentX() > 0) {
             game_action = GAME_ACTION_RIGHT;
         } else if(touchpad.getKnobPercentX() < 0){
