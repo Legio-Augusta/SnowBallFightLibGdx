@@ -62,12 +62,13 @@ public class VictoryScreen extends DefaultScreen {
         batch.draw(imgV, SCREEN_WIDTH/2+16, VIEW_PORT_HEIGHT/2+imgHero_v.getHeight()/4);
         batch.end();
 
-         time += delta;
-         if (time > 1) {
+        delta = 0.05f;
+        time += delta;
+        if (time > 1) {
              if (Gdx.input.isKeyPressed(Input.Keys.ANY_KEY) || Gdx.input.justTouched()) {
                  game.setScreen(new VillageScreen(game));
              }
-         }
+        }
     }
 
     @Override

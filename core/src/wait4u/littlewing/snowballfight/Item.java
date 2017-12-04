@@ -55,11 +55,6 @@ public class Item extends Sprite {
 		bounds = new Rectangle(0, 0, 0, 0);
 	}
 
-	@Override
-	public void draw(Batch batch) {
-
-	}
-
 	// Item acting
 	public void acting() {
 		delta = Math.min(0.06f, Gdx.graphics.getDeltaTime());
