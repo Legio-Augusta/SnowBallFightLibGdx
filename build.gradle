@@ -28,7 +28,7 @@ buildscript {
 
     dependencies {
         classpath "de.richsource.gradle.plugins:gwt-gradle-plugin:$gwtGradleVersion"
-        classpath "com.android.tools.build:gradle:$androidGradleToolsVersion"
+        classpath 'com.android.tools.build:gradle:3.0.0'
         classpath "com.mobidevelop.robovm:robovm-gradle-plugin:$roboVMGradleVersion"
         classpath "com.excelsiorjet:excelsior-jet-gradle-plugin:0.7.0"
     }
