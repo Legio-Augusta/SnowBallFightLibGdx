@@ -3,6 +3,8 @@ libgdx migrate J2ME SnowBallFight
 
   Libgdx SnowBallFight - Samsung Funclub
 
+![snowballfight](https://github.com/Legio-Augusta/SnowBallFightLibGdx/blob/master/android/assets/data/screen_2.png)
+![snowball-fight](https://github.com/Legio-Augusta/SnowBallFightLibGdx/blob/master/android/assets/data/screen_3.png)
 
 SnowBallFight is a Samsung J2ME [arcade game by MCookie n Wait4U, NeoMnT](http://www.samsung.com/be/funclub/), which was ported to libgdx by [Dzung Ng](http://cheatortrick.blogspot.com/).
 
@@ -20,6 +22,7 @@ SnowBallFight is a Samsung J2ME [arcade game by MCookie n Wait4U, NeoMnT](http:/
   * [Intellij IDEA](https://github.com/libgdx/libgdx/wiki/Gradle-and-Intellij-IDEA)
   * [NetBeans](https://github.com/libgdx/libgdx/wiki/Gradle-and-NetBeans)
   * [Commandline|Gradle on the Commandline](https://github.com/libgdx/libgdx/wiki/Gradle-on-the-Commandline)
+  * [CLDC Wireless Toolkit] http://www.oracle.com/technetwork/java/download-135801.html
   * [J2ME docs] (https://docs.oracle.com/javame/config/cldc/ref-impl/midp2.0/jsr118/javax/microedition/lcdui/Graphics.html)
 # SnowBallFightLibGdx
 
