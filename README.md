@@ -4,6 +4,7 @@ libgdx migrate J2ME SnowBallFight
   Libgdx SnowBallFight - Samsung Funclub
 
 ![snowballfight](https://github.com/Legio-Augusta/SnowBallFightLibGdx/blob/master/android/assets/data/screen_2.png)
+![snowball-fight](https://github.com/Legio-Augusta/SnowBallFightLibGdx/blob/master/android/assets/data/screen_3.png)
 
 SnowBallFight is a Samsung J2ME [arcade game by MCookie n Wait4U, NeoMnT](http://www.samsung.com/be/funclub/), which was ported to libgdx by [Dzung Ng](http://cheatortrick.blogspot.com/).
 
