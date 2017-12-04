@@ -43,7 +43,7 @@ public class Boss {
     public State  state = State.IDLE;
     public boolean  facingLeft = true;
 
-    private int hp = 120;
+    private int hp = 40; // 120 def, small for fast debug
     // TODO private e_move_dir
     public int e_boss_move_dir = 1; // Default e_move_dir = 1 to avoid init() and/or e_move_ai() call in original J2ME.
     private Texture bobTexture;

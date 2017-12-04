@@ -22,7 +22,7 @@ public class Enemy {
     public int max_e_hp;
     public int e_snow_y;
     public int e_snow_x;
-    public int e_snow_top;
+    public int e_snow_top; // TODO update geometry reserve
     public int e_snow_gap;
     public int e_snow_dx;
     public int e_ppang_item;
@@ -44,7 +44,7 @@ public class Enemy {
     public State  state = State.IDLE;
     public boolean  facingLeft = true;
 
-    private int hp = 120;
+    private int hp = 30; // 120 def, small for fast debug
     // TODO private e_move_dir
     public int e_move_dir = 1; // Default e_move_dir = 1 to avoid init() and/or e_move_ai() call in original J2ME.
     private Texture bobTexture;
@@ -54,8 +54,8 @@ public class Enemy {
 
     public Enemy(Vector2 position) {
         this.position = position;
-        this.bounds.height = SIZE;
-        bounds = new Rectangle(0, 0, 0, 0);
+//        this.bounds.height = SIZE;
+//        bounds = new Rectangle(0, 0, 0, 0);
     }
     public void update(Matrix3 delta) {
         position.add(velocity.cpy().mul(delta));
@@ -140,202 +140,6 @@ public class Enemy {
     /*
      * This function simulate enemy moving like in real. It's based on screen size 120x160 and some arithmetic calculate.
      * */
-    public void e_move_() {
-        int i = this.e_move_dir;
-        if ((i >= 1) && (i < 8))
-        {
-            i++;
-            if (i == 8) {
-                i = 100;
-            }
-        }
-        else if ((i >= 21) && (i < 31))
-        {
-            i++;
-            if ((this.position.x != 2) && (i % 3 == 0)) {
-                this.position.x -= 1;
-            }
-            if (i == 31) {
-                i = 100;
-            }
-        }
-        else if ((i > -31) && (i <= -21))
-        {
-            i--;
-            if ((this.position.x != 22) && (i % 3 == 0)) {
-                this.position.x += 1;
-            }
-            if (i == -31) {
-                i = 100;
-            }
-        }
-        else if ((i >= 11) && (i < 14))
-        {
-            i++;
-            if ((this.position.y != 1) && (i % 2 == 0)) {
-                this.position.y -= 1;
-            }
-            if (i == 14) {
-                i = 100;
-            }
-        }
-        else if ((i > -14) && (i <= -11))
-        {
-            i--;
-            if ((this.position.y != 7) && (i % 2 == 0)) {
-                this.position.y += 1;
-            }
-            if (i == -14) {
-                i = 100;
-            }
-        }
-        this.e_move_dir = i;
-    }
-
-    public void e_move_ai_() {
-        int i;
-        if (((int)this.position.x == 2))
-        {
-            i = get_random(4);
-            if ((i == 0) || (i == 1)) {
-                this.e_move_dir = -21;
-            } else if (i == 2) {
-                this.e_move_dir = -11;
-            } else if (i == 3) {
-                this.e_move_dir = 11;
-            }
-        }
-        else if (((int)this.position.x == 22) || (((int)this.position.x >= 14)))
-        {
-            i = get_random(4);
-            if ((i == 0) || (i == 1)) {
-                this.e_move_dir = 21;
-            } else if (i == 2) {
-                this.e_move_dir = -11;
-            } else if (i == 3) {
-                this.e_move_dir = 11;
-            }
-        }
-        else if (((int)this.position.y == 6) || ((int)this.position.y == 7))
-        {
-            i = get_random(4);
-            if ((i == 1) || (i == 2)) {
-                this.e_move_dir = 11;
-            } else if (i == 0) {
-                this.e_move_dir = 21;
-            } else if (i == 1) {
-                this.e_move_dir = -21;
-            }
-        }
-        else
-        {
-            i = get_random(8);
-            if ((i == 0) || (i == 1)) {
-                this.e_move_dir = 21;
-            } else if ((i == 2) || (i == 3)) {
-                this.e_move_dir = -21;
-            } else if (i == 4) {
-                this.e_move_dir = 11;
-            } else if (i == 5) {
-                this.e_move_dir = -11;
-            } else {
-                this.e_move_dir = 1;
-            }
-        }
-    }
-
-    public void e_move_ai2() {
-        int i;
-        if (((int)this.position.x == 2))
-        {
-            i = get_random(4);
-            if ((i == 0) || (i == 1)) {
-                this.e_move_dir = -21;
-            } else if (i == 2) {
-                this.e_move_dir = -11;
-            } else if (i == 3) {
-                this.e_move_dir = 11;
-            }
-        }
-        else if (((int)this.position.y == 6) || ((int)this.position.y == 7))
-        {
-            i = get_random(4);
-            if ((i == 1) || (i == 2)) {
-                this.e_move_dir = 11;
-            } else if (i == 0) {
-                this.e_move_dir = 21;
-            } else if (i == 1) {
-                this.e_move_dir = -21;
-            }
-        }
-        else
-        {
-            i = get_random(8);
-            if ((i == 0) || (i == 1)) {
-                this.e_move_dir = 21;
-            } else if ((i == 2) || (i == 3)) {
-                this.e_move_dir = -21;
-            } else if (i == 4) {
-                this.e_move_dir = 11;
-            } else if (i == 5) {
-                this.e_move_dir = -11;
-            } else {
-                this.e_move_dir = 1;
-            }
-        }
-    }
-    public void e_move2() {
-        // Dewey
-        int i2 = this.e_move_dir;
-        if ((i2 >= 1) && (i2 < 8))
-        {
-            i2++;
-            if (i2 == 8) {
-                i2 = 100;
-            }
-        }
-        else if ((i2 >= 21) && (i2 < 31))
-        {
-            i2++;
-            if ((this.position.x != 2) && (i2 % 3 == 0)) {
-                this.position.x -= 1;
-            }
-            if (i2 == 31) {
-                i2 = 100;
-            }
-        }
-        else if ((i2 > -31) && (i2 <= -21))
-        {
-            i2--;
-            if ((this.position.x != 22) && (i2 % 3 == 0)) {
-                this.position.x += 1;
-            }
-            if (i2 == -31) {
-                i2 = 100;
-            }
-        }
-        else if ((i2 >= 11) && (i2 < 14))
-        {
-            i2++;
-            if ((this.position.y != 1) && (i2 % 2 == 0)) {
-                this.position.y -= 1;
-            }
-            if (i2 == 14) {
-                i2 = 100;
-            }
-        }
-        else if ((i2 > -14) && (i2 <= -11))
-        {
-            i2--;
-            if ((this.position.y != 7) && (i2 % 2 == 0)) {
-                this.position.y += 1;
-            }
-            if (i2 == -14) {
-                i2 = 100;
-            }
-        }
-        this.e_move_dir = i2;
-    }
 
     public void e_move_ai(Enemy[] enemies, int paramInt)
     {
@@ -621,11 +425,12 @@ public class Enemy {
                     enemies[k].e_wp = 0;
                 }
             }
+            // TODO update snow_dx by board height, it's seem to be too high, so snow fire to outer right/left
             enemies[k].e_behv = i;
             enemies[k].item.position.y = (int)enemies[k].position.y; // TODO why y do not multiple by cell (5)
             enemies[k].item.position.x = (int)(enemies[k].position.x); // orig: *5
             enemies[k].e_snow_gap = 0;
-            enemies[k].e_snow_dx = i;
+            enemies[k].e_snow_dx = i/2; // orig: i; i +/-1 +/-3 +/- 5 +/-2 ...
             enemies[k].e_snow_top = 1;
             enemies[k].e_idx = 3;
             enemies[k].dis_count = 1;
@@ -673,12 +478,13 @@ public class Enemy {
         }
     }
 
+    // TODO modify addition change by view port board width x height from original 240x320. The gap need modify.
     public void e_snow(int e_num, int e_boss, Enemy[] enemies, Boss boss, Hero hero)
     {
         for (int i = 0; i < e_num; i++) {
             if ( enemies[i].e_behv != 100)
             {
-                enemies[i].item.position.y += 1; // e_snow_y
+                enemies[i].item.position.y -= 1; // e_snow_y
                 enemies[i].item.position.x += enemies[i].e_snow_dx;
                 if ((enemies[i].e_snow_gap < 10) && (enemies[i].e_snow_top == 1))
                 {
@@ -691,16 +497,17 @@ public class Enemy {
                 {
                     enemies[i].e_snow_gap -= 1;
                 }
-                if ((int)enemies[i].item.position.y == 13) {
+                if ((int)enemies[i].item.position.y == 5) { // orig: 13
                     hero.check_hero((int)enemies[i].item.position.x, i);
-                } else if (enemies[i].item.position.y >= 16) {
+                } else if (enemies[i].item.position.y <= 5) { // Reserved geometry y-axis => y <= 16 (orig: >= 16)
+                    // May be BOTTOM_BOUND or addition added on draw Snow (in drawRunningScreen) so top_snow_y need update.
                     enemies[i].e_behv = 100;
                 }
             }
         }
         if ((e_boss > 0) && (boss.e_boss_behv != 100))
         {
-            boss.getItem().position.y += 1; // currently use public Item
+            boss.getItem().position.y -= 1; // currently use public Item
             boss.item.position.x += boss.e_boss_snow_dx;
             if ((boss.e_boss_snow_gap < 10) && (boss.e_boss_snow_top == 1))
             {

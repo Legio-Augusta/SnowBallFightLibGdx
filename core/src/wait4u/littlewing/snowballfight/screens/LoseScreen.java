@@ -17,37 +17,40 @@ public class LoseScreen extends DefaultScreen {
         super(game);
     }
 
-    TextureRegion victory;
+    Texture imgLose;
+    Texture imgHero_l;
     SpriteBatch batch;
-    float time = 0;
 
     @Override
     public void show() {
-        victory = new TextureRegion(new Texture(Gdx.files.internal("data/samsung-white/hero_lose3.png")), 0, 0, 432, 360);
+        imgLose = new Texture("data/samsung-white/lose.png");
+        imgHero_l = new Texture("data/samsung-white/hero-lose.png");
         batch = new SpriteBatch();
-        batch.getProjectionMatrix().setToOrtho2D(0, 0, 432, 360);
     }
 
     @Override
     public void render(float delta) {
+        int SCREEN_HEIGHT = Gdx.graphics.getHeight();
+        int SCREEN_WIDTH = Gdx.graphics.getWidth();
+        int VIEW_PORT_HEIGHT = (int)SCREEN_HEIGHT*3/4;
+        int BOTTOM_SPACE = (int)SCREEN_HEIGHT/8;
+
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
-        batch.draw(victory, 0, 0);
+        batch.draw(imgLose, 0, VIEW_PORT_HEIGHT/2+2*BOTTOM_SPACE);
+        batch.draw(imgHero_l, 0, VIEW_PORT_HEIGHT/2+BOTTOM_SPACE);
         batch.end();
 
-        time += delta;
-        if (time > 1) {
-            if (Gdx.input.isKeyPressed(Input.Keys.ANY_KEY) || Gdx.input.justTouched()) {
-                game.setScreen(new GameScreen(game, -1));
-            }
+        if (Gdx.input.isKeyPressed(Input.Keys.ANY_KEY) || Gdx.input.justTouched()) {
+            game.setScreen(new VillageScreen(game));
         }
     }
 
     @Override
     public void hide() {
-        Gdx.app.debug("Snow Ball Fight", "dispose intro");
         batch.dispose();
-        victory.getTexture().dispose();
+        imgLose.dispose();
+        imgHero_l.dispose();
         /*        int k;
         if (this.ani_step < 30)
         {
