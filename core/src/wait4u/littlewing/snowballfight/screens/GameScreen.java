@@ -474,8 +474,7 @@ public class GameScreen extends DefaultScreen {
                 enemyStartPositionX -= boss.get_random(6);
             }
             enemies[i] = new Enemy(new Vector2(enemyStartPositionX, enemyPosY ));
-            enemies[i].setBobTexture("data/samsung-white/enemy0_0_106x.png");
-            enemies[i].setBound(new Rectangle(enemies[i].position.x*CELL_WIDTH, enemies[i].position.y*CELL_WIDTH, enemies[i].getBobTexture().getWidth(), enemies[i].getBobTexture().getHeight()));
+            enemies[i].setBound(new Rectangle(enemies[i].position.x*CELL_WIDTH, enemies[i].position.y*CELL_WIDTH, enemies[i].getImage().getWidth(), enemies[i].getImage().getHeight()));
         }
 
         for(int i=0; i < e_num; i++) {
@@ -537,17 +536,13 @@ public class GameScreen extends DefaultScreen {
         Vector2 facing = new Vector2(hero.position.x, SCREEN_HEIGHT*4/5/CELL_WIDTH);
         Item item = new Item(0, hero.position, facing);
         item.setTexture(new Texture("data/samsung-white/item0.png"));
-        hero.setItem(item);
-        hero.getItem().setBound(new Rectangle(item.getX(), item.getY(), item.getWidth(), item.getHeight()) );
+        hero.item = item;
+        hero.item.setBound(new Rectangle(item.getX(), item.getY(), item.getWidth(), item.getHeight()) );
     }
 
     protected void initHeroTexture () {
         snowWhiteBg = new Texture("data/samsung-white/white_bg.png");
-        heroTexture = new Texture("data/samsung-white/hero1.png");
-        hero = new Hero(new Sprite());
-        hero.position.x = SCREEN_WIDTH/2/CELL_WIDTH;
-        hero.setBobTexture(heroTexture);
-        hero.position.y = (BOTTOM_SPACE+ui.getHeight()+SMALL_GAP)/CELL_WIDTH;
+        hero = new Hero(new Vector2(SCREEN_WIDTH/2/CELL_WIDTH, (BOTTOM_SPACE+ui.getHeight()+SMALL_GAP)/CELL_WIDTH));
 
         fireBtnTexture = new Texture("data/samsung-white/fire.png");
         initBobItem();
@@ -608,7 +603,7 @@ public class GameScreen extends DefaultScreen {
 
         for (int i = 0; i < enemies.length; i++) {
             if ((int)enemies[i].position.x != -10) {
-                batch.draw(enemies[i].getBobTexture(), (int) enemies[i].position.x * 5 * SGH_SCALE_RATIO, enemies[i].position.y * 5 * SGH_SCALE_RATIO + 5, 0, 0, enemies[i].getBobTexture().getWidth(), enemies[i].getBobTexture().getHeight(), 1, 1, 0, 0, 0, enemies[i].getBobTexture().getWidth(), enemies[i].getBobTexture().getHeight(), false, false);
+                batch.draw(enemies[i].getImage(), (int) enemies[i].position.x * 5 * SGH_SCALE_RATIO, enemies[i].position.y * 5 * SGH_SCALE_RATIO + 5, 0, 0, enemies[i].getImage().getWidth(), enemies[i].getImage().getHeight(), 1, 1, 0, 0, 0, enemies[i].getImage().getWidth(), enemies[i].getImage().getHeight(), false, false);
                 if (enemies[i].e_ppang_time > 0) {
                     enemies[i].e_ppang_time -= 1;
                     // paramGraphics.drawImage(this.imgItem_hyo[(this.e_ppang_item[i] - 1)], this.e_x[i] * 5, this.e_y[i] * 5 + 1, 0x10 | 0x1);
@@ -623,7 +618,7 @@ public class GameScreen extends DefaultScreen {
                     enemies[i].dis_count += 1;
                     if (enemies[i].dis_count == 4) {
                         enemies[i].dis_count = 0;
-                        enemies[i].setIdx(0);
+                        enemies[i].e_idx = 0;
                     }
                 } else if (enemies[i].dis_count <= -1) {
                     enemies[i].dis_count -= 1;
@@ -677,7 +672,7 @@ public class GameScreen extends DefaultScreen {
     * Try use original e_move() from J2ME.
     * */
     protected void enemyMoving() {
-        int rightBoundEnemy = (int)(SCREEN_WIDTH - enemies[0].getBobTexture().getWidth())/CELL_WIDTH;
+        int rightBoundEnemy = (int)(SCREEN_WIDTH - enemies[0].getImage().getWidth())/CELL_WIDTH;
         int rightBoundBoss = (int)((SCREEN_WIDTH - boss.getBobTexture().getWidth())/CELL_WIDTH);
 
         int topBoundInCell = (int) (TOP_BOUND / CELL_WIDTH);
@@ -691,7 +686,7 @@ public class GameScreen extends DefaultScreen {
     }
     protected void updateEnemyBound() {
         for(int i = 0; i < e_num; i++) {
-            enemies[i].setBound(new Rectangle(enemies[i].position.x * CELL_WIDTH, enemies[i].position.y * CELL_WIDTH, enemies[i].getBobTexture().getWidth(), enemies[i].getBobTexture().getHeight()));
+            enemies[i].setBound(new Rectangle(enemies[i].position.x * CELL_WIDTH, enemies[i].position.y * CELL_WIDTH, enemies[i].getImage().getWidth(), enemies[i].getImage().getHeight()));
         }
         boss.setBound(new Rectangle(boss.position.x*CELL_WIDTH, boss.position.y*CELL_WIDTH, boss.getBobTexture().getWidth(), boss.getBobTexture().getHeight()));
     }
@@ -724,46 +719,44 @@ public class GameScreen extends DefaultScreen {
             // camera.unproject(touchPos);
             Rectangle textureBounds=new Rectangle(SCREEN_WIDTH-fireBtnTexture.getWidth()-50, SCREEN_HEIGHT-50-fireBtnTexture.getHeight(), fireBtnTexture.getWidth(),fireBtnTexture.getHeight());
 
-            Item bobItem = hero.getItem();
             if(textureBounds.contains(touchPos.x, touchPos.y) && (heroFireState == false))
             {
-                if(bobItem.position.y <= SCREEN_HEIGHT*4/5/CELL_WIDTH) {
+                if(hero.item.position.y <= SCREEN_HEIGHT*4/5/CELL_WIDTH) {
                     heroFireState = true;
                 } else {
-                    bobItem.position.y = hero.position.y;
+                    hero.item.position.y = hero.position.y;
                 }
             }
             if(heroFireState) {
-                bobItem.setVelocity(new Vector2(0, 12));
-                bobItem.velocity.scl(2);
-                if(bobItem.position.y <= SCREEN_HEIGHT*4/5/CELL_WIDTH) {
-                    bobItem.position.add(bobItem.velocity.x * bobItem.getDelta()/CELL_WIDTH, bobItem.velocity.y * 2/CELL_WIDTH);
-                    bobItem.setBound(new Rectangle(hero.position.x*CELL_WIDTH, bobItem.position.y*CELL_WIDTH, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight()));
+                hero.item.setVelocity(new Vector2(0, 12));
+                hero.item.velocity.scl(2);
+                if(hero.item.position.y <= SCREEN_HEIGHT*4/5/CELL_WIDTH) {
+                    hero.item.position.add(hero.item.velocity.x * hero.item.getDelta()/CELL_WIDTH, hero.item.velocity.y * 2/CELL_WIDTH);
+                    hero.item.setBound(new Rectangle(hero.position.x*CELL_WIDTH, hero.item.position.y*CELL_WIDTH, hero.item.getTexture().getWidth(), hero.item.getTexture().getHeight()));
                     heroFire();
                     checkCollisionHeroToEnemy();
                 } else {
                     heroFireState = false;
-                    bobItem.setPosition(hero.position.x, hero.position.y);
+                    hero.item.setPosition(hero.position.x, hero.position.y);
                     // TODO handle smooth (fire one, impact one) instead of steped fire.
                     // Snow do not fire direct from player to enemy, it fly a distance then wait until next event like touch. So it is a bug.
-                    Gdx.app.log("INFO", "Over rooftop " + bobItem.position.toString());
+                    Gdx.app.log("INFO", "Over rooftop " + hero.item.position.toString());
                 }
             }
-            Gdx.app.log("INFO", "Snow "+ bobItem.getBound().toString()+ "huey "+ enemies[0].getBound().toString() + " dewey "+ enemies[1].getBound().toString() + " boss " + boss.getHp() + " screen ");
-            if(bobItem.position.y > SCREEN_HEIGHT*4/5) {
+            Gdx.app.log("INFO", "Snow "+ hero.item.getBound().toString()+ "huey "+ enemies[0].getBound().toString() + " dewey "+ enemies[1].getBound().toString() + " boss " + boss.getHp() + " screen ");
+            if(hero.item.position.y > SCREEN_HEIGHT*4/5) {
                 heroFireState = false;
-                bobItem.setPosition(hero.position.x, hero.position.y);
+                hero.item.setPosition(hero.position.x, hero.position.y);
             }
         }
     }
 
     protected void heroFire() {
-        Item bobItem = hero.getItem();
-        batch.draw(bobItem.getItemTexture(), hero.position.x*CELL_WIDTH+(hero.getBobTexture().getWidth()), bobItem.position.y*CELL_WIDTH+hero.getBobTexture().getHeight()/2, bobItem.getItemTexture().getWidth(), bobItem.getItemTexture().getHeight());
+        batch.draw(hero.item.getTexture(), hero.position.x*CELL_WIDTH+(hero.getImage().getWidth()), hero.item.position.y*CELL_WIDTH+hero.getImage().getHeight()/2, hero.item.getTexture().getWidth(), hero.item.getTexture().getHeight());
     }
 
     protected void handleHeroMoveBound() {
-        bobTexture = hero.getBobTexture();
+        bobTexture = hero.getImage();
         float leftBound = 0;
         float rightBound = (int)(SCREEN_WIDTH - bobTexture.getWidth())/CELL_WIDTH;
         // TODO use object instead of global var, handle screen size
@@ -804,15 +797,15 @@ public class GameScreen extends DefaultScreen {
     }
 
     protected void checkCollisionHeroToEnemy() {
-        Rectangle heroItem = hero.getItem().getBound();
+        Rectangle heroItem = hero.item.getBound();
         for(int i=0; i < e_num; i++) {
             if(heroItem.overlaps(enemies[i].getBound())) {
-                enemies[i].loseHp(hero.getItem().getDamage());
+                enemies[i].loseHp(hero.item.getDamage());
             }
         }
 
         if(heroItem.overlaps(boss.getBound())) {
-            boss.loseHp(hero.getItem().getDamage());
+            boss.loseHp(hero.item.getDamage());
         }
     }
 
@@ -844,7 +837,7 @@ public class GameScreen extends DefaultScreen {
     }
 
     protected void updateHeroBullet() {
-        hero.setBound(new Rectangle(hero.position.x * CELL_WIDTH, hero.position.y * CELL_WIDTH, hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight()));
+        hero.setBound(new Rectangle(hero.position.x * CELL_WIDTH, hero.position.y * CELL_WIDTH, hero.getImage().getWidth(), hero.getImage().getHeight()));
     }
 
     public void check_building(int paramInt1, int paramInt2) {
@@ -1146,11 +1139,7 @@ public class GameScreen extends DefaultScreen {
                     m_mode += 1;
                 }
             }
-            // RIGHT MENU ?
-            // KEY_NUM1	49
-            // KEY_NUM2	50
-            // KEY_NUM3	51
-            // KEY_NUM4	52
+            // RIGHT MENU ? KEY_NUM1	49 KEY_NUM2	50 KEY_NUM3	51 KEY_NUM4	52
             else if ((paramInt == 35) || (getGameAction(paramInt) == 8) || ((paramInt >= 49) && (paramInt <= 52)) || (paramInt == -7))
             {
                 if (paramInt > 48) {
@@ -1868,7 +1857,7 @@ public class GameScreen extends DefaultScreen {
         int snowBoardHeight = VIEW_PORT_HEIGHT - ui.getHeight();
         // Scale by Y vertically, bg is in square ratio.
         batch.draw(snowWhiteBg, 0, BOTTOM_SPACE+ui.getHeight(), snowBoardHeight, snowBoardHeight); // VIEW_PORT_HEIGHT
-        batch.draw(hero.getBobTexture(), hero.position.x * 5 * SGH_SCALE_RATIO, BOTTOM_SPACE+ui.getHeight()+SMALL_GAP , hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight()); // orig 83
+        batch.draw(hero.getImage(), hero.position.x * 5 * SGH_SCALE_RATIO, BOTTOM_SPACE+ui.getHeight()+SMALL_GAP , hero.getImage().getWidth(), hero.getImage().getHeight()); // orig 83
         if (ppang_time > 0)
         {
             if (ppang_item == 1) {
@@ -1898,7 +1887,7 @@ public class GameScreen extends DefaultScreen {
             }
         } // end item_mode
         if (pw_up == 2) {
-            batch.draw(imgShadow, hero.getItem().position.x * 5*SGH_SCALE_RATIO, (hero.getItem().position.y * 7 + 4)*SGH_SCALE_RATIO);
+            batch.draw(imgShadow, hero.item.position.x * 5*SGH_SCALE_RATIO, (hero.item.position.y * 7 + 4)*SGH_SCALE_RATIO);
             batch.draw(imgItem[wp], hero.position.x * 5 * SGH_SCALE_RATIO, (hero.position.y * 7 - snow_gap + 4)*SGH_SCALE_RATIO );
         }
         else if (pw_up == 1) {
@@ -1917,7 +1906,7 @@ public class GameScreen extends DefaultScreen {
         } // end pw_up = 1
         else if (pw_up == 0) {
             if (ppang <= -1) {
-                batch.draw(imgPok, hero.getItem().position.x* 5* SGH_SCALE_RATIO, (hero.getItem().position.y * 7 - 3)*SGH_SCALE_RATIO);
+                batch.draw(imgPok, hero.item.position.x* 5* SGH_SCALE_RATIO, (hero.item.position.y * 7 - 3)*SGH_SCALE_RATIO);
                 ppang -= 1;
                 if (ppang == -3) {
                     ppang = 0;
@@ -1927,9 +1916,9 @@ public class GameScreen extends DefaultScreen {
                 if (s_item != -10)
                 {
                     if (ppang < 3) {
-                        batch.draw(imgPPang, hero.getItem().position.x * 5*SGH_SCALE_RATIO, (hero.getItem().position.y * 7 - 6)*SGH_SCALE_RATIO );
+                        batch.draw(imgPPang, hero.item.position.x * 5*SGH_SCALE_RATIO, (hero.item.position.y * 7 - 6)*SGH_SCALE_RATIO );
                     } else {
-                        batch.draw(imgPPang1, hero.getItem().position.x * 5* SGH_SCALE_RATIO, (hero.getItem().position.y * 7 - 6)*SGH_SCALE_RATIO );
+                        batch.draw(imgPPang1, hero.item.position.x * 5* SGH_SCALE_RATIO, (hero.item.position.y * 7 - 6)*SGH_SCALE_RATIO );
                     }
                 }
                 else if (ppang < 4) {
@@ -1954,7 +1943,7 @@ public class GameScreen extends DefaultScreen {
                         // paramGraphics.fillRect(this.e_boss_x * 5 + 12, this.e_boss_y * 5 + 5, 3, 15 - 15 * this.e_boss_hp / this.max_e_boss_hp); // (9672090); // 0093959A gray
                     }
                     if (al == 1) {
-                        batch.draw(imgAl, (hero.getItem().position.x * 5 + 6)*SGH_SCALE_RATIO, (hero.getItem().position.y * 7 - 10)*SGH_SCALE_RATIO);
+                        batch.draw(imgAl, (hero.item.position.x * 5 + 6)*SGH_SCALE_RATIO, (hero.item.position.y * 7 - 10)*SGH_SCALE_RATIO);
                     }
                 }
                 ppang += 1;
@@ -1990,7 +1979,7 @@ public class GameScreen extends DefaultScreen {
         for (j = 0; j < e_num; j++) { // or count array elements enemies
             if (enemies[j].e_behv != 100) {
                 batch.draw(imgShadow, enemies[j].getItem().position.x*CELL_WIDTH, (enemies[j].getItem().position.y * 5-5)*SGH_SCALE_RATIO ); // orig: y*6+17;
-                batch.draw(imgItem[enemies[j].e_wp], enemies[j].getItem().position.x*CELL_WIDTH, (enemies[j].getItem().position.y * 5 + 13 - enemies[j].e_snow_gap)*SGH_SCALE_RATIO ); // orig *6 + 13
+                batch.draw(imgItem[enemies[j].e_wp], enemies[j].getItem().position.x*CELL_WIDTH, (enemies[j].getItem().position.y * 5 + 10 - enemies[j].e_snow_gap)*SGH_SCALE_RATIO ); // orig *6 + 13
             }
         }
         if ((boss.e_boss_behv != 100) && (e_boss > 0))
@@ -2076,7 +2065,7 @@ public class GameScreen extends DefaultScreen {
             for (j = 0; j < e_num; j++)
             {
                 if (enemies[j].position.x != -10) {
-                    batch.draw(enemies[j].getBobTexture(), enemies[j].position.x * 5*SGH_SCALE_RATIO, (enemies[j].position.y * 5 + 5)*SGH_SCALE_RATIO, enemies[j].getBobTexture().getWidth(), enemies[j].getBobTexture().getHeight());
+                    batch.draw(enemies[j].getImage(), enemies[j].position.x * 5*SGH_SCALE_RATIO, (enemies[j].position.y * 5 + 5)*SGH_SCALE_RATIO, enemies[j].getImage().getWidth(), enemies[j].getImage().getHeight());
                 }
                 if (enemies[j].e_behv != 100) {
                     batch.draw(imgShadow, enemies[j].getItem().position.x*CELL_WIDTH, (enemies[j].getItem().position.y * 5-5)*SGH_SCALE_RATIO ); // orig: y*6+17;
@@ -2090,19 +2079,19 @@ public class GameScreen extends DefaultScreen {
         if (this.special == 1)
         {
             if (ani_step <= 45) {
-                batch.draw(imgSp, 158 - ani_step * 3, BOTTOM_SPACE+ui.getHeight()+hero.getBobTexture().getHeight());
+                batch.draw(imgSp, 158 - ani_step * 3, BOTTOM_SPACE+ui.getHeight()+hero.getImage().getHeight());
             }
         }
         else if (special == 2)
         {
             if (ani_step <= 45) {
-                batch.draw(imgSp, 158 - ani_step * 3, BOTTOM_SPACE+ui.getHeight()+hero.getBobTexture().getHeight());
+                batch.draw(imgSp, 158 - ani_step * 3, BOTTOM_SPACE+ui.getHeight()+hero.getImage().getHeight());
             }
         }
         else if ((special == 3) && (ani_step <= 45)) {
             batch.draw(imgSp, 168 - ani_step * 3, 30*SGH_SCALE_RATIO + BOTTOM_SPACE + ui.getHeight());
         }
-        batch.draw(hero.getBobTexture(), hero.position.x * 5 * SGH_SCALE_RATIO, (int)(83/160)*VIEW_PORT_HEIGHT+BOTTOM_SPACE, hero.getBobTexture().getWidth(), hero.getBobTexture().getHeight());
+        batch.draw(hero.getImage(), hero.position.x * 5 * SGH_SCALE_RATIO, (int)(83/160)*VIEW_PORT_HEIGHT+BOTTOM_SPACE, hero.getImage().getWidth(), hero.getImage().getHeight());
     }
 
     public void make_e_num(int paramInt1, int paramInt2)

@@ -48,14 +48,28 @@ public class Enemy {
     // TODO private e_move_dir
     public int e_move_dir = 1; // Default e_move_dir = 1 to avoid init() and/or e_move_ai() call in original J2ME.
     private Texture bobTexture;
+    public Texture[] imgEnemy;
     private Sprite sprite;
     // snow or stone item used in firing
+    // TODO handle item random by enemy, may be need e_wp to get what is used.
     public Item item;
 
     public Enemy(Vector2 position) {
         this.position = position;
-//        this.bounds.height = SIZE;
-//        bounds = new Rectangle(0, 0, 0, 0);
+        imgEnemy = new Texture[4];
+        /*for (int m = 0; m < 4; m++) {
+            imgEnemy[m] = new Texture("data/samsung-white/enemy1" + m + ".png");
+        }*/
+
+        if (get_random(2) == 0) {
+            for (int j = 0; j < 4; j++) {
+                imgEnemy[j] = new Texture("data/samsung-white/enemy0" + j + ".png");
+            }
+        } else {
+            for (int k = 0; k < 4; k++) {
+                imgEnemy[k] = new Texture("data/samsung-white/enemy1" + k + ".png");
+            }
+        }
     }
     public void update(Matrix3 delta) {
         position.add(velocity.cpy().mul(delta));
@@ -68,16 +82,9 @@ public class Enemy {
     public Enemy(Sprite sprite) {
         this.sprite = new Sprite(sprite);
     }
-    public void setBobTexture(Texture texture) {
-        bobTexture = texture;
-    }
 
-    public void setBobTexture(String image) {
-        bobTexture = new Texture(image);
-    }
-
-    public Texture getBobTexture() {
-        return bobTexture;
+    public Texture getImage() {
+        return imgEnemy[e_idx];
     }
 
     public Sprite getSprite() {
@@ -103,12 +110,6 @@ public class Enemy {
     }
     public int getHp() {
         return this.hp;
-    }
-    public int getIdx() {
-        return e_idx;
-    }
-    public void setIdx(int e_idx) {
-        this.e_idx = e_idx;
     }
 
     public void loseHp(int damage) {

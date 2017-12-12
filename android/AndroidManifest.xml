@@ -10,7 +10,7 @@
     
     <application
         android:icon="@drawable/ic_launcher"
-        android:label="Pax Britannica"
+        android:label="SnowBallFight"
         android:theme="@style/AppTheme" >
         <activity
             android:name="wait4u.littlewing.paxbritan.android.AndroidLauncher"

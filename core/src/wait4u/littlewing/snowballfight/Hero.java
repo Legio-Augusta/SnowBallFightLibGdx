@@ -43,47 +43,33 @@ public class Hero {
     public int pw_up = 0;
 
     private Texture bobTexture;
+    public Texture[] imgHero;
     private Sprite sprite;
     // snow or stone item used in firing
-    private Item item;
+    public Item item;
 
     public Hero(Vector2 position) {
         this.position = position;
         this.bounds.height = SIZE;
         bounds = new Rectangle(0, 0, 0, 0);
+        imgHero = new Texture[5];
+        for (int m = 0; m < 5; m++) {
+            imgHero[m] = new Texture("data/samsung-white/hero" + m + ".png");
+        }
     }
     public void update(Matrix3 delta) {
         position.add(velocity.cpy().mul(delta));
     }
 
-    public Hero(Texture texture) {
-        bobTexture = texture;
-    }
-
-    public Hero(Sprite sprite) {
-        this.sprite = new Sprite(sprite);
+    public Texture getImage() {
+        return imgHero[h_idx];
     }
     public void setBobTexture(Texture texture) {
         bobTexture = texture;
     }
 
-    public void setBobTexture(String image) {
-        bobTexture = new Texture(image);
-    }
-
     public Texture getBobTexture() {
         return bobTexture;
-    }
-
-    public Sprite getSprite() {
-        return sprite;
-    }
-
-    public void setItem(Item item) {
-        this.item = item;
-    }
-    public Item getItem() {
-        return this.item;
     }
 
     public void setBound(Rectangle rect) {

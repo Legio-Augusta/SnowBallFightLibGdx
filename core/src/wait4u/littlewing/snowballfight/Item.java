@@ -147,7 +147,7 @@ public class Item extends Sprite {
 	public void setTexture(Texture texture) {
 		this.itemTexture = texture;
 	}
-	public Texture getItemTexture() {
+	public Texture getTexture() {
 		return this.itemTexture;
 	}
 
