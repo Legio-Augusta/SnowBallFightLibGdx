@@ -4,6 +4,7 @@ package wait4u.littlewing.snowballfight;
  * Created by nickfarow on 17/10/2016.
  */
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Matrix3;
@@ -32,6 +33,9 @@ public class Enemy {
     public int e_wp;
     public int e_behv; // Use in enemy attack
     public int dis_count;
+    private static int SGH_120_CELL = 5; // 5 pixel per cell in original 120px SGH
+    private static int SGH_SCALE_RATIO = (int) Gdx.graphics.getWidth()/120; // 120 or 128px from original J2ME resolution.
+    private static int CELL_WIDTH = SGH_120_CELL*SGH_SCALE_RATIO;
 
     static final float SPEED = 2f; // unit per second
     static final float JUMP_VELOCITY = 1f;
@@ -429,9 +433,9 @@ public class Enemy {
             // TODO update snow_dx by board height, it's seem to be too high, so snow fire to outer right/left
             enemies[k].e_behv = i;
             enemies[k].item.position.y = (int)enemies[k].position.y; // TODO why y do not multiple by cell (5)
-            enemies[k].item.position.x = (int)(enemies[k].position.x); // orig: *5
+            enemies[k].item.position.x = (int)(enemies[k].position.x * CELL_WIDTH); // orig: *5
             enemies[k].e_snow_gap = 0;
-            enemies[k].e_snow_dx = i/2; // orig: i; i +/-1 +/-3 +/- 5 +/-2 ...
+            enemies[k].e_snow_dx = i*3; // orig: i; i +/-1 +/-3 +/- 5 +/-2 ... Try to more gap
             enemies[k].e_snow_top = 1;
             enemies[k].e_idx = 3;
             enemies[k].dis_count = 1;

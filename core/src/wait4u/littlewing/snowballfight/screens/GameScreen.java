@@ -2,15 +2,19 @@ package wait4u.littlewing.snowballfight.screens;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
@@ -28,13 +32,19 @@ import wait4u.littlewing.snowballfight.OverlapTester;
  * Created by nickfarow on 13/10/2016.
  */
 
-public class GameScreen extends DefaultScreen {
+public class GameScreen extends DefaultScreen implements InputProcessor {
     OrthographicCamera camera;
     SpriteBatch batch;
-    Texture ttrSplash;
     Texture snowWhiteBg;
-    Texture heroTexture;
     Texture fireBtnTexture;
+    private BoundingBox touchMoveArea;
+    private BoundingBox touchKeyUpArea;
+    private BoundingBox touchKeyDownArea;
+    private BoundingBox touchKeyLeftArea;
+    private BoundingBox touchKeyRightArea;
+    private BoundingBox touchFireArea;
+    private BoundingBox touchOptionsArea;
+    // private BoundingBox useItem
 
     float heroSpeed = 0.3f; // 1 cell step (screen width devided to about 24 cell).
 
@@ -143,6 +153,7 @@ public class GameScreen extends DefaultScreen {
     private int al;
     private int d_gauge; // gauge rule (power fire)
     private int game_action = 0;
+    private int key_code = 0;
     private static final int GAME_ACTION_OK = 8; // simulate KEY, gameAction in J2ME
     private static final int GAME_ACTION_LEFT = 2;
     private static final int GAME_ACTION_RIGHT = 5;
@@ -186,6 +197,8 @@ public class GameScreen extends DefaultScreen {
     private Texture imgStage_num;
     private Texture ui;
     private Texture [] imgStage;
+
+    Ray collisionRay;
 
 /*    public GameScreen(Game game) {
         super(game);
@@ -231,6 +244,13 @@ public class GameScreen extends DefaultScreen {
 
         touchPoint = new Vector3();
         init_game(-1);
+
+        // TODO use ratio
+        touchKeyUpArea = new BoundingBox(new Vector3(20+(200/3), 20+(200/3), 0),new Vector3(27+400/3, 20+200, 0));
+        touchKeyDownArea = new BoundingBox(new Vector3(20+(200/3), 20, 0),new Vector3(27+400/3, 20+200/3, 0));
+        touchKeyLeftArea = new BoundingBox(new Vector3(20+(400/3), 20+(200/6), 0),new Vector3(27+400/3, 20+150, 0));
+        touchKeyRightArea = new BoundingBox(new Vector3(20+(200/3), 20+(200/3), 0),new Vector3(27+400/3, 20+200, 0));
+        touchOptionsArea = new BoundingBox(new Vector3(20, 20+(200/6), 0),new Vector3(20, 20+150, 0));
     }
 
     public void create () {
@@ -264,6 +284,8 @@ public class GameScreen extends DefaultScreen {
         touch_stage = new Stage(new StretchViewport(SCREEN_WIDTH, SCREEN_HEIGHT), batch);
         touch_stage.addActor(touchpad);
         Gdx.input.setInputProcessor(touch_stage);
+
+        Gdx.input.setInputProcessor(this);
 
         loadTextures();
     }
@@ -698,8 +720,8 @@ public class GameScreen extends DefaultScreen {
     protected void drawTouchPad() {
         camera.update();
 
-        handleHeroMoveBound();
-        updateHeroBullet();
+//        handleHeroMoveBound();
+//        updateHeroBullet();
 
         //Draw
         batch.enableBlending();
@@ -793,7 +815,6 @@ public class GameScreen extends DefaultScreen {
             game_action = GAME_ACTION_DOWN;
         }
 
-        keyPressed();
     }
 
     protected void checkCollisionHeroToEnemy() {
@@ -946,7 +967,7 @@ public class GameScreen extends DefaultScreen {
         int j;
         if ((screen == 6) && (state == 1))
         {
-            if ((getGameAction(paramInt) == 2) || (paramInt == 52)) // NUM_4 or left key
+            if ((getGameAction(paramInt) == GAME_ACTION_LEFT) || (key_code == 52)) // NUM_4 or left key
             {
                 if ((item_mode == 0) && (ppang_item != 2))
                 {
@@ -969,7 +990,7 @@ public class GameScreen extends DefaultScreen {
                     // repaint();
                 }
             }
-            else if ((getGameAction(paramInt) == 5) || (paramInt == 54)) // NUM_6 or RIGHT_KEY (may be LEFT_KEY by keyboard view)
+            else if ((getGameAction(paramInt) == GAME_ACTION_RIGHT) || (paramInt == 54)) // NUM_6 or RIGHT_KEY (may be LEFT_KEY by keyboard view)
             {
                 if ((item_mode == 0) && (ppang_item != 2))
                 {
@@ -992,7 +1013,7 @@ public class GameScreen extends DefaultScreen {
                     // repaint();
                 }
             }
-            else if ((getGameAction(paramInt) == 6) || (paramInt == 56)) // NUM_8 or DOWN KEY
+            else if ((getGameAction(paramInt) == GAME_ACTION_DOWN) || (paramInt == 56)) // NUM_8 or DOWN KEY
             {
                 if (mana >= 12) {
                     // use_special();
@@ -1075,19 +1096,19 @@ public class GameScreen extends DefaultScreen {
                     m_mode += 1;
                 }
             }
-            else if (getGameAction(paramInt) == 2)
+            else if (getGameAction(paramInt) == GAME_ACTION_LEFT)
             {
                 if (m_mode == 3) {
                     s_play = 1;
                 }
             }
-            else if (getGameAction(paramInt) == 5) // LEFT
+            else if (getGameAction(paramInt) == GAME_ACTION_RIGHT)
             {
                 if (m_mode == 3) {
                     s_play = 2;
                 }
             }
-            else if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == -7)) { // 35, -7 = right menu, action 8 = OK
+            else if ((paramInt == 35) || (getGameAction(paramInt) == GAME_ACTION_OK) || (paramInt == -7)) { // 35, -7 = right menu, action 8 = OK
                 if (m_mode == 2)
                 {
                     // goto_menu();
@@ -1749,6 +1770,102 @@ public class GameScreen extends DefaultScreen {
         }
     } // End run()
 
+    @Override
+    public boolean keyDown(int keycode) {
+        return false;
+    }
+
+    @Override
+    public boolean keyUp(int keycode) {
+        return false;
+    }
+
+    @Override
+    public boolean keyTyped(char character) {
+        return false;
+    }
+
+    @Override
+    public boolean touchDown(int x, int y, int pointer, int button) {
+        // TODO use boundingBox and touchAreas
+        float leftBound = 0;
+        float rightBound = (int)(SCREEN_WIDTH - hero.getImage().getWidth())/CELL_WIDTH;
+        // TODO use object instead of global var, handle screen size
+        if(hero.position.x < leftBound) {
+            hero.position.x = 0;
+        }
+        if(hero.position.x > rightBound) {
+            hero.position.x = rightBound;
+        }
+        if((hero.position.x >= leftBound) && (hero.position.x <= rightBound) ) {
+            hero.position.x = (hero.position.x + touchpad.getKnobPercentX() * heroSpeed);
+        }
+        // TODO find where touch event (dragged) call, can it be overrided ?
+        // BoundingBox can be use Rectangle as alternative ?
+        // convert touch event to key event (getGameAction)
+
+        touchPoint.set(Gdx.input.getX(),Gdx.input.getY(), 0);
+        Rectangle upBtnRect = new Rectangle(110, 1300-160, SCREEN_WIDTH-200, 160);
+        Rectangle downBtnRect = new Rectangle(110, 1160-140, SCREEN_WIDTH-200, 140);
+        Rectangle leftBtnRect = new Rectangle(SCREEN_WIDTH-imgSl.getWidth(), 480, imgSl.getWidth(), imgSl.getHeight());
+        Rectangle rightBtnRect = new Rectangle(15, 480, imgBk.getWidth(), imgBk.getHeight());
+
+        Gdx.app.log("INFO", "touch " + touchPoint.x + " y "+ (SCREEN_HEIGHT-touchPoint.y) + " bound x "+ upBtnRect.toString() + " saved "+ downBtnRect.toString());
+        if(OverlapTester.pointInRectangle(upBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
+
+        }
+
+        collisionRay = camera.getPickRay(x, y);
+        if (Intersector.intersectRayBoundsFast(collisionRay, touchKeyUpArea)) { // TODO may be need flag to avoid fire continuously
+            game_action = GAME_ACTION_UP;
+        }
+        if (Intersector.intersectRayBoundsFast(collisionRay, touchKeyDownArea)) {
+            game_action = GAME_ACTION_DOWN;
+        }
+        if (Intersector.intersectRayBoundsFast(collisionRay, touchKeyLeftArea)) {
+            game_action = GAME_ACTION_LEFT;
+        }
+        if (Intersector.intersectRayBoundsFast(collisionRay, touchKeyRightArea)) {
+            game_action = GAME_ACTION_RIGHT;
+        }
+
+/*        if(touchpad.getKnobPercentX() > 0) {
+            game_action = GAME_ACTION_RIGHT;
+        } else if(touchpad.getKnobPercentX() < 0){
+            game_action = GAME_ACTION_LEFT;
+        }
+        if(touchpad.getKnobPercentY() > 0) {
+            game_action = GAME_ACTION_UP;
+        } else if(touchpad.getKnobPercentY() < 0) {
+            game_action = GAME_ACTION_DOWN;
+        }*/
+
+        keyPressed();
+
+        return false;
+    }
+
+    @Override
+    public boolean touchUp(int x, int y, int pointer, int button) {
+
+        return false;
+    }
+
+    @Override
+    public boolean touchDragged(int x, int y, int pointer) {
+        return false;
+    }
+
+    @Override
+    public boolean mouseMoved(int screenX, int screenY) {
+        return false;
+    }
+
+    @Override
+    public boolean scrolled(int amount) {
+        return false;
+    }
+
     public int input_item(int paramInt) {
         for (int i = 0; i < 5; i++) {
             if ((item_slot[i] == paramInt) && (paramInt <= 8)) {
@@ -1978,8 +2095,10 @@ public class GameScreen extends DefaultScreen {
         }
         for (j = 0; j < e_num; j++) { // or count array elements enemies
             if (enemies[j].e_behv != 100) {
-                batch.draw(imgShadow, enemies[j].getItem().position.x*CELL_WIDTH, (enemies[j].getItem().position.y * 5-5)*SGH_SCALE_RATIO ); // orig: y*6+17;
-                batch.draw(imgItem[enemies[j].e_wp], enemies[j].getItem().position.x*CELL_WIDTH, (enemies[j].getItem().position.y * 5 + 10 - enemies[j].e_snow_gap)*SGH_SCALE_RATIO ); // orig *6 + 13
+                // Be careful with * CELL_WIDTH; original snow_x do not multiple by CELL_WIDTH (5px). This will cause snow gap slide horizontal.
+                // e_snow_x is real position, not Cell map
+                batch.draw(imgShadow, enemies[j].item.position.x, (enemies[j].getItem().position.y * 5-5)*SGH_SCALE_RATIO ); // orig: y*6+17;
+                batch.draw(imgItem[enemies[j].e_wp], enemies[j].item.position.x, (enemies[j].getItem().position.y * 5 + 10 - enemies[j].e_snow_gap)*SGH_SCALE_RATIO ); // orig *6 + 13
             }
         }
         if ((boss.e_boss_behv != 100) && (e_boss > 0))
