@@ -223,6 +223,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     }*/
     public GameScreen(Game game, int param_screen) {
         super(game);
+        Gdx.input.setCatchBackKey( true );
+        Gdx.input.setInputProcessor(this);
         item_price[0] = 5;
         item_price[1] = 8;
         item_price[2] = 8;
@@ -237,7 +239,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         item_slot[1] = 5;
         stage = last_stage = 11; // TODO use sharedPreference
 
-        camera = newOrthographicCamera(SCREEN_WIDTH, SCREEN_HEIGHT);
+//        camera = new OrthographicCamera();
+//        camera.setToOrtho(true, SCREEN_WIDTH, SCREEN_HEIGHT);
+
         // Calculate global var width/height, view port ...
         create();
         this.screen = param_screen;
@@ -260,7 +264,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         //Create camera
         float aspectRatio = (float) SCREEN_WIDTH / (float) SCREEN_HEIGHT;
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 10f*aspectRatio, 10f);
+        camera.position.x = SCREEN_WIDTH/2;
+        camera.position.y = SCREEN_HEIGHT/2;
+        camera.update();
+
+//        camera.setToOrtho(false, 10f*aspectRatio, 10f); // Touchpad
 
         //Create a touchpad skin
         touchpadSkin = new Skin();
@@ -297,7 +305,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     public void render(float delta) {
         Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
+        camera.position.x = SCREEN_WIDTH/2;
+        camera.position.y = SCREEN_HEIGHT/2;
         camera.update();
 
         batch.enableBlending();
@@ -463,7 +472,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     @Override
     public void resize(int width, int height) {
-
+//        viewport.update(width, height);
     }
 
     @Override
@@ -1961,6 +1970,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         getPrefs().flush();
     }
 
+    /** Draw playing game screen (value code screen = 6). This will draw all related character like enemy, hero, enemy's item etc.
+     * This will also draw S-T-A-G-E screen title on a game start. */
     public void drawRunningScreen() {
         // monitorEnemyPosition(); // custom inject function to correct enemy position. TODO figure out do we have to match all thing together or just inject simple "guard" method
 
@@ -2097,8 +2108,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             if (enemies[j].e_behv != 100) {
                 // Be careful with * CELL_WIDTH; original snow_x do not multiple by CELL_WIDTH (5px). This will cause snow gap slide horizontal.
                 // e_snow_x is real position, not Cell map
-                batch.draw(imgShadow, enemies[j].item.position.x, (enemies[j].getItem().position.y * 5-5)*SGH_SCALE_RATIO ); // orig: y*6+17;
-                batch.draw(imgItem[enemies[j].e_wp], enemies[j].item.position.x, (enemies[j].getItem().position.y * 5 + 10 - enemies[j].e_snow_gap)*SGH_SCALE_RATIO ); // orig *6 + 13
+                batch.draw(imgShadow, enemies[j].item.position.x, (enemies[j].item.position.y * 5-5)*SGH_SCALE_RATIO ); // orig: y*6+17;
+                batch.draw(imgItem[enemies[j].e_wp], enemies[j].item.position.x, (enemies[j].item.position.y * 5 + 8 - enemies[j].e_snow_gap)*SGH_SCALE_RATIO ); // orig *6 + 13
             }
         }
         if ((boss.e_boss_behv != 100) && (e_boss > 0))
