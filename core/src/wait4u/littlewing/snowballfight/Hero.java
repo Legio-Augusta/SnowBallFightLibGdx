@@ -23,6 +23,8 @@ public class Hero {
     public int h_timer_p;
     public int snow_pw;
     public int real_snow_pw;
+    public int ppang_item;
+    public int ppang_time;
 
     static final float SPEED = 2f; // unit per second
     static final float JUMP_VELOCITY = 1f;

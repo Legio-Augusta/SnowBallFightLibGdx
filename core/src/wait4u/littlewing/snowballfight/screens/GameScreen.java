@@ -46,6 +46,13 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private BoundingBox touchOptionsArea;
     // private BoundingBox useItem
 
+    // Use rectangle until figure out how to work with BoundingBox multi input.
+    Rectangle upBtnRect = new Rectangle(20+(200/3), 20+(400/3), 72, 70);
+    Rectangle downBtnRect = new Rectangle(20+(200/3), 20, 72, 70);
+    Rectangle leftBtnRect = new Rectangle(20, 20+(200/6), 70, 140);
+    Rectangle rightBtnRect = new Rectangle(20+(400/3), 20+(200/6), 70, 140);
+    Rectangle optionBtnRect = new Rectangle(SCREEN_WIDTH/2+150, SCREEN_HEIGHT/8, SCREEN_WIDTH/2-180, 70);
+
     float heroSpeed = 0.3f; // 1 cell step (screen width devided to about 24 cell).
 
     private boolean heroFireState = false;
@@ -116,13 +123,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private int school;
     private int state;
 
-    private int pw_up;
     private int mana = 0;
     private int max_hp;
     private int dem; // damage
     private int wp;
-    private int snow_pw;
-    private int real_snow_pw;
     private int snow_last_y;
     private int snow_top_y;
     private int snow_gap;
@@ -131,8 +135,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private int ppang;
     private int gold;
     private int[] item_slot = new int[5];
-    private int ppang_item;
-    private int ppang_time;
     private int special;
     private int item_mode;
     private int[] item_price = new int[8];
@@ -516,8 +518,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         dem = 12;
         ppang = 0;
         al = -1;
-        ppang_time = 0;
-        ppang_item = 0;
+        hero.ppang_time = 0;
+        hero.ppang_item = 0;
         make_enemy(paramInt);
         d_gauge = 2;
 
@@ -951,7 +953,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         {
             if ((getGameAction(paramInt) == GAME_ACTION_LEFT) || (key_code == 52)) // NUM_4 or left key
             {
-                if ((item_mode == 0) && (ppang_item != 2))
+                if ((item_mode == 0) && (hero.ppang_item != 2)) // hero frezed ?
                 {
                     if ((int)hero.position.x != 2)
                     {
@@ -974,7 +976,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             }
             else if ((getGameAction(paramInt) == GAME_ACTION_RIGHT) || (paramInt == 54)) // NUM_6 or RIGHT_KEY (may be LEFT_KEY by keyboard view)
             {
-                if ((item_mode == 0) && (ppang_item != 2))
+                if ((item_mode == 0) && (hero.ppang_item != 2))
                 {
                     if ((int)hero.position.x != 23)
                     {
@@ -1004,18 +1006,18 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 }
             }
             // KEY_UP = 50 (fire can be use up key), -5 = OK keycode
-            else if ((paramInt == -5) || (getGameAction(paramInt) == 1) || (paramInt == 50) || (paramInt == 53)) // OK, NUM_5 etc
+            else if ((paramInt == -5) || (getGameAction(paramInt) == 1) || (paramInt == 50) || (paramInt == 53) || isTouchedUp() || isTouchedOK()) // OK, NUM_5 etc
             {
                 if (item_mode == 0)
                 {
-                    if ((pw_up == 0) && (ppang_item != 2))
+                    if ((hero.pw_up == 0) && (hero.ppang_item != 2))
                     {
-                        snow_pw = 0;
-                        real_snow_pw = 0;
-                        pw_up = 1;
+                        hero.snow_pw = 0;
+                        hero.real_snow_pw = 0;
+                        hero.pw_up = 1;
                         hero.h_idx = 2;
                     }
-                    else if ((pw_up == 1) && (real_snow_pw > 0))
+                    else if ((hero.pw_up == 1) && (hero.real_snow_pw > 0))
                     {
                         hero.h_idx = 4;
                         hero.make_attack();
@@ -1510,7 +1512,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     }
                     catch (Exception localException1) {}
 
-                    if (pw_up == 1) // hero fire
+                    if (hero.pw_up == 1) // hero fire
                     {
                         hero.setPower();
                         if (hero.h_idx == 2) {
@@ -1519,7 +1521,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                             hero.h_idx = 2;
                         }
                     }
-                    else if (pw_up == 2)
+                    else if (hero.pw_up == 2)
                     {
                         if (hero.h_timer < 4)
                         {
@@ -1787,28 +1789,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         // convert touch event to key event (getGameAction)
 
         touchPoint.set(Gdx.input.getX(),Gdx.input.getY(), 0);
-        Rectangle upBtnRect = new Rectangle(20+(200/3), 20+(400/3), 72, 70);
-        Rectangle downBtnRect = new Rectangle(20+(200/3), 20, 72, 70);
-        Rectangle leftBtnRect = new Rectangle(20+(200/3), 20+(200/6), 70, 140);
-        Rectangle rightBtnRect = new Rectangle(20+(400/3), 20+(200/6), 70, 140);
-        Rectangle optionBtnRect = new Rectangle(SCREEN_WIDTH/2+150, SCREEN_HEIGHT/8, SCREEN_WIDTH/2-180, 70);
 
         Gdx.app.log("INFO", "touch " + touchPoint.x + " y "+ (SCREEN_HEIGHT-touchPoint.y) + " bound x "+ upBtnRect.toString() + " saved "+ downBtnRect.toString());
-        if(OverlapTester.pointInRectangle(upBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
-            game_action = GAME_ACTION_UP;
-        }
-        if(OverlapTester.pointInRectangle(downBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
-            game_action = GAME_ACTION_DOWN;
-        }
-        if(OverlapTester.pointInRectangle(leftBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
-            game_action = GAME_ACTION_LEFT;
-        }
-        if(OverlapTester.pointInRectangle(rightBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
-            game_action = GAME_ACTION_RIGHT;
-        }
-        if(OverlapTester.pointInRectangle(optionBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
-            game_action = KEY_RIGHT_MENU;
-        }
+        game_action = getGameAction();
 
 /*        collisionRay = camera.getPickRay(x, y);
         if (Intersector.intersectRayBoundsFast(collisionRay, touchKeyUpArea)) { // TODO may be need flag to avoid fire continuously
@@ -1836,10 +1819,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }*/
 
         // Fire button touched
-        Vector3 touchPos=new Vector3(Gdx.input.getX(),Gdx.input.getY(), 0);
         Rectangle textureBounds=new Rectangle(SCREEN_WIDTH-fireBtnTexture.getWidth()-50, SCREEN_HEIGHT-50-fireBtnTexture.getHeight(), fireBtnTexture.getWidth(),fireBtnTexture.getHeight());
-
-        if(textureBounds.contains(touchPos.x, touchPos.y)) {
+        if(textureBounds.contains(touchPoint.x, touchPoint.y)) {
             game_action = GAME_ACTION_OK;
         }
 
@@ -1902,9 +1883,46 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     * https://docs.oracle.com/javame/config/cldc/ref-impl/midp2.0/jsr118/constant-values.html#javax.microedition.lcdui.Canvas.UP
     * */
     public int getGameAction(int keyCode) {
-
-        Gdx.app.log("INFO", "Game action = " + game_action);
         return game_action;
+    }
+    public int getGameAction() {
+        Gdx.app.log("INFO", "touch " + touchPoint.x + " y "+ (SCREEN_HEIGHT-touchPoint.y) + " bound x "+ upBtnRect.toString() + " saved "+ downBtnRect.toString());
+        if(OverlapTester.pointInRectangle(upBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
+            return GAME_ACTION_UP;
+        }
+        if(OverlapTester.pointInRectangle(downBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
+            return GAME_ACTION_DOWN;
+        }
+        if(OverlapTester.pointInRectangle(leftBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
+            return GAME_ACTION_LEFT;
+        }
+        if(OverlapTester.pointInRectangle(rightBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
+            return GAME_ACTION_RIGHT;
+        }
+        if(OverlapTester.pointInRectangle(optionBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
+            return KEY_RIGHT_MENU;
+        }
+
+        return 0;
+    }
+    protected boolean isTouchedUp() {
+        return OverlapTester.pointInRectangle(upBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
+    }
+    protected boolean isTouchedDown() {
+        return OverlapTester.pointInRectangle(downBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
+    }
+    protected boolean isTouchedLeft() {
+        return OverlapTester.pointInRectangle(leftBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
+    }
+    protected boolean isTouchedRight() {
+        return OverlapTester.pointInRectangle(rightBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
+    }
+    protected boolean isTouchedOption() {
+        return OverlapTester.pointInRectangle(optionBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
+    }
+    protected boolean isTouchedOK() {
+        Rectangle textureBounds=new Rectangle(SCREEN_WIDTH-fireBtnTexture.getWidth()-50, SCREEN_HEIGHT-50-fireBtnTexture.getHeight(), fireBtnTexture.getWidth(),fireBtnTexture.getHeight());
+        return textureBounds.contains(touchPoint.x, touchPoint.y);
     }
     protected Preferences getPrefs() {
         if(prefs==null){
@@ -1983,16 +2001,16 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         // Scale by Y vertically, bg is in square ratio.
         batch.draw(snowWhiteBg, 0, BOTTOM_SPACE+ui.getHeight(), snowBoardHeight, snowBoardHeight); // VIEW_PORT_HEIGHT
         batch.draw(hero.getImage(), hero.position.x * 5 * SGH_SCALE_RATIO, BOTTOM_SPACE+ui.getHeight()+SMALL_GAP , hero.getImage().getWidth(), hero.getImage().getHeight()); // orig 83
-        if (ppang_time > 0)
+        if (hero.ppang_time > 0)
         {
-            if (ppang_item == 1) {
+            if (hero.ppang_item == 1) {
                 batch.draw(imgItem_hyo[0], hero.position.x * CELL_WIDTH, (74/160*VIEW_PORT_HEIGHT)+BOTTOM_SPACE); // orig y:74 TODO may be use relative position by hero.y
             } else {
                 batch.draw(imgItem_hyo[1], hero.position.x * CELL_WIDTH, (83/160*VIEW_PORT_HEIGHT)+BOTTOM_SPACE); // orig y:83
             }
-            ppang_time -= 1;
-            if (ppang_time == 0) {
-                ppang_item = 0;
+            hero.ppang_time -= 1;
+            if (hero.ppang_time == 0) {
+                hero.ppang_item = 0;
             }
         }
         draw_enemy();
@@ -2011,12 +2029,12 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 item_mode = 0;
             }
         } // end item_mode
-        if (pw_up == 2) {
+        if (hero.pw_up == 2) {
             batch.draw(imgShadow, hero.item.position.x * 5*SGH_SCALE_RATIO, (hero.item.position.y * 7 + 4)*SGH_SCALE_RATIO);
             batch.draw(imgItem[wp], hero.position.x * 5 * SGH_SCALE_RATIO, (hero.position.y * 7 - snow_gap + 4)*SGH_SCALE_RATIO );
         }
-        else if (pw_up == 1) {
-            if ((real_snow_pw > 0) && (ppang_item != 1))
+        else if (hero.pw_up == 1) {
+            if ((hero.real_snow_pw > 0) && (hero.ppang_item != 1))
             {
                 // paramGraphics.setColor(7196662); // 6DCFF6 light_blue
                 if ((int)hero.position.x >= 13) {
@@ -2029,7 +2047,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 }
             }
         } // end pw_up = 1
-        else if (pw_up == 0) {
+        else if (hero.pw_up == 0) {
             if (ppang <= -1) {
                 batch.draw(imgPok, hero.item.position.x* 5* SGH_SCALE_RATIO, (hero.item.position.y * 7 - 3)*SGH_SCALE_RATIO);
                 ppang -= 1;
@@ -2085,8 +2103,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 draw_text();
             }
         } // end pw_up = 0
-        else if (pw_up == -1) {
-            pw_up = 0;
+        else if (hero.pw_up == -1) {
+            hero.pw_up = 0;
         }
         if (p_mode == 1) {
             try
@@ -2172,7 +2190,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             {
                 // destroyImage(9);
                 // loadImage(100);
-                pw_up = -1;
+                hero.pw_up = -1;
                 batch.draw(imgBack, 0, VIEW_PORT_HEIGHT);
                 screen = 6;
                 ppang = 50;
@@ -2459,14 +2477,14 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 int k = (int)enemies[i].position.y;
                 if ((k >= 0) && (k <= 4))
                 {
-                    if ((k + real_snow_pw == 7) || (k + real_snow_pw == 8))
+                    if ((k + hero.real_snow_pw == 7) || (k + hero.real_snow_pw == 8))
                     {
                         ppang = 1;
                         decs_e_hp(i);
                         break;
                     }
                 }
-                else if ((k + real_snow_pw == 8) || (k + real_snow_pw == 9))
+                else if ((k + hero.real_snow_pw == 8) || (k + hero.real_snow_pw == 9))
                 {
                     ppang = 1;
                     decs_e_hp(i);
@@ -2477,7 +2495,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
         if ((e_boss > 0) && (boss.position.x - snow_x >= -1) && (boss.position.x - snow_x <= 1))
         {
-            j = (int)(boss.position.y + real_snow_pw - 1);
+            j = (int)(boss.position.y + hero.real_snow_pw - 1);
             if ((j == 9) || (j == 7) || (j == 8))
             {
                 if (j == 7) {
@@ -2487,7 +2505,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 decs_e_hp(10);
             }
         }
-        pw_up = -1;
+        hero.pw_up = -1;
         if (wp != 0) {
             wp = 0;
         }
