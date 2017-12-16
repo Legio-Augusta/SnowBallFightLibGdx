@@ -200,27 +200,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     Ray collisionRay;
 
-/*    public GameScreen(Game game) {
-        super(game);
-        item_price[0] = 5;
-        item_price[1] = 8;
-        item_price[2] = 8;
-        item_price[3] = 14;
-        item_price[4] = 6;
-        item_price[5] = 12;
-        item_price[6] = 10;
-        item_price[7] = 12;
-        // printScore("hero", 0);
-        // printScore("config", 1);
-        item_slot[0] = 3;
-        item_slot[1] = 5;
-        stage = last_stage = 11; // TODO use sharedPreference
-
-        camera = newOrthographicCamera(SCREEN_WIDTH, SCREEN_HEIGHT);
-        // Calculate global var width/height, view port ...
-        create();
-        init_game(-1);
-    }*/
     public GameScreen(Game game, int param_screen) {
         super(game);
         Gdx.input.setCatchBackKey( true );
@@ -252,8 +231,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         // TODO use ratio
         touchKeyUpArea = new BoundingBox(new Vector3(20+(200/3), 20+(200/3), 0),new Vector3(27+400/3, 20+200, 0));
         touchKeyDownArea = new BoundingBox(new Vector3(20+(200/3), 20, 0),new Vector3(27+400/3, 20+200/3, 0));
-        touchKeyLeftArea = new BoundingBox(new Vector3(20+(400/3), 20+(200/6), 0),new Vector3(27+400/3, 20+150, 0));
-        touchKeyRightArea = new BoundingBox(new Vector3(20+(200/3), 20+(200/3), 0),new Vector3(27+400/3, 20+200, 0));
+        touchKeyLeftArea = new BoundingBox(new Vector3(20+(200/3), 20+(200/6), 0),new Vector3(27+400/3, 20+150, 0));
+        touchKeyRightArea = new BoundingBox(new Vector3(20+(400/3), 20+(200/6), 0),new Vector3(27+400/3, 20+200, 0));
         touchOptionsArea = new BoundingBox(new Vector3(20, 20+(200/6), 0),new Vector3(20, 20+150, 0));
     }
 
@@ -386,7 +365,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
         batch.begin();
         drawFireBtn();
-        handleFireTouch();
+//        handleFireTouch();
         batch.end();
 
         handleVictoryOrLose();
@@ -478,13 +457,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     @Override
     public void hide() {
 
-    }
-
-    protected OrthographicCamera newOrthographicCamera(int width, int height) {
-        camera = new OrthographicCamera();
-        camera.setToOrtho(true, width, height);
-
-        return camera;
     }
 
     public void initEnemy() {
@@ -764,7 +736,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 if(hero.item.position.y <= SCREEN_HEIGHT*4/5/CELL_WIDTH) {
                     hero.item.position.add(hero.item.velocity.x * hero.item.getDelta()/CELL_WIDTH, hero.item.velocity.y * 2/CELL_WIDTH);
                     hero.item.setBound(new Rectangle(hero.position.x*CELL_WIDTH, hero.item.position.y*CELL_WIDTH, hero.item.getTexture().getWidth(), hero.item.getTexture().getHeight()));
-                    heroFire();
+                    //heroFire();
+                    batch.draw(hero.item.getTexture(), hero.position.x*CELL_WIDTH+(hero.getImage().getWidth()), hero.item.position.y*CELL_WIDTH+hero.getImage().getHeight()/2, hero.item.getTexture().getWidth(), hero.item.getTexture().getHeight());
                     checkCollisionHeroToEnemy();
                 } else {
                     heroFireState = false;
@@ -811,7 +784,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
         Gdx.app.log("INFO", "touch " + touchPoint.x + " y "+ (SCREEN_HEIGHT-touchPoint.y) + " bound x "+ upBtnRect.toString() + " saved "+ downBtnRect.toString());
         if(OverlapTester.pointInRectangle(upBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
-
+            game_action = GAME_ACTION_UP;
         }
         if(touchpad.getKnobPercentX() > 0) {
             game_action = GAME_ACTION_RIGHT;
@@ -1814,17 +1787,30 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         // convert touch event to key event (getGameAction)
 
         touchPoint.set(Gdx.input.getX(),Gdx.input.getY(), 0);
-        Rectangle upBtnRect = new Rectangle(110, 1300-160, SCREEN_WIDTH-200, 160);
-        Rectangle downBtnRect = new Rectangle(110, 1160-140, SCREEN_WIDTH-200, 140);
-        Rectangle leftBtnRect = new Rectangle(SCREEN_WIDTH-imgSl.getWidth(), 480, imgSl.getWidth(), imgSl.getHeight());
-        Rectangle rightBtnRect = new Rectangle(15, 480, imgBk.getWidth(), imgBk.getHeight());
+        Rectangle upBtnRect = new Rectangle(20+(200/3), 20+(400/3), 72, 70);
+        Rectangle downBtnRect = new Rectangle(20+(200/3), 20, 72, 70);
+        Rectangle leftBtnRect = new Rectangle(20+(200/3), 20+(200/6), 70, 140);
+        Rectangle rightBtnRect = new Rectangle(20+(400/3), 20+(200/6), 70, 140);
+        Rectangle optionBtnRect = new Rectangle(SCREEN_WIDTH/2+150, SCREEN_HEIGHT/8, SCREEN_WIDTH/2-180, 70);
 
         Gdx.app.log("INFO", "touch " + touchPoint.x + " y "+ (SCREEN_HEIGHT-touchPoint.y) + " bound x "+ upBtnRect.toString() + " saved "+ downBtnRect.toString());
         if(OverlapTester.pointInRectangle(upBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
-
+            game_action = GAME_ACTION_UP;
+        }
+        if(OverlapTester.pointInRectangle(downBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
+            game_action = GAME_ACTION_DOWN;
+        }
+        if(OverlapTester.pointInRectangle(leftBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
+            game_action = GAME_ACTION_LEFT;
+        }
+        if(OverlapTester.pointInRectangle(rightBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
+            game_action = GAME_ACTION_RIGHT;
+        }
+        if(OverlapTester.pointInRectangle(optionBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
+            game_action = KEY_RIGHT_MENU;
         }
 
-        collisionRay = camera.getPickRay(x, y);
+/*        collisionRay = camera.getPickRay(x, y);
         if (Intersector.intersectRayBoundsFast(collisionRay, touchKeyUpArea)) { // TODO may be need flag to avoid fire continuously
             game_action = GAME_ACTION_UP;
         }
@@ -1836,7 +1822,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
         if (Intersector.intersectRayBoundsFast(collisionRay, touchKeyRightArea)) {
             game_action = GAME_ACTION_RIGHT;
-        }
+        }*/
 
 /*        if(touchpad.getKnobPercentX() > 0) {
             game_action = GAME_ACTION_RIGHT;
@@ -1848,6 +1834,17 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         } else if(touchpad.getKnobPercentY() < 0) {
             game_action = GAME_ACTION_DOWN;
         }*/
+
+        // Fire button touched
+        Vector3 touchPos=new Vector3(Gdx.input.getX(),Gdx.input.getY(), 0);
+        Rectangle textureBounds=new Rectangle(SCREEN_WIDTH-fireBtnTexture.getWidth()-50, SCREEN_HEIGHT-50-fireBtnTexture.getHeight(), fireBtnTexture.getWidth(),fireBtnTexture.getHeight());
+
+        if(textureBounds.contains(touchPos.x, touchPos.y)) {
+            game_action = GAME_ACTION_OK;
+        }
+
+        // Use rectangle instead of collisionRay. TODO fix collisionRay null and multiplex many Gdx.input
+        // TODO May be use OverlapTester Class for these task
 
         keyPressed();
 
@@ -2108,8 +2105,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             if (enemies[j].e_behv != 100) {
                 // Be careful with * CELL_WIDTH; original snow_x do not multiple by CELL_WIDTH (5px). This will cause snow gap slide horizontal.
                 // e_snow_x is real position, not Cell map
+                // Be carefull with item and snow align centered, it require both scale item n shadow match.
                 batch.draw(imgShadow, enemies[j].item.position.x, (enemies[j].item.position.y * 5-5)*SGH_SCALE_RATIO ); // orig: y*6+17;
-                batch.draw(imgItem[enemies[j].e_wp], enemies[j].item.position.x, (enemies[j].item.position.y * 5 + 8 - enemies[j].e_snow_gap)*SGH_SCALE_RATIO ); // orig *6 + 13
+                batch.draw(imgItem[enemies[j].e_wp], enemies[j].item.position.x, (enemies[j].item.position.y * 5 + 9 - enemies[j].e_snow_gap)*SGH_SCALE_RATIO ); // orig *6 + 13
             }
         }
         if ((boss.e_boss_behv != 100) && (e_boss > 0))

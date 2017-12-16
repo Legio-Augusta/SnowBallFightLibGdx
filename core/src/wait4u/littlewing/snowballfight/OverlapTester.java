@@ -2,6 +2,7 @@ package wait4u.littlewing.snowballfight;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 
 /**
  * Created by nickfarrow on 11/29/17.
@@ -21,6 +22,16 @@ public class OverlapTester {
 
     public static boolean pointInRectangle (Rectangle r, float x, float y) {
         return r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y;
+    }
+
+    /**
+     * Do not care about z index, just for match Vector3 input
+     * @param r
+     * @param p
+     * @return
+     */
+    public static boolean pointInRectangle (Rectangle r, Vector3 p) {
+        return r.x <= p.x && r.x + r.width >= p.x && r.y <= p.y && r.y + r.height >= p.y;
     }
 
 }
