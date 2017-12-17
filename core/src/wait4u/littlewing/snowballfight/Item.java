@@ -67,7 +67,6 @@ public class Item extends Sprite {
 
 		collisionCenter.set(collisionPoints.get(0)).add(collisionPoints.get(2)).scl(0.5f);
 
-//		velocity.scl( (float) Math.pow(0.97f, delta * 30.f));
 		velocity.scl(2);
 		position.add(velocity.x * delta, velocity.y * 2);
 

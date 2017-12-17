@@ -15,10 +15,7 @@ import java.util.Random;
 
 
 public class Boss {
-
-    public enum State {
-        IDLE, WALKING, JUMPING, DYING, FIRING, FREEZE, HANGING
-    }
+    public int e_boss = 1;
     public int e_boss_idx;
     public int e_boss_fire_time;
     public int e_boss_hp;
@@ -32,55 +29,45 @@ public class Boss {
     public int e_boss_behv;
     public int boss_dis_count;
 
-    static final float SPEED = 2f; // unit per second
-    static final float JUMP_VELOCITY = 1f;
     public static final float SIZE = 0.5f; // half a unit
 
     public Vector2 position = new Vector2();
-    Vector2  acceleration = new Vector2();
-    Vector2  velocity = new Vector2();
+    Vector2 velocity = new Vector2();
     private Rectangle bounds = new Rectangle();
-    public State  state = State.IDLE;
-    public boolean  facingLeft = true;
 
     private int hp = 40; // 120 def, small for fast debug
     // TODO private e_move_dir
     public int e_boss_move_dir = 1; // Default e_move_dir = 1 to avoid init() and/or e_move_ai() call in original J2ME.
-    private Texture bobTexture;
+    public Texture[] imgBoss;
     private Sprite sprite;
     // snow or stone item used in firing
     public Item item;
 
-    public Boss(Vector2 position) {
+    public Boss(Vector2 position, int level) { // e_boss as level
+        e_boss = level;
         this.position = position;
         this.bounds.height = SIZE;
         bounds = new Rectangle(0, 0, 0, 0);
+        imgBoss = new Texture[4];
+
+        for (int k = 0; k < 4; k++) {
+            imgBoss[k] = new Texture("data/samsung-white/boss" + level + k + ".png");
+        }
     }
     public void update(Matrix3 delta) {
         position.add(velocity.cpy().mul(delta));
     }
 
-    public Boss(Texture texture) {
-        bobTexture = texture;
-    }
-
     public Boss(Sprite sprite) {
         this.sprite = new Sprite(sprite);
-    }
-    public void setBobTexture(Texture texture) {
-        bobTexture = texture;
-    }
-
-    public void setBobTexture(String image) {
-        bobTexture = new Texture(image);
-    }
-
-    public Texture getBobTexture() {
-        return bobTexture;
     }
 
     public Sprite getSprite() {
         return sprite;
+    }
+
+    public Texture getImage() {
+        return imgBoss[e_boss_idx];
     }
 
     public void setItem(Item item) {
@@ -115,16 +102,7 @@ public class Boss {
     public void setIdx(int idx) {
         this.e_boss_idx = idx;
     }
-    public int getIdx() {
-        return this.e_boss_idx;
-    }
 
-    public void e_move() {
-
-    }
-    public void e_move_ai() {
-
-    }
     /*
     * Try reset/update enemy position when it hit bound. TODO use vector or another better solution.
     * */

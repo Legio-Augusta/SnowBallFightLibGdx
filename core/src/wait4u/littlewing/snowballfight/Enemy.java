@@ -14,11 +14,6 @@ import com.badlogic.gdx.math.Vector2;
 import java.util.Random;
 
 public class Enemy {
-
-    public enum State {
-        IDLE, WALKING, JUMPING, DYING, FIRING, FREEZE, HANGING
-    }
-
     public int e_idx;
     public int max_e_hp;
     public int e_snow_y;
@@ -37,21 +32,14 @@ public class Enemy {
     private static int SGH_SCALE_RATIO = (int) Gdx.graphics.getWidth()/120; // 120 or 128px from original J2ME resolution.
     private static int CELL_WIDTH = SGH_120_CELL*SGH_SCALE_RATIO;
 
-    static final float SPEED = 2f; // unit per second
-    static final float JUMP_VELOCITY = 1f;
-    public static final float SIZE = 0.5f; // half a unit
-
     public Vector2  position = new Vector2();
-    Vector2  acceleration = new Vector2();
     Vector2  velocity = new Vector2();
     private Rectangle  bounds = new Rectangle();
-    public State  state = State.IDLE;
-    public boolean  facingLeft = true;
 
     private int hp = 30; // 120 def, small for fast debug
+    public int e_hp = 30;
     // TODO private e_move_dir
     public int e_move_dir = 1; // Default e_move_dir = 1 to avoid init() and/or e_move_ai() call in original J2ME.
-    private Texture bobTexture;
     public Texture[] imgEnemy;
     private Sprite sprite;
     // snow or stone item used in firing
@@ -61,9 +49,6 @@ public class Enemy {
     public Enemy(Vector2 position) {
         this.position = position;
         imgEnemy = new Texture[4];
-        /*for (int m = 0; m < 4; m++) {
-            imgEnemy[m] = new Texture("data/samsung-white/enemy1" + m + ".png");
-        }*/
 
         if (get_random(2) == 0) {
             for (int j = 0; j < 4; j++) {
@@ -77,10 +62,6 @@ public class Enemy {
     }
     public void update(Matrix3 delta) {
         position.add(velocity.cpy().mul(delta));
-    }
-
-    public Enemy(Texture texture) {
-        bobTexture = texture;
     }
 
     public Enemy(Sprite sprite) {
@@ -432,8 +413,8 @@ public class Enemy {
             }
             // TODO update snow_dx by board height, it's seem to be too high, so snow fire to outer right/left
             enemies[k].e_behv = i;
-            enemies[k].item.position.y = (int)enemies[k].position.y; // TODO why y do not multiple by cell (5)
-            enemies[k].item.position.x = (int)(enemies[k].position.x * CELL_WIDTH); // orig: *5
+            enemies[k].e_snow_y = (int)enemies[k].position.y; // TODO why y do not multiple by cell (5)
+            enemies[k].e_snow_x = (int)(enemies[k].position.x * CELL_WIDTH); // orig: *5
             enemies[k].e_snow_gap = 0;
             enemies[k].e_snow_dx = i*3; // orig: i; i +/-1 +/-3 +/- 5 +/-2 ... Try to more gap
             enemies[k].e_snow_top = 1;
@@ -473,8 +454,8 @@ public class Enemy {
                 }
             }
             boss.e_boss_behv = i;
-            boss.item.position.y = (int)boss.position.y;
-            boss.item.position.x = (int)(boss.position.x * 5);
+            boss.e_boss_snow_y = (int)boss.position.y;
+            boss.e_boss_snow_x = (int)(boss.position.x * 5);
             boss.e_boss_snow_gap = 0;
             boss.e_boss_snow_dx = i;
             boss.e_boss_snow_top = 1;
@@ -489,8 +470,8 @@ public class Enemy {
         for (int i = 0; i < e_num; i++) {
             if ( enemies[i].e_behv != 100)
             {
-                enemies[i].item.position.y -= 1; // e_snow_y
-                enemies[i].item.position.x += enemies[i].e_snow_dx;
+                enemies[i].e_snow_y -= 1; // e_snow_y
+                enemies[i].e_snow_x += enemies[i].e_snow_dx;
                 if ((enemies[i].e_snow_gap < 10) && (enemies[i].e_snow_top == 1))
                 {
                     enemies[i].e_snow_gap += 2;
@@ -502,9 +483,9 @@ public class Enemy {
                 {
                     enemies[i].e_snow_gap -= 1;
                 }
-                if ((int)enemies[i].item.position.y == 5) { // orig: 13
-                    hero.check_hero((int)enemies[i].item.position.x, i);
-                } else if (enemies[i].item.position.y <= 5) { // Reserved geometry y-axis => y <= 16 (orig: >= 16)
+                if ((int)enemies[i].e_snow_y == 5) { // orig: 13
+                    hero.check_hero((int)enemies[i].e_snow_x, i);
+                } else if (enemies[i].e_snow_y <= 5) { // Reserved geometry y-axis => y <= 16 (orig: >= 16)
                     // May be BOTTOM_BOUND or addition added on draw Snow (in drawRunningScreen) so top_snow_y need update.
                     enemies[i].e_behv = 100;
                 }
@@ -512,8 +493,8 @@ public class Enemy {
         }
         if ((e_boss > 0) && (boss.e_boss_behv != 100))
         {
-            boss.getItem().position.y -= 1; // currently use public Item
-            boss.item.position.x += boss.e_boss_snow_dx;
+            boss.e_boss_snow_y -= 1; // currently use public Item
+            boss.e_boss_snow_x += boss.e_boss_snow_dx;
             if ((boss.e_boss_snow_gap < 10) && (boss.e_boss_snow_top == 1))
             {
                 boss.e_boss_snow_gap += 2;
@@ -525,9 +506,9 @@ public class Enemy {
             {
                 boss.e_boss_snow_gap -= 1;
             }
-            if ((int)boss.item.position.y == 13) {
-                hero.check_hero((int)boss.item.position.x, 100);
-            } else if ((int)boss.item.position.y >= 16) {
+            if ((int)boss.e_boss_snow_y == 13) {
+                hero.check_hero(boss.e_boss_snow_x, 100);
+            } else if (boss.e_boss_snow_y >= 16) {
                 boss.e_boss_behv = 100;
             }
         }

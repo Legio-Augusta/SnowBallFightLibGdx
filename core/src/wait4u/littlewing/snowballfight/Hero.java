@@ -13,11 +13,6 @@ import com.badlogic.gdx.math.Vector2;
 import java.util.Random;
 
 public class Hero {
-
-    public enum State {
-        IDLE, WALKING, JUMPING, DYING, FIRING, FREEZE, HANGING
-    }
-
     public int h_idx;
     public int h_timer;
     public int h_timer_p;
@@ -25,22 +20,22 @@ public class Hero {
     public int real_snow_pw;
     public int ppang_item;
     public int ppang_time;
+    public int snow_x;
+    public int snow_y; // TODO replaced by Item
+    public int snow_last_y;
+    public int snow_top_y;
+    public int mana = 0;
+    public int dem; // damage
+    public int wp;
+    public int ppang;
 
-    static final float SPEED = 2f; // unit per second
-    static final float JUMP_VELOCITY = 1f;
     public static final float SIZE = 0.5f; // half a unit
 
     public Vector2 position = new Vector2();
-    Vector2  acceleration = new Vector2();
-    Vector2  velocity = new Vector2();
     private Rectangle bounds = new Rectangle();
-    public State  state = State.IDLE;
-    public boolean  facingLeft = true;
 
-    private int hp = 12; // 120
-    private int max_hp = 106;
-    // TODO private e_move_dir
-    public int e_move_dir = 1; // Default e_move_dir = 1 to avoid init() and/or e_move_ai() call in original J2ME.
+    public int hp;
+    public int max_hp = 106;
     public int snow_gap = 0;
     public int pw_up = 0;
 
@@ -50,17 +45,16 @@ public class Hero {
     // snow or stone item used in firing
     public Item item;
 
-    public Hero(Vector2 position) {
-        this.position = position;
+    public Hero(Vector2 pos) {
+        this.position = pos;
         this.bounds.height = SIZE;
+        snow_x = (int)position.x;
+        snow_y = (int)position.y;
         bounds = new Rectangle(0, 0, 0, 0);
         imgHero = new Texture[5];
         for (int m = 0; m < 5; m++) {
             imgHero[m] = new Texture("data/samsung-white/hero" + m + ".png");
         }
-    }
-    public void update(Matrix3 delta) {
-        position.add(velocity.cpy().mul(delta));
     }
 
     public Texture getImage() {
@@ -152,13 +146,13 @@ public class Hero {
     }
 
     public void make_attack() {
-        item.position.y = 12;
-        item.position.x = position.x;
-        item.position.y = (9 - real_snow_pw);
+        snow_y = (int)position.y; // 12
+        snow_x = (int)position.x;
+        snow_last_y = (17 + real_snow_pw); // orig: 9-real_snow_pw
         if (real_snow_pw % 2 == 0) {
-            item.top_y = (10 - real_snow_pw / 2);
+            snow_top_y = (18 + real_snow_pw / 2); // 10-real_snow_pw/2
         } else {
-            item.top_y = (9 - real_snow_pw / 2);
+            snow_top_y = (17 + real_snow_pw / 2);
         }
         snow_gap = 3;
         h_timer = 0;
