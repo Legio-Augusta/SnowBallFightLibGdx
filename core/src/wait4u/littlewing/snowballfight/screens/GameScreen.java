@@ -6,6 +6,7 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
@@ -63,9 +64,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     public static final String TAG = "LOG";
 
-    public static int GAMESTATE_WIN = 1;
-    public static int GAMESTATE_LOSE = 2;
-    public static int GAMESTATE_PLAYING = 0;
     // Ratio 3:4 ~ 9:12 So with ratio 9:16 we lost (not use) 4/16 = 1/4 of height.
     // Ie. 1920 we will cut 1/4 = 480px to keep ratio 3:4 1080:1440.
     // Bottom space used for fireBtn, so top should space only 240px
@@ -112,7 +110,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private int tmp_stage;
     private int school;
     private int state;
-
 
     private int gold;
     private int[] item_slot = new int[5];
@@ -182,8 +179,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private Texture [] imgStage;
 
     private Texture [] imgColor; // For fillRect with color
+    private Texture imgKeyNum3;
+    BitmapFont font;
 
-    Ray collisionRay;
+    // Ray collisionRay;
 
     public GameScreen(Game game, int param_screen) {
         super(game);
@@ -262,6 +261,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         loadTextures();
         initHeroTexture();
         initEnemy();
+
+        font = new BitmapFont();
+        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        font.getData().setScale(6);
     }
 
     public void update() {
@@ -314,8 +317,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         else if (screen == -33) {
             drawListItems();
         }
-        else if (screen == 200) {
-            drawVictoryScreen();
+        else if (screen == 200) { // Victory
+            game.setScreen(new VictoryScreen(game));
         }
         else if (screen == 65335) {
             drawLoseScreen();
@@ -327,12 +330,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             drawTextScreen();
         }
         else if (screen == -1) {
-            // drawLogoScreen();
             game.setScreen(new LogoScreen(game));
             screen = 6;
         }
         else if (screen == -2) {
-            // drawSamsungLogo();
+            game.setScreen(new SamsungFunclubScreen(game));
         }
         else if (screen == 1000) {
             drawAllClear();
@@ -341,7 +343,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             drawManualScreen();
         }
         else if (screen == 1) {
-            // drawTitleScreen();
+            game.setScreen(new TitleMenuScreen(game));
         }
 
         run();
@@ -352,10 +354,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
         batch.begin();
         drawFireBtn();
-//        handleFireTouch();
         batch.end();
-
-        handleVictoryOrLose();
     }
 
     private void loadTextures() {
@@ -418,6 +417,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         for (int i = 0; i < 6; i++) {
             imgColor[i] = new Texture("data/samsung-white/color-" + i + ".png");
         }
+
+        imgKeyNum3 = new Texture("data/samsung-white/key_num3.png");
     }
 
     public void monitorEnemyPosition() {
@@ -427,8 +428,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     @Override
     public void show() {
-        Gdx.app.log("INFO", "Screen = " + screen);
-        Gdx.app.log("INFO", "Debug Item prices = " + item_price[0]);
+        font = new BitmapFont();
+        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        font.getData().setScale(6);
     }
 
     @Override
@@ -679,6 +681,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     protected void drawFireBtn() {
         batch.draw(fireBtnTexture, SCREEN_WIDTH-50-fireBtnTexture.getWidth(), 50, fireBtnTexture.getWidth(), fireBtnTexture.getHeight());
+        batch.draw(imgKeyNum3, SCREEN_WIDTH-50-fireBtnTexture.getWidth()-fireBtnTexture.getWidth()/2 - imgKeyNum3.getWidth(), BOTTOM_SPACE-imgKeyNum3.getHeight(), imgKeyNum3.getWidth(), imgKeyNum3.getHeight());
     }
 
     protected void drawTouchPad() {
@@ -692,33 +695,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
 //        touch_stage.act(Gdx.graphics.getDeltaTime());
         touch_stage.draw();
-    }
-
-    protected int getGameState() {
-        if(hero.isDead()) {
-            return 2;
-        }
-        if(boss.isDead()) {
-            int temp_state = 1;
-            for(int i=0; i < e_num; i++) {
-                if(!enemies[i].isDead()) {
-                    temp_state = 0;
-                    return 0;
-                }
-            }
-            return temp_state;
-        }
-
-        return 0;
-    }
-
-    protected void handleVictoryOrLose() {
-        if(getGameState() == GAMESTATE_WIN) {
-            game.setScreen(new VictoryScreen(game));
-        }
-        if(getGameState() == GAMESTATE_LOSE) {
-            game.setScreen(new LoseScreen(game));
-        }
     }
 
     public void check_building(int paramInt1, int paramInt2) {
@@ -791,8 +767,44 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
         return 1;
     }
-    public void draw_text() {
 
+    /**
+     *
+     * "1.Play", "2.Instructions", "3.Configuration", "4.Quit", "Resume", "MainMenu", "Sound", "On/", "off", "on/", "OFF", "Instructions", "Quit",
+     * "1.New Game", "2.Saved Game", "Sound", "ON /", "off", "on /", "OFF", "Vibration ", "ON /", "off", "on /", "OFF", "Speed ", "[ " " ]",
+     * "1.Control Keys", "2.Offense items", "3.Defense items", "Good Job!", "Acquired", "Gold:", "press any key", "to continue"
+     * TODO handle box and border box
+     */
+    public void draw_text(String str, int x, int y, int color) {
+        if( (str != null) && (str.length() > 0) ) {
+            if(font != null) {
+                switch(color) {
+                    case 0:
+                        font.setColor(1, 0, 0, 1);
+                        break;
+                    case 1:
+                        font.setColor(0, 1, 1, 1);
+                        break;
+                    case 2:
+                        font.setColor(0, 0, 1, 1);
+                        break;
+                    case 3:
+                        font.setColor(1, 1, 1, 1);
+                        break;
+                    default:
+                        font.setColor(1, 1, 1, 1);
+                        break;
+                }
+                font.draw(batch, str, x, y);
+                int i = message.length();
+                fillRect(0, SCREEN_HEIGHT/2, SCREEN_WIDTH, 19*SGH_SCALE_RATIO, 3); // #00AEEF light blue
+                // setColor(20361) // #004F89 dark blue
+                //drawRect(0, 52, 127, 19);
+                // setColor(0) // black
+                // drawString(message, 64, 53);
+                message = "";
+            }
+        }
     }
     public void draw_item() {
         if (del == -1) {
@@ -846,10 +858,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                         item_mode -= 1;
                     }
                     message = "Item Mode";
+                    draw_text(message, SCREEN_WIDTH/4, SCREEN_HEIGHT/2+SCREEN_HEIGHT/8, 3);
                     // repaint();
                 }
             }
-            else if ((getGameAction(paramInt) == GAME_ACTION_RIGHT) || (paramInt == 54)) // NUM_6 or RIGHT_KEY (may be LEFT_KEY by keyboard view)
+            else if ((getGameAction(paramInt) == GAME_ACTION_RIGHT) || (paramInt == 54) ) // NUM_6 or RIGHT_KEY (may be LEFT_KEY by keyboard view)
             {
                 if ((item_mode == 0) && (hero.ppang_item != 2))
                 {
@@ -875,7 +888,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             else if ((getGameAction(paramInt) == GAME_ACTION_DOWN) || (paramInt == 56)) // NUM_8 or DOWN KEY
             {
                 if (hero.mana >= 12) {
-                    // use_special();
+                     use_special();
                 } else {
                     message = "Insufficient Mana";
                 }
@@ -911,7 +924,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 screen = 100;
                 // repaint();
             }
-            else if ((paramInt == 51) && (game_state == 0)) // ITEM_MODE (NUM_3)
+            else if ((paramInt == 51) && (game_state == 0) || isTouchedNum3()) // ITEM_MODE (NUM_3)
             {
                 i = 0;
                 j = 0;
@@ -1138,22 +1151,18 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     if (saved_gold >= item_price[(b_item + i)])
                     {
                         j = input_item(b_item + i + 1);
-                        if (j == 1)
-                        {
+                        if (j == 1) {
                             saved_gold -= item_price[(b_item + i)];
                             message = "Purchasing Items";
                         }
-                        else if (j == 0)
-                        {
+                        else if (j == 0) {
                             message = "Bag is full";
                         }
-                        else if (j == 3)
-                        {
+                        else if (j == 3) {
                             message = "Duplicated item";
                         }
                     }
-                    else
-                    {
+                    else {
                         message = "not enough gold";
                     }
                 }
@@ -1523,17 +1532,16 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     }
                 }
                 else if (state == 3) {
-                    if (game_state == 2)
-                    {
+                    if (game_state == 2) {
                         screen = 201;
                         // MPlay(7);
                         gold = (school * 6 + hero.get_random(7) + 5);
                     }
-                    else if (game_state == 1)
-                    {
-                        screen = 65336;
+                    else if (game_state == 1) {
+                        screen = 65336; // lose
                         gold = 3;
                     }
+                    setSavedGold(getSavedgold()+ gold);
                 }
             }
             else if (screen == 8) {
@@ -1577,17 +1585,14 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 ani_step = 0;
                 if (last_stage / 10 == school)
                 {
-                    if (stage % 10 != 4)
-                    {
+                    if (stage % 10 != 4) {
                         stage += 1;
                     }
-                    else if (stage != 44)
-                    {
+                    else if (stage != 44) {
                         stage += 10;
                         stage = (stage - stage % 10 + 1);
                     }
-                    else
-                    {
+                    else {
                         stage = 45;
                         state = 10;
                     }
@@ -1595,8 +1600,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 }
 
                 screen = 200;
+                game.setScreen(new VictoryScreen(game));
             } // end screen 201
-            else if (screen == 65336) {
+            else if (screen == 65336) {  // lose
                 item_mode = 0;
                 ani_step = 0;
                 // loadImage(65336);
@@ -1664,21 +1670,12 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         Gdx.app.log("INFO", "touch " + touchPoint.x + " y "+ (SCREEN_HEIGHT-touchPoint.y) + " bound x "+ upBtnRect.toString() + " saved "+ downBtnRect.toString());
         game_action = getGameAction();
 
-/*        collisionRay = camera.getPickRay(x, y);
+        /* collisionRay = camera.getPickRay(x, y);
         if (Intersector.intersectRayBoundsFast(collisionRay, touchKeyUpArea)) { // TODO may be need flag to avoid fire continuously
             game_action = GAME_ACTION_UP;
         }
-        if (Intersector.intersectRayBoundsFast(collisionRay, touchKeyDownArea)) {
-            game_action = GAME_ACTION_DOWN;
-        }
-        if (Intersector.intersectRayBoundsFast(collisionRay, touchKeyLeftArea)) {
-            game_action = GAME_ACTION_LEFT;
-        }
-        if (Intersector.intersectRayBoundsFast(collisionRay, touchKeyRightArea)) {
-            game_action = GAME_ACTION_RIGHT;
-        }*/
 
-/*        if(touchpad.getKnobPercentX() > 0) {
+        if(touchpad.getKnobPercentX() > 0) {
             game_action = GAME_ACTION_RIGHT;
         } else if(touchpad.getKnobPercentX() < 0){
             game_action = GAME_ACTION_LEFT;
@@ -1795,6 +1792,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         Rectangle textureBounds=new Rectangle(SCREEN_WIDTH-fireBtnTexture.getWidth()-50, SCREEN_HEIGHT-50-fireBtnTexture.getHeight(), fireBtnTexture.getWidth(),fireBtnTexture.getHeight());
         return textureBounds.contains(touchPoint.x, touchPoint.y);
     }
+    protected boolean isTouchedNum3() {
+        Rectangle textureBounds=new Rectangle(SCREEN_WIDTH-fireBtnTexture.getWidth()-50-imgKeyNum3.getWidth()-(int)fireBtnTexture.getWidth()/2, SCREEN_HEIGHT-BOTTOM_SPACE, imgKeyNum3.getWidth(),imgKeyNum3.getHeight());
+        return textureBounds.contains(touchPoint.x, touchPoint.y);
+    }
     protected Preferences getPrefs() {
         if(prefs==null){
             prefs = Gdx.app.getPreferences("gamestate");
@@ -1888,7 +1889,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
         if (item_mode != 0) {
             if (message != "") {
-                draw_text();
+                draw_text(message, (int)(SCREEN_WIDTH/3), SCREEN_HEIGHT/2+SCREEN_HEIGHT/8, 3);
             }
             for (int i = 1; i <= 5; i++) {
                 // paramGraphics.drawRect(i * 12 + 23, 110, 10, 9);
@@ -1901,8 +1902,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             }
         } // end item_mode
         if (hero.pw_up == 2) {
-            batch.draw(imgShadow, hero.snow_x * 5*SGH_SCALE_RATIO, (hero.snow_y * 7 + 4)*SGH_SCALE_RATIO);
-            batch.draw(imgItem[hero.wp], hero.position.x * 5 * SGH_SCALE_RATIO, (hero.position.y * 7 - hero.snow_gap + 4)*SGH_SCALE_RATIO );
+            batch.draw(imgShadow, hero.snow_x * 5*SGH_SCALE_RATIO, (hero.snow_y * 6)*SGH_SCALE_RATIO); // orig: *7
+            batch.draw(imgItem[hero.wp], hero.position.x * 5 * SGH_SCALE_RATIO, (hero.snow_y * 6 + hero.snow_gap)*SGH_SCALE_RATIO );
         }
         else if (hero.pw_up == 1) {
             if ((hero.real_snow_pw > 0) && (hero.ppang_item != 1))
@@ -1921,7 +1922,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         } // end pw_up = 1
         else if (hero.pw_up == 0) {
             if (hero.ppang <= -1) {
-                batch.draw(imgPok, hero.snow_x* 5* SGH_SCALE_RATIO, (hero.snow_y * 7 - 3)*SGH_SCALE_RATIO);
+                batch.draw(imgPok, hero.snow_x* 5* SGH_SCALE_RATIO, (hero.snow_y * 6 - 3)*SGH_SCALE_RATIO);
                 hero.ppang -= 1;
                 if (hero.ppang == -3) {
                     hero.ppang = 0;
@@ -1944,8 +1945,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 if (this.hit_idx != 10) {
                     if (enemies[hit_idx].getHp() > 0)
                     {
-                        fillRect( (int)(enemies[hit_idx].position.x * 5 + 8)*SGH_SCALE_RATIO, (int)(enemies[hit_idx].position.y * 5 + 5)*SGH_SCALE_RATIO, 27, 15*SGH_SCALE_RATIO, 0); // 16711680); // FF0000
-                        fillRect( (int)(enemies[hit_idx].position.x * 5 + 8)*SGH_SCALE_RATIO, (int)(enemies[hit_idx].position.y * 5 + 5)*SGH_SCALE_RATIO, 27, (15 - 15 * enemies[hit_idx].e_hp / enemies[hit_idx].max_e_hp)*SGH_SCALE_RATIO ); // 9672090
+                        fillRect( (int)(enemies[hit_idx].position.x * 5 + 10)*SGH_SCALE_RATIO, (int)(enemies[hit_idx].position.y * 5 + 5)*SGH_SCALE_RATIO, 27, 15*SGH_SCALE_RATIO, 0); // 16711680); // FF0000
+                        fillRect( (int)(enemies[hit_idx].position.x * 5 + 10)*SGH_SCALE_RATIO, (int)(enemies[hit_idx].position.y * 5 + 5 + 15 - 15 * enemies[hit_idx].e_hp / enemies[hit_idx].max_e_hp)*SGH_SCALE_RATIO, 27, (15 - 15 * enemies[hit_idx].e_hp / enemies[hit_idx].max_e_hp)*SGH_SCALE_RATIO, 4); // 9672090
                     }
                 }
                 else if (hit_idx == 10) {
@@ -1971,7 +1972,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 draw_sp_hyo();
             }
             if (message != "") {
-                draw_text();
+                draw_text(message, (int)(SCREEN_WIDTH/3), SCREEN_HEIGHT/2+SCREEN_HEIGHT/8, 3);
             }
         } // end pw_up = 0
         else if (hero.pw_up == -1) {
@@ -2305,9 +2306,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     public void drawListItems() { // screen -33
 
     }
-    public void drawVictoryScreen() { // screen 200
 
-    }
     public void drawLoseScreen() { // screen 65335
 
     }
@@ -2315,7 +2314,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     }
     public void drawTextScreen() { // screen 77
-//        draw_text(paramGraphics);
+        draw_text(message, (int)(SCREEN_WIDTH/3), SCREEN_HEIGHT/2+SCREEN_HEIGHT/8, 3);
     }
     public void drawLogoScreen() { // screen -1
 
@@ -2329,16 +2328,13 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     public void drawManualScreen() { // screen -5
 
     }
-    public void drawTitleScreen() { // screen 1
-
-    }
 
     public void draw_gauge()
     {
         if (d_gauge == 2)
         {
             // setColor(16775065); // FFF799 light yellow
-            fillRect(118/128*SCREEN_WIDTH, 49/160*SCREEN_HEIGHT, 8*SGH_SCALE_RATIO, 8*SGH_SCALE_RATIO, 2);
+            fillRect((int)(118/128)*SCREEN_WIDTH, (int)(49/160)*SCREEN_HEIGHT, 8*SGH_SCALE_RATIO, 8*SGH_SCALE_RATIO, 2);
             if (hero.wp != 0) {
                 batch.draw(this.imgItem[hero.wp], (122/128)*SCREEN_WIDTH, (49/160)*SCREEN_HEIGHT + BOTTOM_SPACE);
             }
@@ -2346,30 +2342,30 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         if (hero.mana != 0)
         {
             //setColor(16711680); // FF0000
-            fillRect(30/128*SCREEN_WIDTH, 37/160*SCREEN_HEIGHT, hero.mana, 12, 0);
+            fillRect((int)(30/128)*SCREEN_WIDTH, (int)(37/160)*SCREEN_HEIGHT, hero.mana, 12, 0);
             if (hero.mana == 36)
             {
-                fillRect(39/128*SCREEN_WIDTH, 37/160*SCREEN_HEIGHT, 27, 27, 0);
-                fillRect(51/128*SCREEN_WIDTH, 37/160*SCREEN_HEIGHT, 27, 27, 0);
-                fillRect(63/128*SCREEN_WIDTH, 37/160*SCREEN_HEIGHT, 27, 27, 0);
+                fillRect((int)(39/128)*SCREEN_WIDTH, (int)(37/160)*SCREEN_HEIGHT, 27, 27, 0);
+                fillRect((int)(51/128)*SCREEN_WIDTH, (int)(37/160)*SCREEN_HEIGHT, 27, 27, 0);
+                fillRect((int)(63/128)*SCREEN_WIDTH, (int)(37/160)*SCREEN_HEIGHT, 27, 27, 0);
             }
             else if (hero.mana >= 24)
             {
-                fillRect(39/128*SCREEN_WIDTH, 37/160*SCREEN_HEIGHT, 27, 27, 0);
-                fillRect(51/128*SCREEN_WIDTH, 37/160*SCREEN_HEIGHT, 27, 27, 0);
+                fillRect((int)(39/128)*SCREEN_WIDTH, (int)(37/160)*SCREEN_HEIGHT, 27, 27, 0);
+                fillRect((int)(51/128)*SCREEN_WIDTH, (int)(37/160)*SCREEN_HEIGHT, 27, 27, 0);
             }
             else if (hero.mana >= 12)
             {
-                fillRect(39/128*SCREEN_WIDTH, 37/160*SCREEN_HEIGHT, 27, 27, 0);
+                fillRect((int)(39/128)*SCREEN_WIDTH, (int)(37/160)*SCREEN_HEIGHT, 27, 27, 0);
             }
         }
         else if (hero.mana == 0)
         {
             //setColor(4960985); // 4BB2D9 light blue
-            fillRect(30/128*SCREEN_WIDTH, 36/160*SCREEN_HEIGHT, 36*SGH_SCALE_RATIO, 1*SGH_SCALE_RATIO, 2);
-            fillRect(39/128*SCREEN_WIDTH, 37/160*SCREEN_HEIGHT, 27, 27, 2);
-            fillRect(51/128*SCREEN_WIDTH, 37/160*SCREEN_HEIGHT, 27, 27, 2);
-            fillRect(63/128*SCREEN_WIDTH, 37/160*SCREEN_HEIGHT, 27, 27, 2);
+            fillRect((int)(30/128)*SCREEN_WIDTH, (int)(36/160)*SCREEN_HEIGHT, 36*SGH_SCALE_RATIO, 1*SGH_SCALE_RATIO, 2);
+            fillRect((int)(39/128)*SCREEN_WIDTH, (int)(37/160)*SCREEN_HEIGHT, 27, 27, 2);
+            fillRect((int)(51/128)*SCREEN_WIDTH, (int)(37/160)*SCREEN_HEIGHT, 27, 27, 2);
+            fillRect((int)(63/128)*SCREEN_WIDTH, (int)(37/160)*SCREEN_HEIGHT, 27, 27, 2);
         }
         d_gauge = 0;
     }
@@ -2383,16 +2379,17 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             if ((j - hero.snow_x >= -1) && (j - hero.snow_x <= 1))
             {
                 int k = (int)enemies[i].position.y;
-                if ((k >= 0) && (k <= 4))
+                if ((k >= 30) && (k <= 37)) // orig: 0,4
                 {
-                    if ((k + hero.real_snow_pw == 7) || (k + hero.real_snow_pw == 8))
+                    // min e.y = 30 and min power to reach enemy is 2 (or 3 ?) => item hit at y = 33 ?
+                    if ((k - hero.real_snow_pw == 27) || (k - hero.real_snow_pw == 28)) // max top enemy.y + max power = 36 + 8
                     {
                         hero.ppang = 1;
                         decs_e_hp(i);
                         break;
                     }
                 }
-                else if ((k + hero.real_snow_pw == 8) || (k + hero.real_snow_pw == 9))
+                else if ((k - hero.real_snow_pw == 28) || (k - hero.real_snow_pw == 29))
                 {
                     hero.ppang = 1;
                     decs_e_hp(i);
@@ -2417,6 +2414,35 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         if (hero.wp != 0) {
             hero.wp = 0;
         }
+    }
+    public void use_special()
+    {
+        screen = 8;
+        ani_step = 1;
+        hero.real_snow_pw = 0;
+        hero.snow_pw = 0;
+        hero.h_idx = 0;
+        gameOn = false;
+        // destroyImage(100);
+        // loadImage(8);
+        if (hero.mana == 36)
+        {
+            special = 3;
+            hero.dem = 24;
+        }
+        else if (hero.mana >= 24)
+        {
+            special = 2;
+            hero.dem = 12;
+        }
+        else if (hero.mana >= 12)
+        {
+            special = 1;
+            hero.dem = 12;
+        }
+        d_gauge = 1;
+        // MPlay(5);
+        // call_vib(3);
     }
     public void decs_e_hp(int paramInt)
     {

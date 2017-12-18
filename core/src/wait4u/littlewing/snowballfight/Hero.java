@@ -146,13 +146,13 @@ public class Hero {
     }
 
     public void make_attack() {
-        snow_y = (int)position.y; // 12
+        snow_y = 12; // (int)position.y
         snow_x = (int)position.x;
-        snow_last_y = (17 + real_snow_pw); // orig: 9-real_snow_pw
+        snow_last_y = (18 + real_snow_pw*2); // orig: 9-real_snow_pw
         if (real_snow_pw % 2 == 0) {
-            snow_top_y = (18 + real_snow_pw / 2); // 10-real_snow_pw/2
+            snow_top_y = (14 + real_snow_pw); // 10-real_snow_pw/2
         } else {
-            snow_top_y = (17 + real_snow_pw / 2);
+            snow_top_y = (13 + real_snow_pw);
         }
         snow_gap = 3;
         h_timer = 0;

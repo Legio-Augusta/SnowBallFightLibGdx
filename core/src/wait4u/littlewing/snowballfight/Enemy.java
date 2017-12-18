@@ -113,7 +113,9 @@ public class Enemy {
             this.position.x = 12 + get_random(12);
         }
         if(this.position.x <= leftBound) {
-            this.position.x = get_random(4);
+            if(this.hp > 0) {
+                this.position.x = get_random(4);
+            }
         }
         if(this.position.y >= topBound) {
             this.position.y = 2 + get_random(4) + bottomBound;
