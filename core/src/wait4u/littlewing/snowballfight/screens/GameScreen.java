@@ -913,7 +913,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 }
                 else
                 {
-                    // use_item(item_mode - 1);
+                    use_item(item_mode - 1);
                     gameOn = true;
                 }
             }
@@ -2222,7 +2222,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         for (int i = 0; i < this.e_num; i++)
         {
             if ((this.school == 1) || (this.school == 2)) {
-                enemies[i].setHp(20 + this.school * 10);
+                enemies[i].setHp(40 + this.school * 10); // debug item
             } else if (this.school == 3) {
                 enemies[i].setHp(54);
             } else if (this.school == 4) {
@@ -2516,6 +2516,92 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         int scaleX = (int)(width / 12);
         // (Texture, float x, float y, float originX, float originY, float width, float height, float scaleX, float scaleY, float rotation, int srcX, int srcY, int srcWidth, int srcHeight, boolean flipX, boolean flipY)
         batch.draw(imgColor[color], x, y, 0, 0, imgColor[color].getWidth(), imgColor[color].getHeight(), scaleX, scaleY, 0, 0, 0, imgColor[color].getWidth()*scaleX, imgColor[color].getHeight()*scaleY, false, false);
+    }
+
+    public void use_item(int paramInt)
+    {
+        if ((item_slot[paramInt] > 0) && (item_slot[paramInt] <= 4))
+        {
+            hero.wp = item_slot[paramInt];
+            if (hero.wp == 1)
+            {
+                item_a_num -= 1;
+                if (item_a_num == 0) {
+                    delete_item(1);
+                }
+            }
+            else if (hero.wp == 2)
+            {
+                item_b_num -= 1;
+                if (item_b_num == 0) {
+                    delete_item(2);
+                }
+            }
+            else if (hero.wp == 3)
+            {
+                item_c_num -= 1;
+                if (item_c_num == 0) {
+                    delete_item(3);
+                }
+            }
+            else if (hero.wp == 4)
+            {
+                item_d_num -= 1;
+                if (item_d_num == 0) {
+                    delete_item(4);
+                }
+            }
+            d_gauge = 2;
+        }
+        else if (item_slot[paramInt] == 5)
+        {
+            delete_item(5);
+            hero.hp += hero.max_hp / 3;
+            if (hero.hp > hero.max_hp) {
+                hero.hp = hero.max_hp;
+            }
+            hero.h_timer_p = -4;
+        }
+        else if (this.item_slot[paramInt] == 6)
+        {
+            delete_item(6);
+            hero.mana += 10;
+            if (hero.mana > 36) {
+                hero.mana = 36;
+            }
+            d_gauge = 1;
+        }
+        else if (this.item_slot[paramInt] == 7)
+        {
+            delete_item(7);
+            hero.hp = hero.max_hp;
+            hero.h_timer_p = -4;
+        }
+        else if (this.item_slot[paramInt] == 8)
+        {
+            delete_item(8);
+            hero.hp += hero.max_hp / 3;
+            if (hero.hp > hero.max_hp) {
+                hero.hp = hero.max_hp;
+            }
+            hero.h_timer_p = -4;
+            hero.ppang_item = 0;
+            hero.ppang_time = 0;
+        }
+        item_mode = 100;
+        //MPlay(1);
+    }
+
+    public void delete_item(int paramInt)
+    {
+        for (int i = 0; i < 5; i++) {
+            if (item_slot[i] == paramInt)
+            {
+                item_slot[i] = 0;
+                del = i;
+                return;
+            }
+        }
     }
 
 }
