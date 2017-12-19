@@ -96,14 +96,6 @@ public class NewGameMenuScreen extends  DefaultScreen {
         imgBk.dispose();
         imgCh.dispose();
         samsung_blue.dispose();
-
-        /*        paramGraphics.drawImage(this.imgMM, 0, 0, 20);
-        paramGraphics.setColor(16777164);
-        paramGraphics.drawString("1.New Game", 13, 27, 20);
-        paramGraphics.drawString("2.Saved Game", 13, 44, 20);
-        paramGraphics.drawImage(this.imgSl, 68, 115, 20);
-        paramGraphics.drawImage(this.imgBk, 2, 115, 20);
-        paramGraphics.drawImage(this.imgCh, 4, this.m_mode * 17 + 14, 20);*/
     }
 
 }

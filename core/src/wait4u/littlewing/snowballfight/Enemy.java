@@ -36,14 +36,12 @@ public class Enemy {
     Vector2  velocity = new Vector2();
     private Rectangle  bounds = new Rectangle();
 
-    private int hp = 30; // 120 def, small for fast debug
-    public int e_hp = 30;
+    public int e_hp;
     // TODO private e_move_dir
-    public int e_move_dir = 1; // Default e_move_dir = 1 to avoid init() and/or e_move_ai() call in original J2ME.
+    public int e_move_dir;
+    public int e_dem;
     public Texture[] imgEnemy;
     private Sprite sprite;
-    // snow or stone item used in firing
-    // TODO handle item random by enemy, may be need e_wp to get what is used.
     public Item item;
 
     public Enemy(Vector2 position) {
@@ -90,19 +88,8 @@ public class Enemy {
         return this.bounds;
     }
 
-    public void setHp(int hp) {
-        this.hp = hp;
-    }
-    public int getHp() {
-        return this.hp;
-    }
-
-    public void loseHp(int damage) {
-        this.hp -= damage;
-    }
-
     public boolean isDead() {
-        return (this.hp <= 0) ? true : false;
+        return (this.e_hp <= 0) ? true : false;
     }
 
     /*
@@ -113,7 +100,7 @@ public class Enemy {
             this.position.x = 12 + get_random(12);
         }
         if(this.position.x <= leftBound) {
-            if(this.hp > 0) {
+            if(this.e_hp > 0) {
                 this.position.x = get_random(4);
             }
         }
@@ -128,7 +115,6 @@ public class Enemy {
     /*
      * This function simulate enemy moving like in real. It's based on screen size 120x160 and some arithmetic calculate.
      * */
-
     public void e_move_ai(Enemy[] enemies, int paramInt)
     {
         int i;
@@ -486,7 +472,7 @@ public class Enemy {
                     enemies[i].e_snow_gap -= 1;
                 }
                 if ((int)enemies[i].e_snow_y == 5) { // orig: 13
-                    hero.check_hero((int)enemies[i].e_snow_x, i);
+                    hero.check_hero((int)enemies[i].e_snow_x, i, enemies[i], boss);
                 } else if (enemies[i].e_snow_y <= 5) { // Reserved geometry y-axis => y <= 16 (orig: >= 16)
                     // May be BOTTOM_BOUND or addition added on draw Snow (in drawRunningScreen) so top_snow_y need update.
                     enemies[i].e_behv = 100;
@@ -509,7 +495,7 @@ public class Enemy {
                 boss.e_boss_snow_gap -= 1;
             }
             if ((int)boss.e_boss_snow_y == 13) {
-                hero.check_hero(boss.e_boss_snow_x, 100);
+                hero.check_hero(boss.e_boss_snow_x, 100, enemies[0], boss);
             } else if (boss.e_boss_snow_y >= 16) {
                 boss.e_boss_behv = 100;
             }

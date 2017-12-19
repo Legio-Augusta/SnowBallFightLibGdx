@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -20,6 +21,7 @@ public class LogoScreen extends DefaultScreen {
     Texture logo;
     SpriteBatch batch;
     float time = 0;
+    public Music music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/9.mid"));
 
     public LogoScreen(Game game) {
         super(game);
@@ -39,6 +41,12 @@ public class LogoScreen extends DefaultScreen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         int SCREEN_HEIGHT = Gdx.graphics.getHeight();
 
+        if(music != null) {
+            if(!music.isPlaying()) {
+                music.play();
+                music.setLooping(false);
+            }
+        }
         batch.begin();
         batch.draw(logo, 0, 400);
         batch.end();
@@ -55,10 +63,7 @@ public class LogoScreen extends DefaultScreen {
         Gdx.app.debug("Snow Ball Fight", "dispose intro");
         batch.dispose();
         logo.dispose();
-        /*loadImage(1);
-        paramGraphics.drawImage(this.imgLogo, 0, 0, 20);
-        MPlay(0);
-        destroyImage(1);*/
+        music.dispose();
     }
 
     public void drawInstructionScreen() { // screen = 2
@@ -305,44 +310,4 @@ public class LogoScreen extends DefaultScreen {
 
     }
 
-    public void draw_gauge()
-    {
-        /*if (this.d_gauge == 2)
-        {
-            paramGraphics.setColor(16775065);
-            paramGraphics.fillRect(118, 111, 8, 8);
-            if (this.wp != 0) {
-                paramGraphics.drawImage(this.imgItem[this.wp], 122, 111, 0x10 | 0x1);
-            }
-        }
-        if (this.mana != 0)
-        {
-            paramGraphics.setColor(16711680);
-            paramGraphics.fillRect(30, 124, this.mana, 1);
-            if (this.mana == 36)
-            {
-                paramGraphics.fillRect(39, 123, 3, 3);
-                paramGraphics.fillRect(51, 123, 3, 3);
-                paramGraphics.fillRect(63, 123, 3, 3);
-            }
-            else if (this.mana >= 24)
-            {
-                paramGraphics.fillRect(39, 123, 3, 3);
-                paramGraphics.fillRect(51, 123, 3, 3);
-            }
-            else if (this.mana >= 12)
-            {
-                paramGraphics.fillRect(39, 123, 3, 3);
-            }
-        }
-        else if (this.mana == 0)
-        {
-            paramGraphics.setColor(4960985);
-            paramGraphics.fillRect(30, 124, 36, 1);
-            paramGraphics.fillRect(39, 123, 3, 3);
-            paramGraphics.fillRect(51, 123, 3, 3);
-            paramGraphics.fillRect(63, 123, 3, 3);
-        }
-        this.d_gauge = 0;*/
-    }
 }

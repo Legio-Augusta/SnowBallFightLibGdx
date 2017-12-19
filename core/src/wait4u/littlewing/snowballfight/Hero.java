@@ -4,6 +4,8 @@ package wait4u.littlewing.snowballfight;
  * Created by Admin on 11/13/2017.
  */
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Matrix3;
@@ -38,12 +40,13 @@ public class Hero {
     public int max_hp = 106;
     public int snow_gap = 0;
     public int pw_up = 0;
+    private static int SGH_SCALE_RATIO = (int)Gdx.graphics.getWidth()/120;
 
     private Texture bobTexture;
     public Texture[] imgHero;
     private Sprite sprite;
-    // snow or stone item used in firing
     public Item item;
+    private Music music;
 
     public Hero(Vector2 pos) {
         this.position = pos;
@@ -141,8 +144,70 @@ public class Hero {
     {
         return 0;
     }
-    public void check_hero(int paramInt1, int paramInt2) {
-
+    public void check_hero(int paramInt1, int paramInt2, Enemy enemy, Boss boss) {
+        int i = 0;
+        int j;
+        if (paramInt2 != 100) // not boss
+        {
+            if (enemy.e_behv <= 0) {
+                i = 5*SGH_SCALE_RATIO;
+                j = 9*SGH_SCALE_RATIO;
+            }
+            else {
+                i = 9*SGH_SCALE_RATIO;
+                j = 5*SGH_SCALE_RATIO;
+            }
+        }
+        else if (boss.e_boss_behv <= 0) {
+            i = 5*SGH_SCALE_RATIO;
+            j = 9*SGH_SCALE_RATIO;
+        }
+        else {
+            i = 9*SGH_SCALE_RATIO;
+            j = 5*SGH_SCALE_RATIO;
+        }
+        if ((paramInt1 - position.x * 5*SGH_SCALE_RATIO <= j) && (paramInt1 - position.x * 5*SGH_SCALE_RATIO >= -i))
+        {
+            int k = -1;
+            if (paramInt2 != 100) {
+                enemy.e_behv = 100;
+                k = enemy.e_wp;
+            }
+            else {
+                boss.e_boss_behv = 100;
+                k = boss.e_boss_wp;
+            }
+            this.h_timer_p = -1;
+            if (this.hp > 0) {
+                if (k == 0) {
+                    this.hp -= enemy.e_dem;
+                }
+                else if (k == 1) {
+                    this.ppang_item = 1;
+                    this.ppang_time = 20;
+                    this.hp -= enemy.e_dem * 2 / 3;
+                }
+                else if (k == 2) {
+                    this.ppang_item = 1;
+                    this.ppang_time = 20;
+                    this.hp -= enemy.e_dem;
+                }
+                else if (k == 3) {
+                    this.ppang_item = 2;
+                    this.ppang_time = 20;
+                    this.hp -= enemy.e_dem * 2 / 3;
+                }
+            }
+            // MPlay(4);
+            Gdx.input.vibrate(1*1000);
+            music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/four.mid"));
+            if(music != null) {
+                if (!music.isPlaying()) {
+                    music.play();
+                    music.setLooping(false);
+                }
+            }
+        }
     }
 
     public void make_attack() {
@@ -157,7 +222,14 @@ public class Hero {
         snow_gap = 3;
         h_timer = 0;
         pw_up = 2;
-//        MPlay(2);
+        // MPlay(2);
+        music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/fire.mp3"));
+        if(music != null) {
+            if (!music.isPlaying()) {
+                music.play();
+                music.setLooping(false);
+            }
+        }
     }
 
 }

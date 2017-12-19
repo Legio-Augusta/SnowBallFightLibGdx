@@ -80,6 +80,7 @@ public class VictoryScreen extends DefaultScreen {
         imgBack.dispose();
         snowWhiteBg.dispose();
         ui.dispose();
+        // music.dispose();
 
         /*if ((this.ani_step >= 13) && (this.ani_step < 27))
         {
