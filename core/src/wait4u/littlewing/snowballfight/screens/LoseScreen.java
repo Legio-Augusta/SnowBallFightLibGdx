@@ -27,6 +27,12 @@ public class LoseScreen extends DefaultScreen {
         imgLose = new Texture("data/samsung-white/lose.png");
         imgHero_l = new Texture("data/samsung-white/hero-lose.png");
         batch = new SpriteBatch();
+        if(music != null) {
+            if(!music.isPlaying()) {
+                music.play();
+                music.setLooping(false);
+            }
+        }
     }
 
     @Override
@@ -42,11 +48,12 @@ public class LoseScreen extends DefaultScreen {
         batch.draw(imgHero_l, SCREEN_WIDTH/2-(int)(imgHero_l.getWidth()/2), VIEW_PORT_HEIGHT/2+BOTTOM_SPACE);
         batch.end();
 
-        if(music != null) {
-            if(!music.isPlaying()) {
-                music.play();
-                music.setLooping(false);
-            }
+        if(music == null) {
+            music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/lose.mp3"));
+        }
+        if(!music.isPlaying()) {
+            music.play();
+            music.setLooping(false);
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.ANY_KEY) || Gdx.input.justTouched()) {

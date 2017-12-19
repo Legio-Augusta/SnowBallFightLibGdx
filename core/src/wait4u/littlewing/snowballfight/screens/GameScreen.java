@@ -39,7 +39,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     // Use rectangle until figure out how to work with BoundingBox multi input.
     Rectangle upBtnRect = new Rectangle(20+(200/3), 20+(400/3), 72, 70);
     Rectangle downBtnRect = new Rectangle(20+(200/3), 20, 72, 70);
-    Rectangle leftBtnRect = new Rectangle(20, 20+(200/6), 70, 140);
+    Rectangle leftBtnRect = new Rectangle(20, 20+(200/6), 2*70, 140);
     Rectangle rightBtnRect = new Rectangle(20+(400/3), 20+(200/6), 70, 140);
     Rectangle optionBtnRect = new Rectangle(SCREEN_WIDTH/2+150, SCREEN_HEIGHT/8, SCREEN_WIDTH/2-180, 70);
 
@@ -452,7 +452,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         hero.position.x = 5;
         hero.position.y = (int)((BOTTOM_SPACE+ui.getHeight()+2)/CELL_WIDTH); // orig 8
         hero.h_idx = 0;
-        hero.setHp(hero.getMaxHp()); //106
+        hero.hp = hero.max_hp;
         hero.wp = 0;
         hero.pw_up = 0;
         hero.snow_pw = 0;
@@ -1270,10 +1270,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         {
             MPlay(3);
             m_mode = -1;
-            // destroyImage(2);
             // loadImage(3);
-            hero.position.x = (57/120)*SCREEN_WIDTH;
-            hero.position.y = (46/120)*(Gdx.graphics.getHeight()*3/4);
+            hero.position.x = 57*SGH_SCALE_RATIO;
+            hero.position.y = 46*SGH_SCALE_RATIO;
             saved_gold += gold;
             setSavedGold(saved_gold);
             setSavedMana(hero.mana);
@@ -1684,7 +1683,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         return game_action;
     }
     public int getGameAction() {
-        // Gdx.app.log("INFO", "touch " + touchPoint.x + " y "+ (SCREEN_HEIGHT-touchPoint.y) + " bound x "+ upBtnRect.toString() + " saved "+ downBtnRect.toString());
+        // Gdx.app.log("INFO", "touch " + touchPoint.x + " y "+ (SCREEN_HEIGHT-touchPoint.y) + " bound x "+ upBtnRect.toString() + " down btn "+ downBtnRect.toString());
         if(OverlapTester.pointInRectangle(upBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
             return GAME_ACTION_UP;
         }
@@ -1692,9 +1691,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             return GAME_ACTION_DOWN;
         }
         if(OverlapTester.pointInRectangle(leftBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
+            Gdx.input.vibrate(60);
             return GAME_ACTION_LEFT;
         }
         if(OverlapTester.pointInRectangle(rightBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
+            Gdx.input.vibrate(60);
             return GAME_ACTION_RIGHT;
         }
         if(OverlapTester.pointInRectangle(optionBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
@@ -1806,9 +1807,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         if (hero.ppang_time > 0)
         {
             if (hero.ppang_item == 1) {
-                batch.draw(imgItem_hyo[0], hero.position.x * CELL_WIDTH, (70/160*VIEW_PORT_HEIGHT)+BOTTOM_SPACE); // orig y:74 TODO may be use relative position by hero.y
+                batch.draw(imgItem_hyo[0], hero.position.x * CELL_WIDTH, 70*SGH_SCALE_RATIO); // orig y:74 TODO may be use relative position by hero.y
             } else {
-                batch.draw(imgItem_hyo[1], hero.position.x * CELL_WIDTH-30, (83/160*VIEW_PORT_HEIGHT)+BOTTOM_SPACE+ui.getHeight()); // orig y:83
+                batch.draw(imgItem_hyo[1], hero.position.x * CELL_WIDTH-30, 85*SGH_SCALE_RATIO); // orig y:83
             }
             hero.ppang_time -= 1;
             if (hero.ppang_time == 0) {
@@ -1947,10 +1948,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             else if (hero.h_timer_p == -5)
             {
                 hero.h_timer_p = 0;
-                fillRect(45, 47/160*SCREEN_HEIGHT, 81, 12*SGH_SCALE_RATIO, 0); // 16711680);    // FF0000
+                fillRect(45, BOTTOM_SPACE+16, 81, 12*SGH_SCALE_RATIO, 0); // 16711680);    // FF0000
                 // paramGraphics.setColor(9342606); // 8E8E8E gray
-                if (hero.getHp() > 0) {
-                     fillRect(45, (47/160*SCREEN_HEIGHT), 81, (12 - 12 * hero.hp / hero.max_hp)*SGH_SCALE_RATIO, 4);
+                if (hero.hp > 0) {
+                     fillRect(45, BOTTOM_SPACE+ui.getHeight()-(12 - 12 * hero.hp / hero.max_hp)*SGH_SCALE_RATIO-24, 81, (12 - 12 * hero.hp / hero.max_hp)*SGH_SCALE_RATIO, 4);
                 }
                 if (hero.getHp() <= 0)
                 {
@@ -2219,6 +2220,43 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     public void drawNewGameMenu() { // screen -88
     }
     public void drawSpecialAnimation() { // screen 8
+        if ((this.ani_step == 1) || (this.ani_step == 2))
+        {
+            // setColor(10173); // #0027bd can use light blue
+            fillRect(0, 40*SGH_SCALE_RATIO, SCREEN_WIDTH, 60*SGH_SCALE_RATIO, 1);
+            batch.draw(imgSpecial[0], 44*SGH_SCALE_RATIO, 70*SGH_SCALE_RATIO);
+            batch.draw(imgSpecial[1], 44*SGH_SCALE_RATIO, 89*SGH_SCALE_RATIO);
+        }
+        else if (this.ani_step == 8)
+        {
+            batch.draw(imgSpecial[0], 44*SGH_SCALE_RATIO, 70*SGH_SCALE_RATIO);
+            batch.draw(imgSpecial[1], 48*SGH_SCALE_RATIO, 89*SGH_SCALE_RATIO);
+        }
+        else if (this.ani_step == 16)
+        {
+            batch.draw(imgSpecial[0], 44*SGH_SCALE_RATIO, 70*SGH_SCALE_RATIO);
+            batch.draw(imgSpecial[1], 51*SGH_SCALE_RATIO, 89*SGH_SCALE_RATIO);
+        }
+        else if (this.ani_step == 23)
+        {
+            batch.draw(imgSpecial[0], 44*SGH_SCALE_RATIO, 70*SGH_SCALE_RATIO);
+            batch.draw(imgSpecial[1], 54*SGH_SCALE_RATIO, 89*SGH_SCALE_RATIO);
+        }
+        else if (this.ani_step == 30)
+        {
+            batch.draw(imgSpecial[0], 44*SGH_SCALE_RATIO, 70*SGH_SCALE_RATIO);
+            batch.draw(imgSpecial[1], 55*SGH_SCALE_RATIO, 89*SGH_SCALE_RATIO);
+        }
+        else if (this.ani_step == 37)
+        {
+            batch.draw(imgSpecial[2], 58*SGH_SCALE_RATIO, 88*SGH_SCALE_RATIO);
+        }
+        else if (this.ani_step == 50)
+        {
+            //loadImage(9);
+            ani_step = 0;
+            screen = 9;
+        }
     }
     public void drawSoundSpeedSetting() { // screen 4
 
@@ -2256,38 +2294,38 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         if (d_gauge == 2)
         {
             // setColor(16775065); // FFF799 light yellow
-            fillRect((int)(118/128)*SCREEN_WIDTH, (int)(49/160)*SCREEN_HEIGHT, 8*SGH_SCALE_RATIO, 8*SGH_SCALE_RATIO, 2);
+            fillRect(118*SGH_SCALE_RATIO, 49*SGH_SCALE_RATIO, 8*SGH_SCALE_RATIO, 8*SGH_SCALE_RATIO, 2);
             if (hero.wp != 0) {
-                batch.draw(this.imgItem[hero.wp], (122/128)*SCREEN_WIDTH, (49/160)*SCREEN_HEIGHT + BOTTOM_SPACE);
+                batch.draw(this.imgItem[hero.wp], 122*SGH_SCALE_RATIO, 49*SGH_SCALE_RATIO + BOTTOM_SPACE);
             }
         }
         if (hero.mana != 0)
         {
             //setColor(16711680); // FF0000
-            fillRect((int)(30/128)*SCREEN_WIDTH, (int)(37/160)*SCREEN_HEIGHT, hero.mana, 12, 0);
+            fillRect(30*SGH_SCALE_RATIO, 37*SGH_SCALE_RATIO, hero.mana, 12, 0);
             if (hero.mana == 36)
             {
-                fillRect((int)(39/128)*SCREEN_WIDTH, (int)(37/160)*SCREEN_HEIGHT, 27, 27, 0);
-                fillRect((int)(51/128)*SCREEN_WIDTH, (int)(37/160)*SCREEN_HEIGHT, 27, 27, 0);
-                fillRect((int)(63/128)*SCREEN_WIDTH, (int)(37/160)*SCREEN_HEIGHT, 27, 27, 0);
+                fillRect(39*SGH_SCALE_RATIO, 37*SGH_SCALE_RATIO, 27, 27, 0);
+                fillRect(51*SGH_SCALE_RATIO, 37*SGH_SCALE_RATIO, 27, 27, 0);
+                fillRect(63*SGH_SCALE_RATIO, 37*SGH_SCALE_RATIO, 27, 27, 0);
             }
             else if (hero.mana >= 24)
             {
-                fillRect((int)(39/128)*SCREEN_WIDTH, (int)(37/160)*SCREEN_HEIGHT, 27, 27, 0);
-                fillRect((int)(51/128)*SCREEN_WIDTH, (int)(37/160)*SCREEN_HEIGHT, 27, 27, 0);
+                fillRect(39*SGH_SCALE_RATIO, 37*SGH_SCALE_RATIO, 27, 27, 0);
+                fillRect(51*SGH_SCALE_RATIO, 37*SGH_SCALE_RATIO, 27, 27, 0);
             }
             else if (hero.mana >= 12)
             {
-                fillRect((int)(39/128)*SCREEN_WIDTH, (int)(37/160)*SCREEN_HEIGHT, 27, 27, 0);
+                fillRect(39*SGH_SCALE_RATIO, 37*SGH_SCALE_RATIO, 27, 27, 0);
             }
         }
         else if (hero.mana == 0)
         {
             //setColor(4960985); // 4BB2D9 light blue
-            fillRect((int)(30/128)*SCREEN_WIDTH, (int)(36/160)*SCREEN_HEIGHT, 36*SGH_SCALE_RATIO, 1*SGH_SCALE_RATIO, 2);
-            fillRect((int)(39/128)*SCREEN_WIDTH, (int)(37/160)*SCREEN_HEIGHT, 27, 27, 2);
-            fillRect((int)(51/128)*SCREEN_WIDTH, (int)(37/160)*SCREEN_HEIGHT, 27, 27, 2);
-            fillRect((int)(63/128)*SCREEN_WIDTH, (int)(37/160)*SCREEN_HEIGHT, 27, 27, 2);
+            fillRect(30*SGH_SCALE_RATIO, 36*SGH_SCALE_RATIO, 36*SGH_SCALE_RATIO, 1*SGH_SCALE_RATIO, 2);
+            fillRect(39*SGH_SCALE_RATIO, 37*SGH_SCALE_RATIO, 27, 27, 2);
+            fillRect(51*SGH_SCALE_RATIO, 37*SGH_SCALE_RATIO, 27, 27, 2);
+            fillRect(63*SGH_SCALE_RATIO, 37*SGH_SCALE_RATIO, 27, 27, 2);
         }
         d_gauge = 0;
     }
@@ -2344,7 +2382,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         hero.real_snow_pw = 0;
         hero.snow_pw = 0;
         hero.h_idx = 0;
-        gameOn = false;
+        // gameOn = false;
         // destroyImage(100);
         // loadImage(8);
         if (hero.mana == 36)
@@ -2363,8 +2401,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             hero.dem = 12;
         }
         d_gauge = 1;
-         MPlay(5);
-         call_vib(3);
+        MPlay(5);
+        call_vib(3);
     }
     public void decs_e_hp(int paramInt)
     {
@@ -2525,6 +2563,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             }
         }
     }
+    // TODO use best (I forgot tool) for convert mmf to midi and/or to mp3.
+    // Default FormatFactory seem to lost some track of original sound.
     public void MPlay(int paramInt) {
         String str = null;
         // if (s_play == 1)
@@ -2541,7 +2581,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         } else if (paramInt == 5) {
             str = "special.mp3"; // /8.mmf
         } else if (paramInt == 6) {
-            str = "victory.mp3"; // /3.mmf
+            str = "lose.mp3"; // /3.mmf
         } else if (paramInt == 7) {
             str = "0.mid";
         }
@@ -2556,7 +2596,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     public void call_vib(int paramInt) {
         // if (this.v_mode == 1) { }
-        Gdx.input.vibrate(paramInt*500);
+        Gdx.input.vibrate(paramInt*1000);
     }
 
 }

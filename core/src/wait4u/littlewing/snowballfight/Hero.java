@@ -58,6 +58,7 @@ public class Hero {
         for (int m = 0; m < 5; m++) {
             imgHero[m] = new Texture("data/samsung-white/hero" + m + ".png");
         }
+        mana = 20;
     }
 
     public Texture getImage() {
