@@ -30,9 +30,9 @@ public class LogoScreen extends DefaultScreen {
     @Override
     public void show() {
         // TODO handle screen ratio
-//        logo = new TextureRegion(new Texture(Gdx.files.internal("data/samsung-white/logo.png")), 0, 0, 1080, 1122);
+        // logo = new TextureRegion(new Texture(Gdx.files.internal("data/samsung-white/logo.png")), 0, 0, 1080, 1122);
         batch = new SpriteBatch();
-//        batch.getProjectionMatrix().setToOrtho2D(0, 0, 1080, 1122);
+        // batch.getProjectionMatrix().setToOrtho2D(0, 0, 1080, 1122);
         logo = new Texture(Gdx.files.internal("data/samsung-white/logo.png"));
     }
 

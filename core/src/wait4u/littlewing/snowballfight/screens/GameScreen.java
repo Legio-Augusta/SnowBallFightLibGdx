@@ -13,11 +13,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
-import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.Preferences;
 import wait4u.littlewing.snowballfight.Enemy;
 import wait4u.littlewing.snowballfight.Boss;
@@ -30,30 +25,6 @@ import wait4u.littlewing.snowballfight.OverlapTester;
  */
 
 public class GameScreen extends DefaultScreen implements InputProcessor {
-    OrthographicCamera camera;
-    SpriteBatch batch;
-    Texture snowWhiteBg;
-    Texture fireBtnTexture;
-    // private BoundingBox useItem
-
-    // Use rectangle until figure out how to work with BoundingBox multi input.
-    Rectangle upBtnRect = new Rectangle(20+(200/3), 20+(400/3), 72, 70);
-    Rectangle downBtnRect = new Rectangle(20+(200/3), 20, 72, 70);
-    Rectangle leftBtnRect = new Rectangle(20, 20+(200/6), 2*70, 140);
-    Rectangle rightBtnRect = new Rectangle(20+(400/3), 20+(200/6), 70, 140);
-    Rectangle optionBtnRect = new Rectangle(SCREEN_WIDTH/2+150, SCREEN_HEIGHT/8, SCREEN_WIDTH/2-180, 70);
-
-    private Hero hero;
-    private Boss boss;
-    private Enemy[] enemies;
-    private Stage touch_stage;
-    private Touchpad touchpad;
-    private Touchpad.TouchpadStyle touchpadStyle;
-    Vector3 touchPoint;
-    private Skin touchpadSkin;
-    private Drawable touchBackground;
-    private Drawable touchKnob;
-
     // Ratio 3:4 ~ 9:12 So with ratio 9:16 we lost (not use) 4/16 = 1/4 of height.
     // Ie. 1920 we will cut 1/4 = 480px to keep ratio 3:4 1080:1440.
     // Bottom space used for fireBtn, so top should space only 240px
@@ -72,6 +43,32 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     // That mean enemy should move on 1080 to 1440 on 360px vertical distance.
     private static int SMALL_GAP = 32; // 32px for gap
 
+    OrthographicCamera camera;
+    SpriteBatch batch;
+    Texture snowWhiteBg;
+    Texture fireBtnTexture;
+    // private BoundingBox useItem
+
+    // Use rectangle until figure out how to work with BoundingBox multi input.
+    Rectangle upBtnRect = new Rectangle(20+(200/3), 20+(400/3), 72, 70);
+    Rectangle downBtnRect = new Rectangle(20+(200/3), 20, 72, 70);
+    Rectangle leftBtnRect = new Rectangle(20, 20+(200/6), 2*70, 140);
+    Rectangle rightBtnRect = new Rectangle(20+(400/3), 20+(200/6), 70, 140);
+    Rectangle optionBtnRect = new Rectangle(SCREEN_WIDTH/2+150, SCREEN_HEIGHT/8, SCREEN_WIDTH/2-180, 70);
+    Rectangle speedUpBtnRect = new Rectangle(SCREEN_WIDTH-275-200, 20, 200, 100);
+    Rectangle speedDownBtnRect = new Rectangle(SCREEN_WIDTH-275-400, 20, 200, 100);
+
+    private Hero hero;
+    private Boss boss;
+    private Enemy[] enemies;
+    // private Stage touch_stage;
+    // private Touchpad touchpad;
+    // private Touchpad.TouchpadStyle touchpadStyle;
+    Vector3 touchPoint;
+    // private Skin touchpadSkin;
+    // private Drawable touchBackground;
+    // private Drawable touchKnob;
+
     private static final String PREF_VIBRATION = "vibration";
     private static final String PREF_SOUND_ENABLED = "soundenabled";
     private static final String PREF_SPEED = "gamespeed";
@@ -83,7 +80,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private int game_state = 0;
     private int saved_gold = 10;
     private int speed = 4;
-    private int game_speed = 12; // in milliseconds orig: 17
+    private int game_speed = 24; // in milliseconds orig: 17
     private int screen = -1; //-1; 6 = running
     private boolean gameOn = true;
     private String message;
@@ -144,9 +141,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private Texture imgPwd;
     private Texture [] imgItem;
     private Texture [] imgItem_hyo;
-    private Texture imgVill;
-    private Texture imgSchool;
-    private Texture imgShop;
     private Texture [] imgSpecial;
     private Texture imgSp;
     private Texture [] imgEffect;
@@ -156,6 +150,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     private Texture [] imgColor; // For fillRect with color
     private Texture imgKeyNum3;
+    private Texture imgSpeedUp;
+    private Texture imgSpeedDown;
+    private Texture touch_pad;
+    private Texture touch_pad_knob;
     BitmapFont font;
     private Music music;
     // Ray collisionRay;
@@ -172,8 +170,12 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         item_price[5] = 12;
         item_price[6] = 10;
         item_price[7] = 12;
+        // Default let player has some items, TODO implement item buy use saved gold
         item_slot[0] = 3;
         item_slot[1] = 5;
+        item_slot[2] = 2;
+        item_slot[3] = 7;
+        item_slot[4] = 4;
         stage = last_stage = 11; // TODO use sharedPreference
 
         //camera = new OrthographicCamera();
@@ -184,6 +186,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         this.screen = param_screen;
 
         touchPoint = new Vector3();
+        game_speed = getGameSpeed();
         init_game(-1);
 
         // TODO use ratio
@@ -196,7 +199,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     public void create () {
         batch = new SpriteBatch();
-        shapeRenderer = new ShapeRenderer();
 
         //Create camera
         float aspectRatio = (float) SCREEN_WIDTH / (float) SCREEN_HEIGHT;
@@ -205,15 +207,12 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         camera.position.y = SCREEN_HEIGHT/2;
         camera.update();
 
-        //camera.setToOrtho(false, 10f*aspectRatio, 10f); // Touchpad
+        /* Tempory disable touchpad
+        camera.setToOrtho(false, 10f*aspectRatio, 10f); // Touchpad
 
-        //Create a touchpad skin
         touchpadSkin = new Skin();
-        //Set background image
         touchpadSkin.add("touchBackground", new Texture("data/gui/touchBackground.png"));
-        //Set knob image
         touchpadSkin.add("touchKnob", new Texture("data/gui/touchKnob.png"));
-        //Create TouchPad Style
         touchpadStyle = new Touchpad.TouchpadStyle();
         //Create Drawable's from TouchPad skin
         touchBackground = touchpadSkin.getDrawable("touchBackground");
@@ -228,7 +227,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         //Create a Stage and add TouchPad
         touch_stage = new Stage(new StretchViewport(SCREEN_WIDTH, SCREEN_HEIGHT), batch);
         touch_stage.addActor(touchpad);
-        //Gdx.input.setInputProcessor(touch_stage);
+        Gdx.input.setInputProcessor(touch_stage); */
 
         Gdx.input.setInputProcessor(this);
 
@@ -253,7 +252,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         camera.update();
 
         batch.enableBlending();
-
         batch.begin();
 
         int j;
@@ -322,12 +320,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
         run();
 
-        batch.end();
-
-        drawTouchPad();
-
-        batch.begin();
-        drawFireBtn();
+        // drawTouchPad();
+        drawUI();
         batch.end();
     }
 
@@ -355,11 +349,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         for (int i = 0; i < 3; i++) {
             imgSpecial[i] = new Texture("data/samsung-white/special" + i + ".png");
         }
-        imgSp = new Texture("data/samsung-white/sp1.png");
         // TODO use texture region
         imgEffect = new Texture[2];
         imgEffect[0] = new Texture("data/samsung-white/effect0.png");
-        imgEffect[0] = new Texture("data/samsung-white/effect1.png");
+        imgEffect[1] = new Texture("data/samsung-white/effect1.png");
 
         imgStage_num = new Texture("data/samsung-white/stage1.png"); // tmp_stage +
         ui = new Texture("data/samsung-white/ui.png");  // h:160p (1080p)
@@ -378,7 +371,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             imgColor[i] = new Texture("data/samsung-white/color-" + i + ".png");
         }
 
-        imgKeyNum3 = new Texture("data/samsung-white/key_num3.png");
+        imgKeyNum3 = new Texture("data/samsung-white/use_item_btn.png");
+        imgSpeedUp = new Texture("data/samsung-white/speed_up.png");
+        imgSpeedDown = new Texture("data/samsung-white/speed_down.png");
+        touch_pad = new Texture("data/gui/touchBackground.png");
+        touch_pad_knob = new Texture("data/gui/touchKnob.png");
     }
 
     public void monitorEnemyPosition() {
@@ -446,7 +443,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         // screen = 77;
 
         // repaint(); // TODO find gdx equivalent method or handle this function. May be multi Screen help ? Does global vars remain ?
-        // serviceRepaints();
         game_state = 0;
         p_mode = 1;
         hero.position.x = 5;
@@ -467,6 +463,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
         // screen = 6;
         item_mode = 0;
+
         // loadImage(6);
         // loadImage(100);
         if (e_boss > 0) {
@@ -492,9 +489,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 fillRect( (int)(enemies[i].position.x * 5 + 8)*SGH_SCALE_RATIO, (int)(enemies[i].position.y * 5 + 5)*SGH_SCALE_RATIO, 27, 15*SGH_SCALE_RATIO, 0); // (16711680)
                 fillRect( (int)(enemies[i].position.x * 5 + 8)*SGH_SCALE_RATIO, (int)(enemies[i].position.y * 5 + 5)*SGH_SCALE_RATIO, 27, (15 - 15 * enemies[i].e_hp / enemies[i].max_e_hp)*SGH_SCALE_RATIO, 4); // 9672090 gray
                 if (hero.ppang <= 51) {
-                    batch.draw(imgEffect[0], enemies[i].position.x * 5 * SGH_SCALE_RATIO, (enemies[i].position.y * 5 + 5)*SGH_SCALE_RATIO );
+                    batch.draw(imgEffect[0], enemies[i].position.x * 5 * SGH_SCALE_RATIO, (enemies[i].position.y * 5 + 5)*SGH_SCALE_RATIO, imgEffect[0].getWidth(), imgEffect[0].getHeight());
                 } else if (hero.ppang <= 54) {
-                    batch.draw(imgEffect[1], enemies[i].position.x * 5 * SGH_SCALE_RATIO, (enemies[i].position.y * 5 + 5)*SGH_SCALE_RATIO ) ;
+                    batch.draw(imgEffect[1], enemies[i].position.x * 5 * SGH_SCALE_RATIO, (enemies[i].position.y * 5 + 5)*SGH_SCALE_RATIO);
                 }
             }
         }
@@ -503,9 +500,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             fillRect( (int)(boss.position.x * 5 + 12)*SGH_SCALE_RATIO, (int)(SCREEN_HEIGHT-(boss.position.y * 5 + 5)*SGH_SCALE_RATIO), 27, 15*SGH_SCALE_RATIO, 0); // setColor(16711680);
             fillRect( (int)(boss.position.x * 5 + 12)*SGH_SCALE_RATIO, (int)(SCREEN_HEIGHT-(boss.position.y * 5 + 5)*SGH_SCALE_RATIO), 27, (15 - 15 * boss.e_boss_hp / boss.max_e_boss_hp)*SGH_SCALE_RATIO, 4); // setColor(9672090); // gray
             if (hero.ppang <= 51) {
-                batch.draw(imgEffect[0], boss.position.x * 5 * SGH_SCALE_RATIO, (boss.position.y * 5 + 5)*SGH_SCALE_RATIO );
+                batch.draw(imgEffect[0], boss.position.x * 5 * SGH_SCALE_RATIO, (boss.position.y * 5 + 5)*SGH_SCALE_RATIO, imgEffect[0].getWidth(), imgEffect[0].getHeight());
             } else if (hero.ppang <= 54) {
-                batch.draw(imgEffect[1], boss.position.x * 5 * SGH_SCALE_RATIO, (boss.position.y * 5 + 6)*SGH_SCALE_RATIO );
+                batch.draw(imgEffect[1], boss.position.x * 5 * SGH_SCALE_RATIO, (boss.position.y * 5 + 6)*SGH_SCALE_RATIO, imgEffect[1].getWidth(), imgEffect[1].getHeight());
             }
         }
         if (hero.ppang != 55) {
@@ -543,7 +540,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 batch.draw(enemies[i].getImage(), (int) enemies[i].position.x * 5 * SGH_SCALE_RATIO, enemies[i].position.y * 5 * SGH_SCALE_RATIO + 5, 0, 0, enemies[i].getImage().getWidth(), enemies[i].getImage().getHeight(), 1, 1, 0, 0, 0, enemies[i].getImage().getWidth(), enemies[i].getImage().getHeight(), false, false);
                 if (enemies[i].e_ppang_time > 0) {
                     enemies[i].e_ppang_time -= 1;
-                    batch.draw(imgItem_hyo[(enemies[i].e_ppang_item - 1)], enemies[i].position.x * 5*SGH_SCALE_RATIO, (enemies[i].position.y * 5 + 1)*SGH_SCALE_RATIO);
+                    batch.draw(imgItem_hyo[(enemies[i].e_ppang_item - 1)], enemies[i].position.x * 5*SGH_SCALE_RATIO, (enemies[i].position.y * 5 + 1)*SGH_SCALE_RATIO, imgItem_hyo[(enemies[i].e_ppang_item - 1)].getWidth(), imgItem_hyo[(enemies[i].e_ppang_item - 1)].getHeight());
                     if (enemies[i].e_ppang_time == 0) {
                         enemies[i].e_ppang_item = 0;
                         if (enemies[i].e_lv < 0) {
@@ -628,16 +625,22 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         boss.setBound(new Rectangle(boss.position.x*CELL_WIDTH, boss.position.y*CELL_WIDTH, boss.getImage().getWidth(), boss.getImage().getHeight()));
     }
 
-    protected void drawFireBtn() {
+    protected void drawUI() {
         batch.draw(fireBtnTexture, SCREEN_WIDTH-50-fireBtnTexture.getWidth(), 50, fireBtnTexture.getWidth(), fireBtnTexture.getHeight());
         batch.draw(imgKeyNum3, SCREEN_WIDTH-50-fireBtnTexture.getWidth()-fireBtnTexture.getWidth()/2 - imgKeyNum3.getWidth(), BOTTOM_SPACE-imgKeyNum3.getHeight(), imgKeyNum3.getWidth(), imgKeyNum3.getHeight());
+        batch.draw(imgSpeedUp, SCREEN_WIDTH-50-fireBtnTexture.getWidth()-fireBtnTexture.getWidth()/2 - imgSpeedUp.getWidth(), 20, imgSpeedUp.getWidth(), imgSpeedUp.getHeight());
+        batch.draw(imgSpeedDown, SCREEN_WIDTH-50-fireBtnTexture.getWidth()-fireBtnTexture.getWidth()/2 - 2*imgSpeedDown.getWidth(), 20, imgSpeedDown.getWidth(), imgSpeedDown.getHeight());
+        batch.draw(touch_pad, 20, 20);
+        batch.draw(touch_pad_knob, 20+touch_pad.getWidth()/2-touch_pad_knob.getWidth()/2, 20+touch_pad.getHeight()/2-touch_pad_knob.getHeight()/2);
+
+        fillRect(40, BOTTOM_SPACE+ui.getHeight()-(12 - 12 * hero.hp / hero.max_hp)*SGH_SCALE_RATIO-24, 81+5, (12 - 12 * hero.hp / hero.max_hp)*SGH_SCALE_RATIO, 4);
     }
 
     protected void drawTouchPad() {
         camera.update();
         batch.enableBlending();
         //touch_stage.act(Gdx.graphics.getDeltaTime());
-        touch_stage.draw();
+        batch.flush();
     }
 
     public void check_building(int paramInt1, int paramInt2) {
@@ -712,10 +715,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     }
 
     /**
-     * "1.Play", "2.Instructions", "3.Configuration", "4.Quit", "Resume", "MainMenu", "Sound", "On/", "off", "on/", "OFF", "Instructions", "Quit",
-     * "1.New Game", "2.Saved Game", "Sound", "ON /", "off", "on /", "OFF", "Vibration ", "ON /", "off", "on /", "OFF", "Speed ", "[ " " ]",
-     * "1.Control Keys", "2.Offense items", "3.Defense items", "Good Job!", "Acquired", "Gold:", "press any key", "to continue"
-     * TODO handle box and border box
+     * TODO handle box and border box, batch.begin
      */
     public void draw_text(String str, int x, int y, int color) {
         if( (str != null) && (str.length() > 0) ) {
@@ -737,9 +737,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                         font.setColor(1, 1, 1, 1);
                         break;
                 }
+                fillRect(0, y-100, SCREEN_WIDTH, 19*SGH_SCALE_RATIO, 3); // #00AEEF light blue
                 font.draw(batch, str, x, y);
-                int i = message.length();
-                fillRect(0, SCREEN_HEIGHT/2, SCREEN_WIDTH, 19*SGH_SCALE_RATIO, 3); // #00AEEF light blue
+                // int i = message.length();
                 // setColor(20361) // #004F89 dark blue
                 //drawRect(0, 52, 127, 19);
                 // setColor(0) // black
@@ -752,11 +752,15 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         if (del == -1) {
             for (int i = 0; i < 5; i++) {
                 if (item_slot[i] != 0) {
-                    batch.draw(imgItem[item_slot[i]], (12 * i + 34)*SGH_SCALE_RATIO-4, 49/160*VIEW_PORT_HEIGHT + BOTTOM_SPACE + 74); // 20 as J2ME canvas anchor orig: 111
+                    if(i < 3) {
+                        batch.draw(imgItem[item_slot[i]], (12 * i + 34)*SGH_SCALE_RATIO-4, 35*SGH_SCALE_RATIO); // 20 as J2ME canvas anchor orig: 111
+                    } else {
+                        batch.draw(imgItem[item_slot[i]], (12 * i + 32)*SGH_SCALE_RATIO, 35*SGH_SCALE_RATIO); // 20 as J2ME canvas anchor orig: 111
+                    }
                 }
             }
         } else {
-            fillRect(del * 12 + 37, (int)49/160*SCREEN_HEIGHT, 72, 72, 4); // setColor(6974058); // 6A6A6A use gray
+            fillRect(del * 12 + 37, 49*SGH_SCALE_RATIO, 72, 72, 4); // setColor(6974058); // 6A6A6A use gray
             del = -1;
         }
     }
@@ -799,7 +803,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                         item_mode -= 1;
                     }
                     message = "Item Mode";
-                    draw_text(message, SCREEN_WIDTH/4, SCREEN_HEIGHT/2+SCREEN_HEIGHT/8, 3);
+                    draw_text(message, 30*SGH_SCALE_RATIO, SCREEN_HEIGHT/2+SCREEN_HEIGHT/8-200, 3);
                     // repaint();
                 }
             }
@@ -1239,7 +1243,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     stage = 11;
                     saved_gold = 0;
                     hero.mana = 0;
-
                 }
                 // destroyImage(2);
                 // loadImage(3);
@@ -1471,6 +1474,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                         screen = 65336; // lose
                         gold = 3;
                     }
+                    setSavedMana(hero.mana);
                     setSavedGold(getSavedgold()+ gold);
                 }
             }
@@ -1581,6 +1585,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     @Override
     public boolean touchDown(int x, int y, int pointer, int button) {
+        batch.begin();
         // TODO use boundingBox and touchAreas
         float leftBound = 0;
         float rightBound = (int)(SCREEN_WIDTH - hero.getImage().getWidth())/CELL_WIDTH;
@@ -1599,6 +1604,18 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         Gdx.app.log("INFO", "touch " + touchPoint.x + " y "+ (SCREEN_HEIGHT-touchPoint.y) + " bound x "+ upBtnRect.toString() + " saved "+ downBtnRect.toString());
         game_action = getGameAction();
 
+        if(isTouchedSpeedUp()) { // smaller value, shorter sleep
+            if(game_speed >= 12) {
+                game_speed -= 8;
+            }
+            setGameSpeed(game_speed);
+        }
+        if(isTouchedSpeedDown()) {
+            if(game_speed <= 128) {
+                game_speed += 8;
+            }
+            setGameSpeed(game_speed);
+        }
         /* collisionRay = camera.getPickRay(x, y);
         if (Intersector.intersectRayBoundsFast(collisionRay, touchKeyUpArea)) { // TODO may be need flag to avoid fire continuously
             game_action = GAME_ACTION_UP;
@@ -1625,6 +1642,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         // TODO May be use OverlapTester Class for these task
 
         keyPressed();
+        batch.end();
 
         return false;
     }
@@ -1663,7 +1681,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 if (paramInt == 1) {
                     item_a_num = 2;
                 } else if (paramInt == 2) {
-                    item_b_num = 4;
+                    item_b_num = 2;
                 } else if (paramInt == 3) {
                     item_c_num = 2;
                 } else if (paramInt == 4) {
@@ -1688,14 +1706,16 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             return GAME_ACTION_UP;
         }
         if(OverlapTester.pointInRectangle(downBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
-            return GAME_ACTION_DOWN;
+            if(item_mode == 0) {
+                return GAME_ACTION_DOWN;
+            }
         }
         if(OverlapTester.pointInRectangle(leftBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
-            Gdx.input.vibrate(60);
+            Gdx.input.vibrate(5);
             return GAME_ACTION_LEFT;
         }
         if(OverlapTester.pointInRectangle(rightBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
-            Gdx.input.vibrate(60);
+            Gdx.input.vibrate(5);
             return GAME_ACTION_RIGHT;
         }
         if(OverlapTester.pointInRectangle(optionBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
@@ -1726,6 +1746,12 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     protected boolean isTouchedNum3() {
         Rectangle textureBounds=new Rectangle(SCREEN_WIDTH-fireBtnTexture.getWidth()-50-imgKeyNum3.getWidth()-(int)fireBtnTexture.getWidth()/2, SCREEN_HEIGHT-BOTTOM_SPACE, imgKeyNum3.getWidth(),imgKeyNum3.getHeight());
         return textureBounds.contains(touchPoint.x, touchPoint.y);
+    }
+    protected boolean isTouchedSpeedUp() {
+        return OverlapTester.pointInRectangle(speedUpBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
+    }
+    protected boolean isTouchedSpeedDown() {
+        return OverlapTester.pointInRectangle(speedDownBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
     }
     protected Preferences getPrefs() {
         if(prefs==null){
@@ -1780,7 +1806,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     }
 
     public int getGameSpeed() {
-        return getPrefs().getInteger(PREF_SPEED, 64);
+        return getPrefs().getInteger(PREF_SPEED, 24);
     }
 
     public void setGameSpeed(int saved_gold) {
@@ -1807,9 +1833,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         if (hero.ppang_time > 0)
         {
             if (hero.ppang_item == 1) {
-                batch.draw(imgItem_hyo[0], hero.position.x * CELL_WIDTH, 70*SGH_SCALE_RATIO); // orig y:74 TODO may be use relative position by hero.y
+                batch.draw(imgItem_hyo[0], hero.position.x * CELL_WIDTH, 69*SGH_SCALE_RATIO); // orig y:74 TODO may be use relative position by hero.y
             } else {
-                batch.draw(imgItem_hyo[1], hero.position.x * CELL_WIDTH-30, 85*SGH_SCALE_RATIO); // orig y:83
+                batch.draw(imgItem_hyo[1], hero.position.x * CELL_WIDTH-30, 48*SGH_SCALE_RATIO); // orig y:83; ui.getHeight will be wrong on scaled screen
             }
             hero.ppang_time -= 1;
             if (hero.ppang_time == 0) {
@@ -1820,13 +1846,15 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
         if (item_mode != 0) {
             if (message != "") {
-                draw_text(message, (int)(SCREEN_WIDTH/3), SCREEN_HEIGHT/2+SCREEN_HEIGHT/8, 3);
+                draw_text(message, 30*SGH_SCALE_RATIO, SCREEN_HEIGHT/2+SCREEN_HEIGHT/8, 3);
             }
             for (int i = 1; i <= 5; i++) {
-                // paramGraphics.drawRect(i * 12 + 23, 110, 10, 9);
+                // drawRect(i * 12 + 23, 110, 10, 9);
             }
             if (item_mode != 100) {
-                // paramGraphics.drawRect(this.item_mode * 12 + 23, 110, 10, 9); // TODO avoid hard code position, anchor point // (16711680); // red ? white ?
+                // drawRect(this.item_mode * 12 + 23, 110, 10, 9); // TODO avoid hard code position, anchor point // (16711680); // red ? white ?
+                // ui overlap rectangle
+                fillRect((item_mode * 12 + 21)*SGH_SCALE_RATIO, 45*SGH_SCALE_RATIO, 8*SGH_SCALE_RATIO,12, 0);
             }
             else if (item_mode == 100) {
                 item_mode = 0;
@@ -2008,8 +2036,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 }
                 hero.dem = 12;
                 hero.mana = 0;
+                setSavedMana(hero.mana);
             }
-            fillRect(0, (int)(135/160*SCREEN_HEIGHT), SCREEN_WIDTH, (int)(76/160*SCREEN_HEIGHT), 5); // setColor(16777215); // FFFFFF
+            fillRect(0, 135*SGH_SCALE_RATIO, SCREEN_WIDTH, 76*SGH_SCALE_RATIO, 5); // setColor(16777215); // FFFFFF
 
             for (j = 0; j < e_num; j++)
             {
@@ -2017,8 +2046,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     batch.draw(enemies[j].getImage(), enemies[j].position.x * 5*SGH_SCALE_RATIO, (enemies[j].position.y * 5 + 5)*SGH_SCALE_RATIO, enemies[j].getImage().getWidth(), enemies[j].getImage().getHeight());
                 }
                 if (enemies[j].e_behv != 100) {
-                    batch.draw(imgShadow, enemies[j].getItem().position.x*CELL_WIDTH, (enemies[j].getItem().position.y * 5-5)*SGH_SCALE_RATIO ); // orig: y*6+17;
-                    batch.draw(imgItem[enemies[j].e_wp], enemies[j].getItem().position.x*CELL_WIDTH, (enemies[j].getItem().position.y * 5 + 13 - enemies[j].e_snow_gap)*SGH_SCALE_RATIO ); // orig *6 + 13
+                    batch.draw(imgShadow, enemies[j].e_snow_x*CELL_WIDTH, (enemies[j].e_snow_y * 5-5)*SGH_SCALE_RATIO ); // orig: y*6+17;
+                    batch.draw(imgItem[enemies[j].e_wp], enemies[j].e_snow_x*CELL_WIDTH, (enemies[j].e_snow_y * 5 + 13 - enemies[j].e_snow_gap)*SGH_SCALE_RATIO ); // orig *6 + 13
                 }
             }
             if (e_boss > 0) {
@@ -2028,19 +2057,28 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         if (this.special == 1)
         {
             if (ani_step <= 45) {
-                batch.draw(imgSp, 158 - ani_step * 3, BOTTOM_SPACE+ui.getHeight()+hero.getImage().getHeight());
+                if(special > 0) {
+                    imgSp = new Texture("data/samsung-white/sp" + special + ".png");
+                }
+                batch.draw(imgSp, (158 - ani_step * 3)*SGH_SCALE_RATIO, 160*SGH_SCALE_RATIO-imgSp.getHeight());
             }
         }
         else if (special == 2)
         {
             if (ani_step <= 45) {
-                batch.draw(imgSp, 158 - ani_step * 3, BOTTOM_SPACE+ui.getHeight()+hero.getImage().getHeight());
+                if(special > 0) {
+                    imgSp = new Texture("data/samsung-white/sp" + special + ".png");
+                }
+                batch.draw(imgSp, (158 - ani_step * 3)*SGH_SCALE_RATIO, 160*SGH_SCALE_RATIO-imgSp.getHeight());
             }
         }
         else if ((special == 3) && (ani_step <= 45)) {
-            batch.draw(imgSp, 168 - ani_step * 3, 30*SGH_SCALE_RATIO + BOTTOM_SPACE + ui.getHeight());
+            if(imgSp == null) {
+                imgSp = new Texture("data/samsung-white/sp" + special + ".png");
+            }
+            batch.draw(imgSp, (168 - ani_step * 3)*SGH_SCALE_RATIO, 160*SGH_SCALE_RATIO-imgSp.getHeight());
         }
-        batch.draw(hero.getImage(), hero.position.x * 5 * SGH_SCALE_RATIO, (int)(83/160)*VIEW_PORT_HEIGHT+BOTTOM_SPACE, hero.getImage().getWidth(), hero.getImage().getHeight());
+        batch.draw(hero.getImage(), hero.position.x * 5 * SGH_SCALE_RATIO, BOTTOM_SPACE+ui.getHeight(), hero.getImage().getWidth(), hero.getImage().getHeight());
     }
 
     public void make_e_num(int paramInt1, int paramInt2)
@@ -2220,38 +2258,38 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     public void drawNewGameMenu() { // screen -88
     }
     public void drawSpecialAnimation() { // screen 8
-        if ((this.ani_step == 1) || (this.ani_step == 2))
+        if ((ani_step == 1) || (ani_step == 2))
         {
             // setColor(10173); // #0027bd can use light blue
             fillRect(0, 40*SGH_SCALE_RATIO, SCREEN_WIDTH, 60*SGH_SCALE_RATIO, 1);
-            batch.draw(imgSpecial[0], 44*SGH_SCALE_RATIO, 70*SGH_SCALE_RATIO);
-            batch.draw(imgSpecial[1], 44*SGH_SCALE_RATIO, 89*SGH_SCALE_RATIO);
+            batch.draw(imgSpecial[0], 44*SGH_SCALE_RATIO, 90*SGH_SCALE_RATIO);
+            batch.draw(imgSpecial[1], 44*SGH_SCALE_RATIO, 99*SGH_SCALE_RATIO);
         }
-        else if (this.ani_step == 8)
+        else if (ani_step == 8)
         {
-            batch.draw(imgSpecial[0], 44*SGH_SCALE_RATIO, 70*SGH_SCALE_RATIO);
-            batch.draw(imgSpecial[1], 48*SGH_SCALE_RATIO, 89*SGH_SCALE_RATIO);
+            batch.draw(imgSpecial[0], 44*SGH_SCALE_RATIO, 90*SGH_SCALE_RATIO);
+            batch.draw(imgSpecial[1], 48*SGH_SCALE_RATIO, 99*SGH_SCALE_RATIO);
         }
-        else if (this.ani_step == 16)
+        else if (ani_step == 16)
         {
-            batch.draw(imgSpecial[0], 44*SGH_SCALE_RATIO, 70*SGH_SCALE_RATIO);
-            batch.draw(imgSpecial[1], 51*SGH_SCALE_RATIO, 89*SGH_SCALE_RATIO);
+            batch.draw(imgSpecial[0], 44*SGH_SCALE_RATIO, 90*SGH_SCALE_RATIO);
+            batch.draw(imgSpecial[1], 51*SGH_SCALE_RATIO, 99*SGH_SCALE_RATIO);
         }
-        else if (this.ani_step == 23)
+        else if (ani_step == 23)
         {
-            batch.draw(imgSpecial[0], 44*SGH_SCALE_RATIO, 70*SGH_SCALE_RATIO);
-            batch.draw(imgSpecial[1], 54*SGH_SCALE_RATIO, 89*SGH_SCALE_RATIO);
+            batch.draw(imgSpecial[0], 44*SGH_SCALE_RATIO, 90*SGH_SCALE_RATIO);
+            batch.draw(imgSpecial[1], 54*SGH_SCALE_RATIO, 99*SGH_SCALE_RATIO);
         }
-        else if (this.ani_step == 30)
+        else if (ani_step == 30)
         {
-            batch.draw(imgSpecial[0], 44*SGH_SCALE_RATIO, 70*SGH_SCALE_RATIO);
-            batch.draw(imgSpecial[1], 55*SGH_SCALE_RATIO, 89*SGH_SCALE_RATIO);
+            batch.draw(imgSpecial[0], 44*SGH_SCALE_RATIO, 90*SGH_SCALE_RATIO);
+            batch.draw(imgSpecial[1], 55*SGH_SCALE_RATIO, 99*SGH_SCALE_RATIO);
         }
-        else if (this.ani_step == 37)
+        else if (ani_step == 37)
         {
-            batch.draw(imgSpecial[2], 58*SGH_SCALE_RATIO, 88*SGH_SCALE_RATIO);
+            batch.draw(imgSpecial[2], 58*SGH_SCALE_RATIO, 98*SGH_SCALE_RATIO);
         }
-        else if (this.ani_step == 50)
+        else if (ani_step == 50)
         {
             //loadImage(9);
             ani_step = 0;
@@ -2302,30 +2340,30 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         if (hero.mana != 0)
         {
             //setColor(16711680); // FF0000
-            fillRect(30*SGH_SCALE_RATIO, 37*SGH_SCALE_RATIO, hero.mana, 12, 0);
+            fillRect(28*SGH_SCALE_RATIO, 29*SGH_SCALE_RATIO+3, hero.mana*SGH_SCALE_RATIO, 20, 0);
             if (hero.mana == 36)
             {
-                fillRect(39*SGH_SCALE_RATIO, 37*SGH_SCALE_RATIO, 27, 27, 0);
-                fillRect(51*SGH_SCALE_RATIO, 37*SGH_SCALE_RATIO, 27, 27, 0);
-                fillRect(63*SGH_SCALE_RATIO, 37*SGH_SCALE_RATIO, 27, 27, 0);
+                fillRect(37*SGH_SCALE_RATIO, 28*SGH_SCALE_RATIO, 27, 36, 0);
+                fillRect(49*SGH_SCALE_RATIO, 28*SGH_SCALE_RATIO, 27, 36, 0);
+                fillRect(61*SGH_SCALE_RATIO, 28*SGH_SCALE_RATIO, 27, 36, 0);
             }
             else if (hero.mana >= 24)
             {
-                fillRect(39*SGH_SCALE_RATIO, 37*SGH_SCALE_RATIO, 27, 27, 0);
-                fillRect(51*SGH_SCALE_RATIO, 37*SGH_SCALE_RATIO, 27, 27, 0);
+                fillRect(37*SGH_SCALE_RATIO, 28*SGH_SCALE_RATIO, 27, 36, 0);
+                fillRect(49*SGH_SCALE_RATIO, 28*SGH_SCALE_RATIO, 27, 36, 0);
             }
             else if (hero.mana >= 12)
             {
-                fillRect(39*SGH_SCALE_RATIO, 37*SGH_SCALE_RATIO, 27, 27, 0);
+                fillRect(37*SGH_SCALE_RATIO, 29*SGH_SCALE_RATIO+3, 27, 36, 0);
             }
         }
         else if (hero.mana == 0)
         {
             //setColor(4960985); // 4BB2D9 light blue
-            fillRect(30*SGH_SCALE_RATIO, 36*SGH_SCALE_RATIO, 36*SGH_SCALE_RATIO, 1*SGH_SCALE_RATIO, 2);
-            fillRect(39*SGH_SCALE_RATIO, 37*SGH_SCALE_RATIO, 27, 27, 2);
-            fillRect(51*SGH_SCALE_RATIO, 37*SGH_SCALE_RATIO, 27, 27, 2);
-            fillRect(63*SGH_SCALE_RATIO, 37*SGH_SCALE_RATIO, 27, 27, 2);
+            fillRect(28*SGH_SCALE_RATIO, 29*SGH_SCALE_RATIO+3, 36*SGH_SCALE_RATIO, 1*SGH_SCALE_RATIO, 2);
+            fillRect(37*SGH_SCALE_RATIO, 28*SGH_SCALE_RATIO, 27, 36, 2);
+            fillRect(49*SGH_SCALE_RATIO, 28*SGH_SCALE_RATIO, 27, 36, 2);
+            fillRect(61*SGH_SCALE_RATIO, 28*SGH_SCALE_RATIO, 27, 36, 2);
         }
         d_gauge = 0;
     }
@@ -2383,7 +2421,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         hero.snow_pw = 0;
         hero.h_idx = 0;
         // gameOn = false;
-        // destroyImage(100);
+        // destroyImage(100); // imageBak
         // loadImage(8);
         if (hero.mana == 36)
         {
@@ -2472,14 +2510,20 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     }
     public void fillRect(int x, int y, int width, int height, int color) {
         // Hard code default width x height of color img: 12x12 px
-        int scaleY = (int)(height / 12);
-        int scaleX = (int)(width / 12);
+        int scaleY = height / 12;
+        int scaleX = width / 12;
         // (Texture, float x, float y, float originX, float originY, float width, float height, float scaleX, float scaleY, float rotation, int srcX, int srcY, int srcWidth, int srcHeight, boolean flipX, boolean flipY)
         batch.draw(imgColor[color], x, y, 0, 0, imgColor[color].getWidth(), imgColor[color].getHeight(), scaleX, scaleY, 0, 0, 0, imgColor[color].getWidth()*scaleX, imgColor[color].getHeight()*scaleY, false, false);
+    }
+    public void drawRect(int x, int y, int width, int height, int color) {
+
     }
 
     public void use_item(int paramInt)
     {
+        if(paramInt > item_slot.length) { // avoid out of bound
+            paramInt = 0;
+        }
         if ((item_slot[paramInt] > 0) && (item_slot[paramInt] <= 4))
         {
             hero.wp = item_slot[paramInt];
@@ -2577,13 +2621,13 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         } else if (paramInt == 3) {
             str = "hit.mp3"; // /5.mmf
         } else if (paramInt == 4) {
-            str = "four.mid"; // /4.mmf
+            str = "four.mp3"; // /4.mmf
         } else if (paramInt == 5) {
             str = "special.mp3"; // /8.mmf
         } else if (paramInt == 6) {
             str = "lose.mp3"; // /3.mmf
         } else if (paramInt == 7) {
-            str = "0.mid";
+            str = "victory.mp3"; // 0.mid
         }
         music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/"+str));
         if(music != null) {

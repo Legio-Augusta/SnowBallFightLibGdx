@@ -15,12 +15,13 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 public class LoseScreen extends DefaultScreen {
     public LoseScreen(Game game) {
         super(game);
+        music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/lose.mp3"));
     }
 
     Texture imgLose;
     Texture imgHero_l;
     SpriteBatch batch;
-    public Music music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/lose.mp3"));
+    public Music music;
 
     @Override
     public void show() {
@@ -47,13 +48,11 @@ public class LoseScreen extends DefaultScreen {
         batch.draw(imgLose, SCREEN_WIDTH/2-(int)(imgLose.getWidth()/2), VIEW_PORT_HEIGHT/2+2*BOTTOM_SPACE);
         batch.draw(imgHero_l, SCREEN_WIDTH/2-(int)(imgHero_l.getWidth()/2), VIEW_PORT_HEIGHT/2+BOTTOM_SPACE);
         batch.end();
-
-        if(music == null) {
-            music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/lose.mp3"));
-        }
-        if(!music.isPlaying()) {
-            music.play();
-            music.setLooping(false);
+        if(music != null) {
+            if(!music.isPlaying()) {
+                music.play();
+                music.setLooping(false);
+            }
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.ANY_KEY) || Gdx.input.justTouched()) {

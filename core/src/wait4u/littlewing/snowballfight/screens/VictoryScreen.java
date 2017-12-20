@@ -3,6 +3,7 @@ package wait4u.littlewing.snowballfight.screens;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -23,11 +24,13 @@ public class VictoryScreen extends DefaultScreen {
 
     SpriteBatch batch;
     float time = 0;
+    public Music music;
 
     // TODO draw last state of game, need many more shared data between runningGame and Victory screen.
     // This require more complex constructor and Screen class data.
     public VictoryScreen(Game game) {
         super(game);
+        music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/victory.mp3"));
     }
 
     @Override
@@ -61,6 +64,13 @@ public class VictoryScreen extends DefaultScreen {
         batch.draw(imgHero_v, SCREEN_WIDTH/2 - imgHero_v.getWidth()/2, VIEW_PORT_HEIGHT/2);
         batch.draw(imgV, SCREEN_WIDTH/2+16, VIEW_PORT_HEIGHT/2+imgHero_v.getHeight()/4);
         batch.end();
+
+        if(music != null) {
+            if(!music.isPlaying()) {
+                music.play();
+                music.setLooping(false);
+            }
+        }
 
         delta = 0.05f;
         time += delta;

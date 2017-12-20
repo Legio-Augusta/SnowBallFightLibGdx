@@ -3,6 +3,7 @@ package wait4u.littlewing.snowballfight.screens;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -20,6 +21,7 @@ public class SamsungFunclubScreen extends DefaultScreen {
 
     SpriteBatch batch;
     float time = 0;
+    // public Music music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/Donald_Christmas.mp3"));
 
     public SamsungFunclubScreen(Game game) {
         super(game);

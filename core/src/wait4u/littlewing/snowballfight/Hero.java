@@ -5,6 +5,7 @@ package wait4u.littlewing.snowballfight;
  */
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -37,7 +38,7 @@ public class Hero {
     private Rectangle bounds = new Rectangle();
 
     public int hp;
-    public int max_hp = 106;
+    public int max_hp = 2*106;
     public int snow_gap = 0;
     public int pw_up = 0;
     private static int SGH_SCALE_RATIO = (int)Gdx.graphics.getWidth()/120;
@@ -47,6 +48,7 @@ public class Hero {
     private Sprite sprite;
     public Item item;
     private Music music;
+    Preferences prefs = Gdx.app.getPreferences("gamestate");
 
     public Hero(Vector2 pos) {
         this.position = pos;
@@ -58,7 +60,7 @@ public class Hero {
         for (int m = 0; m < 5; m++) {
             imgHero[m] = new Texture("data/samsung-white/hero" + m + ".png");
         }
-        mana = 20;
+        mana = getPrefs().getInteger("mana", 20);
     }
 
     public Texture getImage() {
@@ -201,7 +203,7 @@ public class Hero {
             }
             // MPlay(4);
             Gdx.input.vibrate(1*1000);
-            music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/four.mid"));
+            music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/four.mp3"));
             if(music != null) {
                 if (!music.isPlaying()) {
                     music.play();
@@ -232,5 +234,10 @@ public class Hero {
             }
         }
     }
-
+    protected Preferences getPrefs() {
+        if(prefs==null){
+            prefs = Gdx.app.getPreferences("gamestate");
+        }
+        return prefs;
+    }
 }

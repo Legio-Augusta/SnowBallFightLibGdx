@@ -27,8 +27,7 @@ public class TitleMenuScreen extends DefaultScreen {
 
     SpriteBatch batch;
     float time = 0;
-    // TODO pref setting on/off
-    public Music music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/9.mp3"));
+    public Music music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/Donald_Christmas.mp3"));
 
     public TitleMenuScreen(Game game) {
         super(game);
@@ -52,12 +51,12 @@ public class TitleMenuScreen extends DefaultScreen {
         int SCREEN_HEIGHT = Gdx.graphics.getHeight();
         int SCREEN_WIDTH = Gdx.graphics.getWidth();
 
-        /* if(music != null) {
+        if(music != null) {
             if(!music.isPlaying()) {
                 music.play();
                 music.setLooping(false);
             }
-        }*/
+        }
         batch.begin();
         batch.draw(samsung_blue, 0, 0, SCREEN_HEIGHT, SCREEN_HEIGHT);
         batch.draw(imgMM, 0, 480);
@@ -70,7 +69,6 @@ public class TitleMenuScreen extends DefaultScreen {
         // if (time > 1) { } // Delay a bit for music ie.
         if (Gdx.input.isKeyPressed(Input.Keys.ANY_KEY) || Gdx.input.justTouched()) {
             // TODO use global var ie. screen or just pass value in constructor
-            Gdx.app.log("INFO", "Touched at " + Gdx.input.getX());
             touchPoint.set(Gdx.input.getX(),Gdx.input.getY(), 0);
             Rectangle selectButtonBound = new Rectangle(SCREEN_WIDTH-imgPl.getWidth(), 480, imgPl.getWidth(), imgPl.getHeight());
             Rectangle backButtonBound = new Rectangle(0, 480, imgBk.getWidth(), imgBk.getHeight());
