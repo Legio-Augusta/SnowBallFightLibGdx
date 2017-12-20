@@ -55,7 +55,7 @@ public class LoseScreen extends DefaultScreen {
             }
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.ANY_KEY) || Gdx.input.justTouched()) {
+        if (Gdx.input.justTouched()) {
             try {
                 Thread.sleep(1000);
             }
@@ -70,27 +70,5 @@ public class LoseScreen extends DefaultScreen {
         imgLose.dispose();
         imgHero_l.dispose();
         music.dispose();
-        /*        int k;
-        if (this.ani_step < 30)
-        {
-            paramGraphics.setColor(0);
-            for (k = 0; k < 11; k++) {
-                paramGraphics.fillRect(0, k * 10, this.ani_step * 4 + 12, 5);
-            }
-        }
-        else if (this.ani_step < 65)
-        {
-            paramGraphics.setColor(0);
-            for (k = 0; k < 11; k++) {
-                paramGraphics.fillRect(0, k * 10 + 5, (this.ani_step - 30) * 7 - k * 10, 5);
-            }
-        }
-        else if ((this.ani_step >= 65) && (this.ani_step <= 100))
-        {
-            if (this.ani_step > 90) {
-                paramGraphics.drawImage(this.imgLose, 60, 60, 0x10 | 0x1);
-            }
-            paramGraphics.drawImage(this.imgHero_l, this.h_x * 5, 87, 0x10 | 0x1);
-        }*/
     }
 }

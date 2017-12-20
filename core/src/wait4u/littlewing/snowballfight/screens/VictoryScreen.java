@@ -24,7 +24,7 @@ public class VictoryScreen extends DefaultScreen {
 
     SpriteBatch batch;
     float time = 0;
-    public Music music;
+    public Music music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/victory.mp3"));
 
     // TODO draw last state of game, need many more shared data between runningGame and Victory screen.
     // This require more complex constructor and Screen class data.
@@ -54,6 +54,14 @@ public class VictoryScreen extends DefaultScreen {
         int BOTTOM_SPACE = (int)SCREEN_HEIGHT/8;
         int snowBoardHeight = VIEW_PORT_HEIGHT - ui.getHeight();
 
+        if(music == null) {
+            music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/victory.mp3"));
+        }
+        if(!music.isPlaying()) {
+            music.play();
+            music.setLooping(false);
+        }
+
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
         batch.draw(snowWhiteBg, 0, BOTTOM_SPACE+ui.getHeight(), snowBoardHeight, snowBoardHeight);
@@ -65,17 +73,10 @@ public class VictoryScreen extends DefaultScreen {
         batch.draw(imgV, SCREEN_WIDTH/2+16, VIEW_PORT_HEIGHT/2+imgHero_v.getHeight()/4);
         batch.end();
 
-        if(music != null) {
-            if(!music.isPlaying()) {
-                music.play();
-                music.setLooping(false);
-            }
-        }
-
         delta = 0.05f;
         time += delta;
         if (time > 1) {
-             if (Gdx.input.isKeyPressed(Input.Keys.ANY_KEY) || Gdx.input.justTouched()) {
+             if (Gdx.input.justTouched()) {
                  game.setScreen(new VillageScreen(game));
              }
         }
@@ -90,25 +91,7 @@ public class VictoryScreen extends DefaultScreen {
         imgBack.dispose();
         snowWhiteBg.dispose();
         ui.dispose();
-        // music.dispose();
-
-        /*if ((this.ani_step >= 13) && (this.ani_step < 27))
-        {
-            paramGraphics.setColor(16777215);
-            paramGraphics.fillRect(0, 60, 128, 47);
-            paramGraphics.drawImage(this.imgHero_v, this.h_x * 5, 83, 0x10 | 0x1);
-        }
-        else if ((this.ani_step >= 28) && (this.ani_step < 50))
-        {
-            paramGraphics.drawImage(this.imgV, this.h_x * 5 + 8, 87, 0x10 | 0x1);
-            if (this.ani_step > 41) {
-                paramGraphics.drawImage(this.imgVictory, 60, 60, 0x10 | 0x1);
-            }
-        }
-        else if (this.ani_step == 50)
-        {
-            this.ani_step = -1;
-        }*/
+        music.dispose();
     }
 
 }

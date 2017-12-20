@@ -51,33 +51,17 @@ public class SamsungFunclubScreen extends DefaultScreen {
         batch.draw(http2, SCREEN_WIDTH/16, 500 );
         batch.end();
 
-        if (Gdx.input.isKeyPressed(Input.Keys.ANY_KEY) || Gdx.input.justTouched()) {
+        if (Gdx.input.justTouched()) {
             game.setScreen(new TitleMenuScreen(game));
         }
     }
 
     @Override
     public void hide() {
-        Gdx.app.debug("Snow Ball Fight", "dispose intro");
         batch.dispose();
         present.dispose();
         sam_logo.dispose();
         http1.dispose();
         http2.dispose();
-
-        /*  paramGraphics.setColor(16777215);
-        paramGraphics.fillRect(0, 0, 128, 135);
-        paramGraphics.setColor(25054);
-        paramGraphics.fillRect(0, 0, 128, 22);
-        paramGraphics.fillRect(0, 71, 128, 84);
-        try
-        {
-            paramGraphics.drawImage(Image.createImage("/present.png"), 64, 5, 0x10 | 0x1);
-            paramGraphics.drawImage(Image.createImage("/sam_logo.png"), 64, 28, 0x10 | 0x1);
-            paramGraphics.drawImage(Image.createImage("/http1.png"), 7, 77, 20);
-            paramGraphics.drawImage(Image.createImage("/http2.png"), 7, 103, 20);
-        }
-        catch (Exception localException3) {}
-        System.gc();*/
     }
 }

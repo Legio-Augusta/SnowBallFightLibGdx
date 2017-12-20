@@ -75,6 +75,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private static final String PREF_LEVEL = "level";
     private static final String PREF_SAVEDGOLD = "saved_gold";
     private static final String PREF_MANA= "mana";
+    private static final String PREF_GAME_STAGE= "game_stage";
     Preferences prefs = Gdx.app.getPreferences("gamestate");
 
     private int game_state = 0;
@@ -90,7 +91,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private int p_mode;
     private int ani_step;
     private int stage;
-    private int last_stage = 11;
+    private int last_stage;
     private int tmp_stage;
     private int school;
     private int state;
@@ -107,7 +108,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private int item_d_num;
     private int b_item;
     private int s_item;
-    private int e_num = 2; // set default value for debug avoid exceed 2 item size TODO init then remove this
+    private int e_num; // set default value for debug avoid exceed 2 item size TODO init then remove this
     private int e_t_num;
 
     private int e_time;
@@ -158,7 +159,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private Music music;
     // Ray collisionRay;
 
-    public GameScreen(Game game, int param_screen) {
+    public GameScreen(Game game, int param_screen, int param_school) {
         super(game);
         Gdx.input.setCatchBackKey( true );
         Gdx.input.setInputProcessor(this);
@@ -176,7 +177,12 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         item_slot[2] = 2;
         item_slot[3] = 7;
         item_slot[4] = 4;
-        stage = last_stage = 11; // TODO use sharedPreference
+        last_stage = getGameStage();
+        if(last_stage <= 0) {
+            last_stage = 32;
+        }
+        stage = last_stage;
+        school = param_school;
 
         //camera = new OrthographicCamera();
         //camera.setToOrtho(true, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -187,7 +193,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
         touchPoint = new Vector3();
         game_speed = getGameSpeed();
-        init_game(-1);
+        init_game(stage);
 
         // TODO use ratio
         // touchKeyUpArea = new BoundingBox(new Vector3(20+(200/3), 20+(200/3), 0),new Vector3(27+400/3, 20+200, 0));
@@ -233,7 +239,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
         loadTextures();
         initHeroTexture();
-        initEnemy();
+        //initEnemy();
 
         font = new BitmapFont();
         font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
@@ -416,13 +422,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     }
 
     public void initEnemy() {
-        boss = new Boss(new Vector2(SCREEN_WIDTH/2/CELL_WIDTH, TOP_BOUND/CELL_WIDTH-6), 1);
-        if(e_num <= 2) {
-            e_num = 2;
-        }
+        boss = new Boss(new Vector2(SCREEN_WIDTH/2/CELL_WIDTH, TOP_BOUND/CELL_WIDTH-6), school);
 
         enemies = new Enemy[e_num];
-        for (int i = 0; i < enemies.length; i++) {
+        for (int i = 0; i < e_num; i++) {
             // Add some random on start position of enemies
             int enemyPosY = (TOP_BOUND/CELL_WIDTH)-3;
             int enemyStartPositionX = (int) SCREEN_WIDTH / 2 / CELL_WIDTH;
@@ -438,7 +441,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     public void init_game(int paramInt)
     {
         initHeroTexture();
-        initEnemy();
+        //initEnemy();
         // game.setScreen(new LogoScreen(game));
         // screen = 77;
 
@@ -459,6 +462,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         hero.ppang_time = 0;
         hero.ppang_item = 0;
         make_enemy(paramInt);
+        //initEnemy();
         d_gauge = 2;
 
         // screen = 6;
@@ -1606,12 +1610,14 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
         if(isTouchedSpeedUp()) { // smaller value, shorter sleep
             if(game_speed >= 12) {
+                Gdx.input.vibrate(5);
                 game_speed -= 8;
             }
             setGameSpeed(game_speed);
         }
         if(isTouchedSpeedDown()) {
             if(game_speed <= 128) {
+                Gdx.input.vibrate(5);
                 game_speed += 8;
             }
             setGameSpeed(game_speed);
@@ -1811,6 +1817,14 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     public void setGameSpeed(int saved_gold) {
         getPrefs().putInteger(PREF_SPEED, saved_gold);
+        getPrefs().flush();
+    }
+    public int getGameStage() {
+        return getPrefs().getInteger(PREF_GAME_STAGE, 11);
+    }
+
+    public void setGameStage(int game_stage) {
+        getPrefs().putInteger(PREF_GAME_STAGE, game_stage);
         getPrefs().flush();
     }
 
@@ -2181,10 +2195,12 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     public void make_enemy(int paramInt)
     {
         if (paramInt < 0) { // new game ?
-            make_e_num(hero.get_random(2) + 2, this.school);
+            make_e_num(hero.get_random(2) + 2, school);
         } else {
             make_e_num(this.last_stage % 10, this.school);
         }
+        //enemies = new Enemy[e_num];
+        initEnemy();
 
         e_time = 0;
 
@@ -2196,7 +2212,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             e_dem = 14;
         }
 
-        for (int i = 0; i < this.e_num; i++)
+        for (int i = 0; i < e_num; i++)
         {
             if ((this.school == 1) || (this.school == 2)) {
                 enemies[i].e_hp= 30 + this.school * 10; // 20 def

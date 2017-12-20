@@ -65,9 +65,7 @@ public class TitleMenuScreen extends DefaultScreen {
         batch.draw(imgBk, 0, 480);
         batch.end();
 
-        // time += delta;
-        // if (time > 1) { } // Delay a bit for music ie.
-        if (Gdx.input.isKeyPressed(Input.Keys.ANY_KEY) || Gdx.input.justTouched()) {
+        if (Gdx.input.justTouched()) {
             // TODO use global var ie. screen or just pass value in constructor
             touchPoint.set(Gdx.input.getX(),Gdx.input.getY(), 0);
             Rectangle selectButtonBound = new Rectangle(SCREEN_WIDTH-imgPl.getWidth(), 480, imgPl.getWidth(), imgPl.getHeight());
@@ -79,28 +77,18 @@ public class TitleMenuScreen extends DefaultScreen {
                 game.setScreen(new NewGameMenuScreen(game));
             } else if(OverlapTester.pointInRectangle(backButtonBound, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
                 // options
-//                    game.setScreen(new VillageScreen(game)); // Configurations screen
+                //game.setScreen(new VillageScreen(game)); // Configurations screen
             }
         }
     }
 
     @Override
     public void hide() {
-        Gdx.app.debug("Snow Ball Fight", "dispose intro");
         batch.dispose();
         imgMM.dispose();
         title.dispose();
         imgPl.dispose();
         imgBk.dispose();
-
-        /*        paramGraphics.drawImage(this.imgMM, 0, 0, 20);
-        try
-        {
-            paramGraphics.drawImage(Image.createImage("/title.png"), 64, 35, 0x10 | 0x1);
-        }
-        catch (Exception localException6) {}
-        paramGraphics.drawImage(this.imgPl, 68, 115, 20);
-        paramGraphics.drawImage(this.imgBk, 2, 115, 20);
-        System.gc();*/
+        music.dispose();
     }
 }

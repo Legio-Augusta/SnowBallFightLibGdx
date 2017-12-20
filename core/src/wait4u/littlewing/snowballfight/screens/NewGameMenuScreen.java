@@ -61,7 +61,7 @@ public class NewGameMenuScreen extends  DefaultScreen {
         batch.draw(imgCh, 36, 1230); // this.m_mode * 17 + 14
         batch.end();
 
-        if (Gdx.input.isKeyPressed(Input.Keys.ANY_KEY) || Gdx.input.justTouched()) {
+        if (Gdx.input.justTouched()) {
             // Can not use font getBound(), so hard code position of text Bitmap.
             touchPoint.set(Gdx.input.getX(),Gdx.input.getY(), 0);
             Rectangle newGameTextBound = new Rectangle(110, 1300-160, SCREEN_WIDTH-200, 160);
@@ -81,6 +81,7 @@ public class NewGameMenuScreen extends  DefaultScreen {
                 batch.end();
 //                game.setScreen(new VillageScreen(game));
             } else if(OverlapTester.pointInRectangle(selectButtonBound, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
+                Gdx.input.vibrate(5);
                 game.setScreen(new VillageScreen(game));
             } else if(OverlapTester.pointInRectangle(backButtonBound, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
                 // game.setScreen(new VillageScreen(game)); // Configurations screen
