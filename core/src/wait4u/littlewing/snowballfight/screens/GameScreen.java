@@ -422,7 +422,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     }
 
     public void initEnemy() {
-        boss = new Boss(new Vector2(SCREEN_WIDTH/2/CELL_WIDTH, TOP_BOUND/CELL_WIDTH-6), school);
+        boss = new Boss(new Vector2(SCREEN_WIDTH/2/CELL_WIDTH, TOP_BOUND/CELL_WIDTH-4), school);
 
         enemies = new Enemy[e_num];
         for (int i = 0; i < e_num; i++) {
@@ -499,7 +499,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 }
             }
         }
-        if ((boss.getHp() >= 0) && (e_boss > 0))
+        if ((boss.e_boss_hp >= 0) && (e_boss > 0))
         {
             fillRect( (int)(boss.position.x * 5 + 12)*SGH_SCALE_RATIO, (int)(SCREEN_HEIGHT-(boss.position.y * 5 + 5)*SGH_SCALE_RATIO), 27, 15*SGH_SCALE_RATIO, 0); // setColor(16711680);
             fillRect( (int)(boss.position.x * 5 + 12)*SGH_SCALE_RATIO, (int)(SCREEN_HEIGHT-(boss.position.y * 5 + 5)*SGH_SCALE_RATIO), 27, (15 - 15 * boss.e_boss_hp / boss.max_e_boss_hp)*SGH_SCALE_RATIO, 4); // setColor(9672090); // gray
@@ -1399,7 +1399,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     } // End enemy attack n move ai
                     if (e_boss > 0)
                     {
-                        if (boss.getHp() >= 0)
+                        if (boss.e_boss_hp >= 0)
                         {
                             if ((e_time == boss.e_boss_fire_time) && (hero.get_random(3) != 1)) {
                                 if ((this.e_boss == 1) || (this.e_boss == 2)) {
@@ -1421,11 +1421,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                                 boss.e_boss_move_dir = 0;
                             }
                         }
-                        else if ((boss.e_boss_move_dir == 0) && (boss.getHp() > 0))
+                        else if ((boss.e_boss_move_dir == 0) && (boss.e_boss_hp > 0))
                         {
                             boss.boss_move_ai();
                         }
-                        else if ((boss.e_boss_move_dir != 0) && (boss.getHp() > 0))
+                        else if ((boss.e_boss_move_dir != 0) && (boss.e_boss_hp > 0))
                         {
                             boss.boss_move();
                         }
@@ -1480,6 +1480,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     }
                     setSavedMana(hero.mana);
                     setSavedGold(getSavedgold()+ gold);
+                    if(stage %10 < 4) { // next level
+                        stage += 1;
+                        setGameStage(stage);
+                    }
                 }
             }
             else if (screen == 8) {
@@ -1923,7 +1927,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     }
                 }
                 else if (hit_idx == 10) {
-                    if (boss.getHp() > 0)
+                    if (boss.e_boss_hp > 0)
                     {
                         fillRect( (int)(boss.position.x * 5 + 12)*SGH_SCALE_RATIO, (int)(boss.position.y * 5 + 5)*SGH_SCALE_RATIO, 27, 135, 0); // (16711680); // FF0000
                         // draw boss hp bar
@@ -2414,10 +2418,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
         if ((e_boss > 0) && (boss.position.x - hero.snow_x >= -1) && (boss.position.x - hero.snow_x <= 1))
         {
-            j = (int)(boss.position.y + hero.real_snow_pw - 1);
-            if ((j == 9) || (j == 7) || (j == 8))
+            j = (int)(boss.position.y - hero.real_snow_pw + 1); // orig + -
+            if ((j == 16) || (j == 17) || (j == 18)) // 7 8 9
             {
-                if (j == 7) {
+                if (j == 17) {
                     al = 1;
                 }
                 hero.ppang = 1;
