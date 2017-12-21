@@ -14,7 +14,7 @@
         android:label="SnowBallFight"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="wait4u.littlewing.paxbritan.android.AndroidLauncher"
+            android:name="com.littlewing.sbf.app.AndroidLauncher"
             android:label="Pax Britannica"
             android:configChanges="keyboard|keyboardHidden|orientation"
             android:screenOrientation="portrait" >
@@ -25,7 +25,7 @@
         </activity>
 
         <activity
-            android:name="wait4u.littlewing.paxbritan.android.SnowBallFightLauncher"
+            android:name="com.littlewing.sbf.app.SnowBallFightLauncher"
             android:label="SnowBallFight"
             android:configChanges="keyboard|keyboardHidden|orientation"
             android:screenOrientation="portrait" >

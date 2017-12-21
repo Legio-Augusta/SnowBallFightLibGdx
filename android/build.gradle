@@ -16,6 +16,13 @@ android {
         instrumentTest.setRoot('tests')
     }
     buildToolsVersion '26.0.2'
+    defaultConfig {
+        applicationId "com.littlewing.sbf.app"
+        minSdkVersion 15
+        targetSdkVersion 25
+        versionCode 2
+        versionName "1.1"
+    }
 }
 
 // called every time gradle gets executed, takes the native dependencies of
