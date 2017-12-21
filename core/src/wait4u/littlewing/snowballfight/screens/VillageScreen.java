@@ -62,8 +62,8 @@ public class VillageScreen extends DefaultScreen {
         northernBoy = new Rectangle(20, 480+villHeight/2-180, 200, 240);
 
         batch.draw(samsung_blue, 0, 0, SCREEN_HEIGHT, SCREEN_HEIGHT);
-        font.draw(batch, "Chose school", 110, SCREEN_HEIGHT-360);
         batch.draw(imgVill, 0, 480);
+        font.draw(batch, "Chose school", 110, SCREEN_HEIGHT-360);
         batch.draw(heroIcon, SCREEN_WIDTH/2 - heroIcon.getWidth()/2, imgVill.getHeight()/2+480);
 
         batch.end();

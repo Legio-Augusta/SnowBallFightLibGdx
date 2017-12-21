@@ -89,6 +89,6 @@ public class TitleMenuScreen extends DefaultScreen {
         title.dispose();
         imgPl.dispose();
         imgBk.dispose();
-        music.dispose();
+        //music.dispose();
     }
 }

@@ -57,6 +57,7 @@ public class VictoryScreen extends DefaultScreen {
         if(music == null) {
             music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/victory.mp3"));
         }
+        music.setVolume(0.5f);
         if(!music.isPlaying()) {
             music.play();
             music.setLooping(false);
@@ -77,7 +78,11 @@ public class VictoryScreen extends DefaultScreen {
         time += delta;
         if (time > 1) {
              if (Gdx.input.justTouched()) {
-                 game.setScreen(new VillageScreen(game));
+                 if(Gdx.app.getPreferences("gamestate").getInteger("game_stage")%10 == 4) {
+                     game.setScreen(new AllClearScreen(game));
+                 } else {
+                     game.setScreen(new VillageScreen(game));
+                 }
              }
         }
     }
@@ -91,7 +96,7 @@ public class VictoryScreen extends DefaultScreen {
         imgBack.dispose();
         snowWhiteBg.dispose();
         ui.dispose();
-        music.dispose();
+        //music.dispose();
     }
 
 }

@@ -52,8 +52,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     // Use rectangle until figure out how to work with BoundingBox multi input.
     Rectangle upBtnRect = new Rectangle(20+(200/3), 20+(400/3), 72, 70);
     Rectangle downBtnRect = new Rectangle(20+(200/3), 20, 72, 70);
-    Rectangle leftBtnRect = new Rectangle(20, 20+(200/6), 2*70, 140);
-    Rectangle rightBtnRect = new Rectangle(20+(400/3), 20+(200/6), 70, 140);
+    Rectangle leftBtnRect = new Rectangle(20, 20+(200/6), 70, 140);
+    Rectangle rightBtnRect = new Rectangle(20+(400/3), 20+(200/6), 2*70, 140);
     Rectangle optionBtnRect = new Rectangle(SCREEN_WIDTH/2+150, SCREEN_HEIGHT/8, SCREEN_WIDTH/2-180, 70);
     Rectangle speedUpBtnRect = new Rectangle(SCREEN_WIDTH-275-200, 20, 200, 100);
     Rectangle speedDownBtnRect = new Rectangle(SCREEN_WIDTH-275-400, 20, 200, 100);
@@ -76,6 +76,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private static final String PREF_SAVEDGOLD = "saved_gold";
     private static final String PREF_MANA= "mana";
     private static final String PREF_GAME_STAGE= "game_stage";
+    private static final String PREF_LAST_GAME_STAGE= "last_game_stage";
     Preferences prefs = Gdx.app.getPreferences("gamestate");
 
     private int game_state = 0;
@@ -296,7 +297,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             drawListItems();
         }
         else if (screen == 200) { // Victory
-            game.setScreen(new VictoryScreen(game));
+            if( (stage == 44) && (school == 4)) { // Final battle
+                game.setScreen(new AllClearScreen(game));
+            } else {
+                game.setScreen(new VictoryScreen(game));
+            }
         }
         else if (screen == 65335) {
             game.setScreen(new LoseScreen(game));
@@ -332,7 +337,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     }
 
     private void loadTextures() {
-        imgBack = new Texture("data/samsung-white/back1.png");
+        if(school <= 0) {
+            school = 1;
+        }
+        imgBack = new Texture("data/samsung-white/back"+school+".png");
         imgAl = new Texture("data/samsung-white/al.png");
         imgShadow = new Texture("data/samsung-white/shadow0.png");
         imgPok = new Texture("data/samsung-white/pok.png");
@@ -360,7 +368,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         imgEffect[0] = new Texture("data/samsung-white/effect0.png");
         imgEffect[1] = new Texture("data/samsung-white/effect1.png");
 
-        imgStage_num = new Texture("data/samsung-white/stage1.png"); // tmp_stage +
+        if(tmp_stage <= 8) {
+            tmp_stage = 1;
+        }
+        imgStage_num = new Texture("data/samsung-white/stage"+ tmp_stage + ".png"); // tmp_stage +
         ui = new Texture("data/samsung-white/ui.png");  // h:160p (1080p)
         imgStage = new Texture[5];
         for (int i = 0; i < 5; i++) {
@@ -1483,6 +1494,14 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     if(stage %10 < 4) { // next level
                         stage += 1;
                         setGameStage(stage);
+                    } else if(stage == 14) {
+                        stage = 11;
+                    } else if(stage == 24) {
+                        stage = 21;
+                    } else if(stage == 34) {
+                        stage = 31;
+                    } else if(stage == 44) {
+                        stage = 41;
                     }
                 }
             }
@@ -1539,10 +1558,16 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                         state = 10;
                     }
                     last_stage = stage;
+                    setGameStage(stage);
+                    setLastGameStage(last_stage);
                 }
 
                 screen = 200;
-                game.setScreen(new VictoryScreen(game));
+                if( (stage == 44) && (school == 4)) { // Final battle
+                    game.setScreen(new AllClearScreen(game));
+                } else {
+                    game.setScreen(new VictoryScreen(game));
+                }
             } // end screen 201
             else if (screen == 65336) {  // lose
                 item_mode = 0;
@@ -1831,6 +1856,14 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         getPrefs().putInteger(PREF_GAME_STAGE, game_stage);
         getPrefs().flush();
     }
+    public int getLastGameStage() {
+        return getPrefs().getInteger(PREF_LAST_GAME_STAGE, 11);
+    }
+
+    public void setLastGameStage(int last_game_stage) {
+        getPrefs().putInteger(PREF_LAST_GAME_STAGE, last_game_stage);
+        getPrefs().flush();
+    }
 
     /** Draw playing game screen (value code screen = 6). This will draw all related character like enemy, hero, enemy's item etc.
      * This will also draw S-T-A-G-E screen title on a game start. */
@@ -1880,7 +1913,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         } // end item_mode
         if (hero.pw_up == 2) {
             batch.draw(imgShadow, hero.snow_x * 5*SGH_SCALE_RATIO, (hero.snow_y * 6)*SGH_SCALE_RATIO); // orig: *7
-            batch.draw(imgItem[hero.wp], hero.position.x * 5 * SGH_SCALE_RATIO, (hero.snow_y * 6 + hero.snow_gap)*SGH_SCALE_RATIO );
+            batch.draw(imgItem[hero.wp], hero.snow_x * 5 * SGH_SCALE_RATIO, (hero.snow_y * 6 + hero.snow_gap)*SGH_SCALE_RATIO );
         }
         else if (hero.pw_up == 1) {
             if ((hero.real_snow_pw > 0) && (hero.ppang_item != 1))
@@ -2260,7 +2293,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         boss.e_boss_behv = 100;
         boss.e_boss_snow_y = -10;
         boss.position.x = 10;
-        boss.position.y = 22; // orig 6
+        boss.position.y = 25; // orig 6
         boss.e_boss_idx = 0;
         boss.e_boss_hp = (this.e_boss * 10 + 30 + (this.school - 1) * 10);
         boss.max_e_boss_hp = boss.e_boss_hp;
@@ -2418,10 +2451,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
         if ((e_boss > 0) && (boss.position.x - hero.snow_x >= -1) && (boss.position.x - hero.snow_x <= 1))
         {
-            j = (int)(boss.position.y - hero.real_snow_pw + 1); // orig + -
-            if ((j == 16) || (j == 17) || (j == 18)) // 7 8 9
+            j = (int)(boss.position.y - hero.real_snow_pw); // orig + -
+            if ((j == 22) || (j == 21) || (j == 23)) // 7 8 9
             {
-                if (j == 17) {
+                if (j == 22) {
                     al = 1;
                 }
                 hero.ppang = 1;
@@ -2650,6 +2683,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             str = "victory.mp3"; // 0.mid
         }
         music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/"+str));
+        music.setVolume(0.5f);
         if(music != null) {
             if (!music.isPlaying()) {
                 music.play();
