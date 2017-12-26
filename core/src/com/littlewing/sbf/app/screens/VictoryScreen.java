@@ -50,7 +50,8 @@ public class VictoryScreen extends DefaultScreen {
         int SCREEN_WIDTH = Gdx.graphics.getWidth();
         int VIEW_PORT_HEIGHT = (int)SCREEN_HEIGHT*3/4;
         int BOTTOM_SPACE = (int)SCREEN_HEIGHT/8;
-        int snowBoardHeight = VIEW_PORT_HEIGHT - ui.getHeight();
+        float hd_ratio = (float)SCREEN_WIDTH/(float)1080;
+        int snowBoardHeight = VIEW_PORT_HEIGHT - (int)(ui.getHeight()*hd_ratio);
 
         if(music == null) {
             music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/victory.mp3"));
@@ -63,13 +64,19 @@ public class VictoryScreen extends DefaultScreen {
 
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
-        batch.draw(snowWhiteBg, 0, BOTTOM_SPACE+ui.getHeight(), snowBoardHeight, snowBoardHeight);
-        batch.draw(imgBack, 0, VIEW_PORT_HEIGHT+BOTTOM_SPACE/2);
-        batch.draw(ui, 0, BOTTOM_SPACE);
+        batch.draw(snowWhiteBg, 0, BOTTOM_SPACE+ui.getHeight()*hd_ratio, snowBoardHeight, snowBoardHeight);
+        //batch.draw(imgBack, 0, VIEW_PORT_HEIGHT+BOTTOM_SPACE/2);
+        //batch.draw(ui, 0, BOTTOM_SPACE);
+//
+        //batch.draw(imgVictory, SCREEN_WIDTH/6, VIEW_PORT_HEIGHT/2+BOTTOM_SPACE);
+        //batch.draw(imgHero_v, SCREEN_WIDTH/2 - imgHero_v.getWidth()/2, VIEW_PORT_HEIGHT/2);
+        //batch.draw(imgV, SCREEN_WIDTH/2+16, VIEW_PORT_HEIGHT/2+imgHero_v.getHeight()/4);
 
-        batch.draw(imgVictory, SCREEN_WIDTH/6, VIEW_PORT_HEIGHT/2+BOTTOM_SPACE);
-        batch.draw(imgHero_v, SCREEN_WIDTH/2 - imgHero_v.getWidth()/2, VIEW_PORT_HEIGHT/2);
-        batch.draw(imgV, SCREEN_WIDTH/2+16, VIEW_PORT_HEIGHT/2+imgHero_v.getHeight()/4);
+        drawFitScreen(imgBack, 0, VIEW_PORT_HEIGHT+BOTTOM_SPACE/2, hd_ratio);
+        drawFitScreen(ui, 0, BOTTOM_SPACE, hd_ratio);
+        drawFitScreen(imgVictory, SCREEN_WIDTH/6, VIEW_PORT_HEIGHT/2+BOTTOM_SPACE, hd_ratio);
+        drawFitScreen(imgHero_v, SCREEN_WIDTH/2 - imgHero_v.getWidth()/2*hd_ratio, VIEW_PORT_HEIGHT/2, hd_ratio);
+        drawFitScreen(imgV, SCREEN_WIDTH/2+16*hd_ratio, VIEW_PORT_HEIGHT/2+imgHero_v.getHeight()/4*hd_ratio, hd_ratio);
         batch.end();
 
         delta = 0.05f;
@@ -95,6 +102,9 @@ public class VictoryScreen extends DefaultScreen {
         snowWhiteBg.dispose();
         ui.dispose();
         //music.dispose();
+    }
+    public void drawFitScreen(Texture texture, float x, float y, float hd_ratio) {
+        batch.draw(texture, x, y, 0, 0, texture.getWidth(), texture.getHeight(), hd_ratio, hd_ratio, 0, 0, 0, texture.getWidth(), texture.getHeight(), false, false);
     }
 
 }

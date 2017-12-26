@@ -38,6 +38,7 @@ public class LogoScreen extends DefaultScreen {
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         int SCREEN_HEIGHT = Gdx.graphics.getHeight();
+        int SCREEN_WIDTH = Gdx.graphics.getWidth();
 
         if(music != null) {
             if(!music.isPlaying()) {
@@ -46,10 +47,12 @@ public class LogoScreen extends DefaultScreen {
             }
         }
         batch.begin();
-        batch.draw(logo, 0, 400);
+        //batch.draw(logo, 0, 400);
+        float hd_ratio = (float)SCREEN_WIDTH/(float)logo.getWidth();
+        batch.draw(logo, 0, hd_ratio*400, 0, 0, logo.getWidth(), logo.getHeight(), hd_ratio, hd_ratio, 0, 0, 0, logo.getWidth(), logo.getHeight(), false, false);
         batch.end();
 
-        if (Gdx.input.isKeyPressed(Input.Keys.ANY_KEY) || Gdx.input.justTouched()) {
+        if (Gdx.input.justTouched()) {
             game.setScreen(new SamsungFunclubScreen(game));
         }
     }
@@ -59,6 +62,9 @@ public class LogoScreen extends DefaultScreen {
         batch.dispose();
         logo.dispose();
         music.dispose();
+    }
+    public void resize(int width, int height) {
+        batch.getProjectionMatrix().setToOrtho2D(0, 0, width, height);
     }
 
 }

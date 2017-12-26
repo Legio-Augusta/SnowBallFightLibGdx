@@ -36,8 +36,7 @@ public class AllClearScreen extends DefaultScreen {
     public void render(float delta) {
         int SCREEN_HEIGHT = Gdx.graphics.getHeight();
         int SCREEN_WIDTH = Gdx.graphics.getWidth();
-        int VIEW_PORT_HEIGHT = (int)SCREEN_HEIGHT*3/4;
-        int BOTTOM_SPACE = (int)SCREEN_HEIGHT/8;
+        float hd_ratio = (float)SCREEN_WIDTH/(float)1080;
 
         if(music == null) {
             music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/victory.mp3"));
@@ -50,7 +49,9 @@ public class AllClearScreen extends DefaultScreen {
 
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
-        batch.draw(imgAllClear, 0, 110);
+        //batch.draw(imgAllClear, 0, 110);
+        //batch.draw(imgAllClear, 0, 110);
+        drawFitScreen(imgAllClear, 0, 110*hd_ratio, hd_ratio);
         batch.end();
 
         delta = 0.05f;
@@ -66,6 +67,9 @@ public class AllClearScreen extends DefaultScreen {
     public void hide() {
         batch.dispose();
         imgAllClear.dispose();
+    }
+    public void drawFitScreen(Texture texture, float x, float y, float hd_ratio) {
+        batch.draw(texture, x, y, 0, 0, texture.getWidth(), texture.getHeight(), hd_ratio, hd_ratio, 0, 0, 0, texture.getWidth(), texture.getHeight(), false, false);
     }
 
 }

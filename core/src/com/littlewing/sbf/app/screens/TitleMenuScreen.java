@@ -49,6 +49,7 @@ public class TitleMenuScreen extends DefaultScreen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         int SCREEN_HEIGHT = Gdx.graphics.getHeight();
         int SCREEN_WIDTH = Gdx.graphics.getWidth();
+        float hd_ratio = (float)SCREEN_WIDTH/(float)1080;
 
         if(music != null) {
             if(!music.isPlaying()) {
@@ -58,17 +59,22 @@ public class TitleMenuScreen extends DefaultScreen {
         }
         batch.begin();
         batch.draw(samsung_blue, 0, 0, SCREEN_HEIGHT, SCREEN_HEIGHT);
-        batch.draw(imgMM, 0, 480);
-        batch.draw(title, 90, 300+480);
-        batch.draw(imgPl, SCREEN_WIDTH-imgPl.getWidth(), 480);
-        batch.draw(imgBk, 0, 480);
+//        batch.draw(imgMM, 0, 480);
+//        batch.draw(title, 90, 300+480);
+//        batch.draw(imgPl, SCREEN_WIDTH-imgPl.getWidth(), 480);
+//        batch.draw(imgBk, 0, 480);
+
+        drawFitScreen(imgMM, 0, 480*hd_ratio, hd_ratio);
+        drawFitScreen(title, 90*hd_ratio, (300+480)*hd_ratio, hd_ratio);
+        drawFitScreen(imgPl, SCREEN_WIDTH-(float)imgPl.getWidth()*hd_ratio, 480*hd_ratio, hd_ratio);
+        drawFitScreen(imgBk, 0, 480*hd_ratio, hd_ratio);
         batch.end();
 
         if (Gdx.input.justTouched()) {
             // TODO use global var ie. screen or just pass value in constructor
             touchPoint.set(Gdx.input.getX(),Gdx.input.getY(), 0);
-            Rectangle selectButtonBound = new Rectangle(SCREEN_WIDTH-imgPl.getWidth(), 480, imgPl.getWidth(), imgPl.getHeight());
-            Rectangle backButtonBound = new Rectangle(0, 480, imgBk.getWidth(), imgBk.getHeight());
+            Rectangle selectButtonBound = new Rectangle(SCREEN_WIDTH-(float)imgPl.getWidth()*hd_ratio, 480*hd_ratio, imgPl.getWidth()*hd_ratio, imgPl.getHeight()*hd_ratio);
+            Rectangle backButtonBound = new Rectangle(0, 480*hd_ratio, imgBk.getWidth()*hd_ratio, imgBk.getHeight()*hd_ratio);
 
             Gdx.app.log("INFO", "touch " + touchPoint.x + " y "+ (SCREEN_HEIGHT-touchPoint.y) + " bound x "+ selectButtonBound.toString());
             // Adjust coordinate and geometry vector touch follow GDX anchor.
@@ -89,5 +95,8 @@ public class TitleMenuScreen extends DefaultScreen {
         imgPl.dispose();
         imgBk.dispose();
         //music.dispose();
+    }
+    public void drawFitScreen(Texture texture, float x, float y, float hd_ratio) {
+        batch.draw(texture, x, y, 0, 0, texture.getWidth(), texture.getHeight(), hd_ratio, hd_ratio, 0, 0, 0, texture.getWidth(), texture.getHeight(), false, false);
     }
 }

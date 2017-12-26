@@ -31,6 +31,7 @@ public class VillageScreen extends DefaultScreen {
     int SCREEN_HEIGHT = Gdx.graphics.getHeight();
     int SCREEN_WIDTH = Gdx.graphics.getWidth();
     int CELL = (int)(SCREEN_WIDTH/120);
+    float hd_ratio = (float)SCREEN_WIDTH/(float)1080;
 
     public VillageScreen(Game game) {
         super(game);
@@ -40,7 +41,7 @@ public class VillageScreen extends DefaultScreen {
     public void show() {
         font = new BitmapFont();
         font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-        font.getData().setScale(6);
+        font.getData().setScale(6*hd_ratio);
 
         imgVill = new Texture("data/samsung-white/village.png");
         imgSchool = new Texture("data/samsung-white/school.png");
@@ -54,16 +55,18 @@ public class VillageScreen extends DefaultScreen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
 
-        int villHeight = imgVill.getHeight();
-        easternBoy = new Rectangle(100*CELL, 480+villHeight/2-180, 200, 240);
-        southernBoy = new Rectangle(20+SCREEN_WIDTH/2, 480+200, 200, 240);
-        westernBoy = new Rectangle(SCREEN_WIDTH/2-20-200, 480+200, 200, 240);
-        northernBoy = new Rectangle(20, 480+villHeight/2-180, 200, 240);
+        float villHeight = imgVill.getHeight()*hd_ratio;
+        easternBoy = new Rectangle(100*CELL, 480+villHeight/2-180, 200*hd_ratio, 240*hd_ratio);
+        southernBoy = new Rectangle(20+SCREEN_WIDTH/2, (480+200)*hd_ratio, 200*hd_ratio, 240*hd_ratio);
+        westernBoy = new Rectangle(SCREEN_WIDTH/2-220*hd_ratio, (480+200)*hd_ratio, 200*hd_ratio, 240*hd_ratio);
+        northernBoy = new Rectangle(20, (480-180)*hd_ratio+villHeight/2, 200*hd_ratio, 240*hd_ratio);
 
         batch.draw(samsung_blue, 0, 0, SCREEN_HEIGHT, SCREEN_HEIGHT);
-        batch.draw(imgVill, 0, 480);
-        font.draw(batch, "Chose school", 110, SCREEN_HEIGHT-360);
-        batch.draw(heroIcon, SCREEN_WIDTH/2 - heroIcon.getWidth()/2, imgVill.getHeight()/2+480);
+        //batch.draw(imgVill, 0, 480);
+        drawFitScreen(imgVill, 0, 480*hd_ratio, hd_ratio);
+        font.draw(batch, "Chose school", 110*hd_ratio, SCREEN_HEIGHT-360*hd_ratio);
+        //batch.draw(heroIcon, SCREEN_WIDTH/2 - heroIcon.getWidth()/2, imgVill.getHeight()/2+480);
+        drawFitScreen(heroIcon, SCREEN_WIDTH/2 - heroIcon.getWidth()/2*hd_ratio, imgVill.getHeight()/2*hd_ratio + 480*hd_ratio, hd_ratio);
 
         batch.end();
 
@@ -89,8 +92,8 @@ public class VillageScreen extends DefaultScreen {
             }
 
 
-            Rectangle selectButtonBound = new Rectangle(10, 480, SCREEN_WIDTH/2-32, 100);
-            Rectangle optionsButtonBound = new Rectangle(SCREEN_WIDTH/2+12, 480, SCREEN_WIDTH/2-12, 100);
+            Rectangle selectButtonBound = new Rectangle(10, 480*hd_ratio, SCREEN_WIDTH/2-32*hd_ratio, 100*hd_ratio);
+            Rectangle optionsButtonBound = new Rectangle(SCREEN_WIDTH/2+12, 480*hd_ratio, SCREEN_WIDTH/2-12, 100*hd_ratio);
             if(OverlapTester.pointInRectangle(selectButtonBound, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
                 game.setScreen(new GameScreen(game, 6, 1));
             } else if(OverlapTester.pointInRectangle(optionsButtonBound, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) )) {
@@ -103,6 +106,9 @@ public class VillageScreen extends DefaultScreen {
     @Override
     public void hide() {
 
+    }
+    public void drawFitScreen(Texture texture, float x, float y, float hd_ratio) {
+        batch.draw(texture, x, y, 0, 0, texture.getWidth(), texture.getHeight(), hd_ratio, hd_ratio, 0, 0, 0, texture.getWidth(), texture.getHeight(), false, false);
     }
 
 }

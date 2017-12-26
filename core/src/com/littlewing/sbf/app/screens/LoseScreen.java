@@ -41,11 +41,14 @@ public class LoseScreen extends DefaultScreen {
         int SCREEN_WIDTH = Gdx.graphics.getWidth();
         int VIEW_PORT_HEIGHT = (int)SCREEN_HEIGHT*3/4;
         int BOTTOM_SPACE = (int)SCREEN_HEIGHT/8;
+        float hd_ratio = (float)SCREEN_WIDTH/(float)1080;
 
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
-        batch.draw(imgLose, SCREEN_WIDTH/2-(int)(imgLose.getWidth()/2), VIEW_PORT_HEIGHT/2+2*BOTTOM_SPACE);
-        batch.draw(imgHero_l, SCREEN_WIDTH/2-(int)(imgHero_l.getWidth()/2), VIEW_PORT_HEIGHT/2+BOTTOM_SPACE);
+        //batch.draw(imgLose, SCREEN_WIDTH/2-(int)(imgLose.getWidth()/2*hd_ratio), VIEW_PORT_HEIGHT/2+2*BOTTOM_SPACE);
+        drawFitScreen(imgLose, SCREEN_WIDTH/2-(int)(imgLose.getWidth()/2*hd_ratio), VIEW_PORT_HEIGHT/2+2*BOTTOM_SPACE, hd_ratio);
+        //batch.draw(imgHero_l, SCREEN_WIDTH/2-(int)(imgHero_l.getWidth()/2*hd_ratio), VIEW_PORT_HEIGHT/2+BOTTOM_SPACE);
+        drawFitScreen(imgHero_l, SCREEN_WIDTH/2-(int)(imgHero_l.getWidth()/2*hd_ratio), VIEW_PORT_HEIGHT/2+BOTTOM_SPACE, hd_ratio);
         batch.end();
         if(music != null) {
             if(!music.isPlaying()) {
@@ -69,5 +72,8 @@ public class LoseScreen extends DefaultScreen {
         imgLose.dispose();
         imgHero_l.dispose();
         music.dispose();
+    }
+    public void drawFitScreen(Texture texture, float x, float y, float hd_ratio) {
+        batch.draw(texture, x, y, 0, 0, texture.getWidth(), texture.getHeight(), hd_ratio, hd_ratio, 0, 0, 0, texture.getWidth(), texture.getHeight(), false, false);
     }
 }

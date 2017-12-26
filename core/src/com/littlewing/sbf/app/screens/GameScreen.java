@@ -42,6 +42,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     // So on J2ME original enemy seem to move on 1/4 of screen height (3 cell +1 /32 cell 5px).
     // That mean enemy should move on 1080 to 1440 on 360px vertical distance.
     private static int SMALL_GAP = 32; // 32px for gap
+    float hd_ratio = (float)SCREEN_WIDTH/(float)1080;
 
     OrthographicCamera camera;
     SpriteBatch batch;
@@ -50,13 +51,13 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     // private BoundingBox useItem
 
     // Use rectangle until figure out how to work with BoundingBox multi input.
-    Rectangle upBtnRect = new Rectangle(20+(200/3), 20+(400/3), 72, 70);
-    Rectangle downBtnRect = new Rectangle(20+(200/3), 20, 72, 70);
-    Rectangle leftBtnRect = new Rectangle(20, 20+(200/6), 70, 140);
-    Rectangle rightBtnRect = new Rectangle(20+(400/3), 20+(200/6), 2*70, 140);
-    Rectangle optionBtnRect = new Rectangle(SCREEN_WIDTH/2+150, SCREEN_HEIGHT/8, SCREEN_WIDTH/2-180, 70);
-    Rectangle speedUpBtnRect = new Rectangle(SCREEN_WIDTH-275-200, 20, 200, 100);
-    Rectangle speedDownBtnRect = new Rectangle(SCREEN_WIDTH-275-400, 20, 200, 100);
+    Rectangle upBtnRect = new Rectangle(20+(200/3)*hd_ratio, 20+(400/3)*hd_ratio, 72*hd_ratio, 70*hd_ratio);
+    Rectangle downBtnRect = new Rectangle(20+(200/3)*hd_ratio, 20*hd_ratio, 72*hd_ratio, 70*hd_ratio);
+    Rectangle leftBtnRect = new Rectangle(20, 20+(200/6)*hd_ratio, 70*hd_ratio, 140*hd_ratio);
+    Rectangle rightBtnRect = new Rectangle(20+(400/3)*hd_ratio, 20+(200/6)*hd_ratio, 2*70*hd_ratio, 140*hd_ratio);
+    Rectangle optionBtnRect = new Rectangle(SCREEN_WIDTH/2+150*hd_ratio, SCREEN_HEIGHT/8, SCREEN_WIDTH/2-180*hd_ratio, 70*hd_ratio);
+    Rectangle speedUpBtnRect = new Rectangle(SCREEN_WIDTH-(275+200)*hd_ratio, 20, 200*hd_ratio, 100*hd_ratio);
+    Rectangle speedDownBtnRect = new Rectangle(SCREEN_WIDTH-(275+400)*hd_ratio, 20, 200*hd_ratio, 100*hd_ratio);
 
     private Hero hero;
     private Boss boss;
@@ -244,7 +245,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
         font = new BitmapFont();
         font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-        font.getData().setScale(6);
+        font.getData().setScale(6*hd_ratio);
     }
 
     public void update() {
@@ -404,7 +405,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     public void show() {
         font = new BitmapFont();
         font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-        font.getData().setScale(6);
+        font.getData().setScale(6*hd_ratio);
     }
 
     @Override
@@ -504,20 +505,24 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 fillRect( (int)(enemies[i].position.x * 5 + 8)*SGH_SCALE_RATIO, (int)(enemies[i].position.y * 5 + 5)*SGH_SCALE_RATIO, 27, 15*SGH_SCALE_RATIO, 0); // (16711680)
                 fillRect( (int)(enemies[i].position.x * 5 + 8)*SGH_SCALE_RATIO, (int)(enemies[i].position.y * 5 + 5)*SGH_SCALE_RATIO, 27, (15 - 15 * enemies[i].e_hp / enemies[i].max_e_hp)*SGH_SCALE_RATIO, 4); // 9672090 gray
                 if (hero.ppang <= 51) {
-                    batch.draw(imgEffect[0], enemies[i].position.x * 5 * SGH_SCALE_RATIO, (enemies[i].position.y * 5 + 5)*SGH_SCALE_RATIO, imgEffect[0].getWidth(), imgEffect[0].getHeight());
+                    //batch.draw(imgEffect[0], enemies[i].position.x * 5 * SGH_SCALE_RATIO, (enemies[i].position.y * 5 + 5)*SGH_SCALE_RATIO, imgEffect[0].getWidth(), imgEffect[0].getHeight());
+                    drawFitScreen(imgEffect[0], enemies[i].position.x*5*SGH_SCALE_RATIO, (enemies[i].position.y * 5 + 5)*SGH_SCALE_RATIO);
                 } else if (hero.ppang <= 54) {
-                    batch.draw(imgEffect[1], enemies[i].position.x * 5 * SGH_SCALE_RATIO, (enemies[i].position.y * 5 + 5)*SGH_SCALE_RATIO);
+                    //batch.draw(imgEffect[1], enemies[i].position.x * 5 * SGH_SCALE_RATIO, (enemies[i].position.y * 5 + 5)*SGH_SCALE_RATIO);
+                    drawFitScreen(imgEffect[1], enemies[i].position.x * 5 * SGH_SCALE_RATIO, (enemies[i].position.y * 5 + 5)*SGH_SCALE_RATIO);
                 }
             }
         }
         if ((boss.e_boss_hp >= 0) && (e_boss > 0))
         {
-            fillRect( (int)(boss.position.x * 5 + 12)*SGH_SCALE_RATIO, (int)(SCREEN_HEIGHT-(boss.position.y * 5 + 5)*SGH_SCALE_RATIO), 27, 15*SGH_SCALE_RATIO, 0); // setColor(16711680);
-            fillRect( (int)(boss.position.x * 5 + 12)*SGH_SCALE_RATIO, (int)(SCREEN_HEIGHT-(boss.position.y * 5 + 5)*SGH_SCALE_RATIO), 27, (15 - 15 * boss.e_boss_hp / boss.max_e_boss_hp)*SGH_SCALE_RATIO, 4); // setColor(9672090); // gray
+            fillRect( (int)(boss.position.x * 5 + 12)*SGH_SCALE_RATIO, (int)(SCREEN_HEIGHT-(boss.position.y * 5 + 5)*SGH_SCALE_RATIO), 27*hd_ratio, 15*SGH_SCALE_RATIO, 0); // setColor(16711680);
+            fillRect( (int)(boss.position.x * 5 + 12)*SGH_SCALE_RATIO, (int)(SCREEN_HEIGHT-(boss.position.y * 5 + 5)*SGH_SCALE_RATIO), 27*hd_ratio, (15 - 15 * boss.e_boss_hp / boss.max_e_boss_hp)*SGH_SCALE_RATIO, 4); // setColor(9672090); // gray
             if (hero.ppang <= 51) {
-                batch.draw(imgEffect[0], boss.position.x * 5 * SGH_SCALE_RATIO, (boss.position.y * 5 + 5)*SGH_SCALE_RATIO, imgEffect[0].getWidth(), imgEffect[0].getHeight());
+                //batch.draw(imgEffect[0], boss.position.x * 5 * SGH_SCALE_RATIO, (boss.position.y * 5 + 5)*SGH_SCALE_RATIO, imgEffect[0].getWidth(), imgEffect[0].getHeight());
+                drawFitScreen(imgEffect[0], boss.position.x * 5 * SGH_SCALE_RATIO, (boss.position.y * 5 + 5)*SGH_SCALE_RATIO);
             } else if (hero.ppang <= 54) {
-                batch.draw(imgEffect[1], boss.position.x * 5 * SGH_SCALE_RATIO, (boss.position.y * 5 + 6)*SGH_SCALE_RATIO, imgEffect[1].getWidth(), imgEffect[1].getHeight());
+                //batch.draw(imgEffect[1], boss.position.x * 5 * SGH_SCALE_RATIO, (boss.position.y * 5 + 6)*SGH_SCALE_RATIO, imgEffect[1].getWidth(), imgEffect[1].getHeight());
+                drawFitScreen(imgEffect[1], boss.position.x * 5 * SGH_SCALE_RATIO, (boss.position.y * 5 + 6)*SGH_SCALE_RATIO);
             }
         }
         if (hero.ppang != 55) {
@@ -552,10 +557,12 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
         for (int i = 0; i < enemies.length; i++) {
             if ((int)enemies[i].position.x != -10) {
-                batch.draw(enemies[i].getImage(), (int) enemies[i].position.x * 5 * SGH_SCALE_RATIO, enemies[i].position.y * 5 * SGH_SCALE_RATIO + 5, 0, 0, enemies[i].getImage().getWidth(), enemies[i].getImage().getHeight(), 1, 1, 0, 0, 0, enemies[i].getImage().getWidth(), enemies[i].getImage().getHeight(), false, false);
+                //batch.draw(enemies[i].getImage(), (int) enemies[i].position.x * 5 * SGH_SCALE_RATIO, enemies[i].position.y * 5 * SGH_SCALE_RATIO + 5, 0, 0, enemies[i].getImage().getWidth(), enemies[i].getImage().getHeight(), 1, 1, 0, 0, 0, enemies[i].getImage().getWidth(), enemies[i].getImage().getHeight(), false, false);
+                drawFitScreen(enemies[i].getImage(), (int) enemies[i].position.x * 5 * SGH_SCALE_RATIO, enemies[i].position.y * 5 * SGH_SCALE_RATIO + 5);
                 if (enemies[i].e_ppang_time > 0) {
                     enemies[i].e_ppang_time -= 1;
-                    batch.draw(imgItem_hyo[(enemies[i].e_ppang_item - 1)], enemies[i].position.x * 5*SGH_SCALE_RATIO, (enemies[i].position.y * 5 + 1)*SGH_SCALE_RATIO, imgItem_hyo[(enemies[i].e_ppang_item - 1)].getWidth(), imgItem_hyo[(enemies[i].e_ppang_item - 1)].getHeight());
+                    //batch.draw(imgItem_hyo[(enemies[i].e_ppang_item - 1)], enemies[i].position.x * 5*SGH_SCALE_RATIO, (enemies[i].position.y * 5 + 1)*SGH_SCALE_RATIO, imgItem_hyo[(enemies[i].e_ppang_item - 1)].getWidth(), imgItem_hyo[(enemies[i].e_ppang_item - 1)].getHeight());
+                    drawFitScreen(imgItem_hyo[(enemies[i].e_ppang_item - 1)], enemies[i].position.x * 5*SGH_SCALE_RATIO, (enemies[i].position.y * 5 + 1)*SGH_SCALE_RATIO);
                     if (enemies[i].e_ppang_time == 0) {
                         enemies[i].e_ppang_item = 0;
                         if (enemies[i].e_lv < 0) {
@@ -588,7 +595,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
         if (e_boss > 0)
         {
-            batch.draw(boss.getImage(), (int)boss.position.x * 5 *SGH_SCALE_RATIO , (boss.position.y * 5)*SGH_SCALE_RATIO, 0, 0, boss.getImage().getWidth(), boss.getImage().getHeight(), 1, 1, 0, 0, 0, boss.getImage().getWidth(), boss.getImage().getHeight(), false, false);
+            //batch.draw(boss.getImage(), (int)boss.position.x * 5 *SGH_SCALE_RATIO , (boss.position.y * 5)*SGH_SCALE_RATIO, 0, 0, boss.getImage().getWidth(), boss.getImage().getHeight(), 1, 1, 0, 0, 0, boss.getImage().getWidth(), boss.getImage().getHeight(), false, false);
+            drawFitScreen(boss.getImage(), (int)boss.position.x * 5 *SGH_SCALE_RATIO , (boss.position.y * 5)*SGH_SCALE_RATIO);
             if (boss.boss_dis_count >= 1)
             {
                 boss.boss_dis_count += 1;
@@ -640,7 +648,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         boss.setBound(new Rectangle(boss.position.x*CELL_WIDTH, boss.position.y*CELL_WIDTH, boss.getImage().getWidth(), boss.getImage().getHeight()));
     }
 
-    protected void drawUI() {
+    protected void drawUI2() {
         batch.draw(fireBtnTexture, SCREEN_WIDTH-50-fireBtnTexture.getWidth(), 50, fireBtnTexture.getWidth(), fireBtnTexture.getHeight());
         batch.draw(imgKeyNum3, SCREEN_WIDTH-50-fireBtnTexture.getWidth()-fireBtnTexture.getWidth()/2 - imgKeyNum3.getWidth(), BOTTOM_SPACE-imgKeyNum3.getHeight(), imgKeyNum3.getWidth(), imgKeyNum3.getHeight());
         batch.draw(imgSpeedUp, SCREEN_WIDTH-50-fireBtnTexture.getWidth()-fireBtnTexture.getWidth()/2 - imgSpeedUp.getWidth(), 20, imgSpeedUp.getWidth(), imgSpeedUp.getHeight());
@@ -649,6 +657,16 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         batch.draw(touch_pad_knob, 20+touch_pad.getWidth()/2-touch_pad_knob.getWidth()/2, 20+touch_pad.getHeight()/2-touch_pad_knob.getHeight()/2);
 
         fillRect(40, BOTTOM_SPACE+ui.getHeight()-(12 - 12 * hero.hp / hero.max_hp)*SGH_SCALE_RATIO-24, 81+5, (12 - 12 * hero.hp / hero.max_hp)*SGH_SCALE_RATIO, 4);
+    }
+    protected void drawUI() {
+        drawFitScreen(fireBtnTexture, SCREEN_WIDTH-(50+fireBtnTexture.getWidth())*hd_ratio, 50*hd_ratio);
+        drawFitScreen(imgKeyNum3, SCREEN_WIDTH-(50+fireBtnTexture.getWidth()+fireBtnTexture.getWidth()/2 + imgKeyNum3.getWidth())*hd_ratio, BOTTOM_SPACE-imgKeyNum3.getHeight()*hd_ratio);
+        drawFitScreen(imgSpeedUp, SCREEN_WIDTH-(50+fireBtnTexture.getWidth()+fireBtnTexture.getWidth()/2 + imgSpeedUp.getWidth())*hd_ratio, 20*hd_ratio);
+        drawFitScreen(imgSpeedDown, SCREEN_WIDTH-(50+fireBtnTexture.getWidth()+fireBtnTexture.getWidth()/2 + 2*imgSpeedDown.getWidth())*hd_ratio, 20*hd_ratio);
+        drawFitScreen(touch_pad, 20*hd_ratio, 20*hd_ratio);
+        drawFitScreen(touch_pad_knob, (20+touch_pad.getWidth()/2-touch_pad_knob.getWidth()/2)*hd_ratio, (20+touch_pad.getHeight()/2-touch_pad_knob.getHeight()/2)*hd_ratio);
+
+        fillRect(40*hd_ratio, BOTTOM_SPACE+ui.getHeight()*hd_ratio-(12 - 12 * hero.hp / hero.max_hp)*SGH_SCALE_RATIO-(24*hd_ratio), 86, (12 - 12 * hero.hp / hero.max_hp)*SGH_SCALE_RATIO, 4);
     }
 
     protected void drawTouchPad() {
@@ -752,7 +770,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                         font.setColor(1, 1, 1, 1);
                         break;
                 }
-                fillRect(0, y-100, SCREEN_WIDTH, 19*SGH_SCALE_RATIO, 3); // #00AEEF light blue
+                fillRect(0, y-100*hd_ratio, (float)SCREEN_WIDTH/hd_ratio, (float)19*SGH_SCALE_RATIO/hd_ratio, 3); // #00AEEF light blue
                 font.draw(batch, str, x, y);
                 // int i = message.length();
                 // setColor(20361) // #004F89 dark blue
@@ -768,14 +786,16 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             for (int i = 0; i < 5; i++) {
                 if (item_slot[i] != 0) {
                     if(i < 3) {
-                        batch.draw(imgItem[item_slot[i]], (12 * i + 34)*SGH_SCALE_RATIO-4, 35*SGH_SCALE_RATIO); // 20 as J2ME canvas anchor orig: 111
+                        //batch.draw(imgItem[item_slot[i]], (12 * i + 34)*SGH_SCALE_RATIO-4, 35*SGH_SCALE_RATIO); // 20 as J2ME canvas anchor orig: 111
+                        drawFitScreen(imgItem[item_slot[i]], (12 * i + 34)*SGH_SCALE_RATIO-4, 35*SGH_SCALE_RATIO);
                     } else {
-                        batch.draw(imgItem[item_slot[i]], (12 * i + 32)*SGH_SCALE_RATIO, 35*SGH_SCALE_RATIO); // 20 as J2ME canvas anchor orig: 111
+                        //batch.draw(imgItem[item_slot[i]], (12 * i + 32)*SGH_SCALE_RATIO, 35*SGH_SCALE_RATIO); // 20 as J2ME canvas anchor orig: 111
+                        drawFitScreen(imgItem[item_slot[i]], (12 * i + 32)*SGH_SCALE_RATIO, 35*SGH_SCALE_RATIO);
                     }
                 }
             }
         } else {
-            fillRect(del * 12 + 37, 49*SGH_SCALE_RATIO, 72, 72, 4); // setColor(6974058); // 6A6A6A use gray
+            fillRect((del * 12 + 37)*hd_ratio, 49*SGH_SCALE_RATIO, 72*hd_ratio, 72*hd_ratio, 4); // setColor(6974058); // 6A6A6A use gray
             del = -1;
         }
     }
@@ -1668,7 +1688,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }*/
 
         // Fire button touched
-        Rectangle textureBounds=new Rectangle(SCREEN_WIDTH-fireBtnTexture.getWidth()-50, SCREEN_HEIGHT-50-fireBtnTexture.getHeight(), fireBtnTexture.getWidth(),fireBtnTexture.getHeight());
+        Rectangle textureBounds=new Rectangle(SCREEN_WIDTH-(fireBtnTexture.getWidth()+50)*hd_ratio, SCREEN_HEIGHT-(50+fireBtnTexture.getHeight())*hd_ratio, fireBtnTexture.getWidth()*hd_ratio,fireBtnTexture.getHeight()*hd_ratio);
         if(textureBounds.contains(touchPoint.x, touchPoint.y)) {
             game_action = GAME_ACTION_OK;
         }
@@ -1775,11 +1795,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         return OverlapTester.pointInRectangle(optionBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
     }
     protected boolean isTouchedOK() {
-        Rectangle textureBounds=new Rectangle(SCREEN_WIDTH-fireBtnTexture.getWidth()-50, SCREEN_HEIGHT-50-fireBtnTexture.getHeight(), fireBtnTexture.getWidth(),fireBtnTexture.getHeight());
+        Rectangle textureBounds=new Rectangle(SCREEN_WIDTH-(fireBtnTexture.getWidth()+50)*hd_ratio, SCREEN_HEIGHT-(50+fireBtnTexture.getHeight())*hd_ratio, fireBtnTexture.getWidth()*hd_ratio,fireBtnTexture.getHeight()*hd_ratio);
         return textureBounds.contains(touchPoint.x, touchPoint.y);
     }
     protected boolean isTouchedNum3() {
-        Rectangle textureBounds=new Rectangle(SCREEN_WIDTH-fireBtnTexture.getWidth()-50-imgKeyNum3.getWidth()-(int)fireBtnTexture.getWidth()/2, SCREEN_HEIGHT-BOTTOM_SPACE, imgKeyNum3.getWidth(),imgKeyNum3.getHeight());
+        Rectangle textureBounds=new Rectangle(SCREEN_WIDTH-(fireBtnTexture.getWidth()+50+imgKeyNum3.getWidth()+(int)fireBtnTexture.getWidth()/2)*hd_ratio, SCREEN_HEIGHT-BOTTOM_SPACE, imgKeyNum3.getWidth()*hd_ratio,imgKeyNum3.getHeight()*hd_ratio);
         return textureBounds.contains(touchPoint.x, touchPoint.y);
     }
     protected boolean isTouchedSpeedUp() {
@@ -1871,22 +1891,26 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         // monitorEnemyPosition(); // custom inject function to correct enemy position. TODO figure out do we have to match all thing together or just inject simple "guard" method
 
         int j;
-        batch.draw(imgBack, 0, VIEW_PORT_HEIGHT+BOTTOM_SPACE); // options|* button
+        //batch.draw(imgBack, 0, VIEW_PORT_HEIGHT+BOTTOM_SPACE); // options|* button
+        drawFitScreen(imgBack, 0, VIEW_PORT_HEIGHT+BOTTOM_SPACE); // options|* button
 
         // ShapeRenderer has drawback, so do not use it.
         // TODO use TextureRegion to draw rectangle with color, pixel (mattdesl/lwjgl-basics)
         // The order of render in original J2ME is bk1 to white snow board. This way require exactly position draw of bk1 and whiteboard.
         // bk1 will be overlapped by white bg if white bg not scale and draw properly by its position.
-        int snowBoardHeight = VIEW_PORT_HEIGHT - ui.getHeight();
+        int snowBoardHeight = VIEW_PORT_HEIGHT - (int)(ui.getHeight()*hd_ratio);
         // Scale by Y vertically, bg is in square ratio.
-        batch.draw(snowWhiteBg, 0, BOTTOM_SPACE+ui.getHeight(), snowBoardHeight, snowBoardHeight); // VIEW_PORT_HEIGHT
-        batch.draw(hero.getImage(), hero.position.x * 5 * SGH_SCALE_RATIO, BOTTOM_SPACE+ui.getHeight()+SMALL_GAP , hero.getImage().getWidth(), hero.getImage().getHeight()); // orig 83
+        batch.draw(snowWhiteBg, 0, BOTTOM_SPACE+ui.getHeight()*hd_ratio, snowBoardHeight, snowBoardHeight); // VIEW_PORT_HEIGHT
+        //batch.draw(hero.getImage(), hero.position.x * 5 * SGH_SCALE_RATIO, BOTTOM_SPACE+ui.getHeight()+SMALL_GAP , hero.getImage().getWidth(), hero.getImage().getHeight()); // orig 83
+        drawFitScreen(hero.getImage(), hero.position.x * 5 * SGH_SCALE_RATIO, BOTTOM_SPACE+(ui.getHeight()+SMALL_GAP)*hd_ratio);
         if (hero.ppang_time > 0)
         {
             if (hero.ppang_item == 1) {
-                batch.draw(imgItem_hyo[0], hero.position.x * CELL_WIDTH, 69*SGH_SCALE_RATIO); // orig y:74 TODO may be use relative position by hero.y
+                //batch.draw(imgItem_hyo[0], hero.position.x * CELL_WIDTH, 69*SGH_SCALE_RATIO); // orig y:74 TODO may be use relative position by hero.y
+                drawFitScreen(imgItem_hyo[0], hero.position.x * CELL_WIDTH, 69*SGH_SCALE_RATIO);
             } else {
-                batch.draw(imgItem_hyo[1], hero.position.x * CELL_WIDTH-30, 48*SGH_SCALE_RATIO); // orig y:83; ui.getHeight will be wrong on scaled screen
+                //batch.draw(imgItem_hyo[1], hero.position.x * CELL_WIDTH-30, 48*SGH_SCALE_RATIO); // orig y:83; ui.getHeight will be wrong on scaled screen
+                drawFitScreen(imgItem_hyo[1], hero.position.x * CELL_WIDTH-30*hd_ratio, 48*SGH_SCALE_RATIO);
             }
             hero.ppang_time -= 1;
             if (hero.ppang_time == 0) {
@@ -1912,27 +1936,32 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             }
         } // end item_mode
         if (hero.pw_up == 2) {
-            batch.draw(imgShadow, hero.snow_x * 5*SGH_SCALE_RATIO, (hero.snow_y * 6)*SGH_SCALE_RATIO); // orig: *7
-            batch.draw(imgItem[hero.wp], hero.snow_x * 5 * SGH_SCALE_RATIO, (hero.snow_y * 6 + hero.snow_gap)*SGH_SCALE_RATIO );
+            //batch.draw(imgShadow, hero.snow_x * 5*SGH_SCALE_RATIO, (hero.snow_y * 6)*SGH_SCALE_RATIO); // orig: *7
+            drawFitScreen(imgShadow, hero.snow_x * 5*SGH_SCALE_RATIO, (hero.snow_y * 6)*SGH_SCALE_RATIO);
+            //batch.draw(imgItem[hero.wp], hero.snow_x * 5 * SGH_SCALE_RATIO, (hero.snow_y * 6 + hero.snow_gap)*SGH_SCALE_RATIO );
+            drawFitScreen(imgItem[hero.wp], hero.snow_x * 5 * SGH_SCALE_RATIO, (hero.snow_y * 6 + hero.snow_gap)*SGH_SCALE_RATIO );
         }
         else if (hero.pw_up == 1) {
             if ((hero.real_snow_pw > 0) && (hero.ppang_item != 1))
             {
                 // paramGraphics.setColor(7196662); // 6DCFF6 light_blue 2
                 if ((int)hero.position.x >= 13) {
-                    fillRect( (int)(hero.position.x * 5 - 5)*SGH_SCALE_RATIO+3, BOTTOM_SPACE+ui.getHeight()+SMALL_GAP, 27, hero.real_snow_pw * 27+16, 3);
+                    fillRect( (int)(hero.position.x * 5 - 5)*SGH_SCALE_RATIO+3, BOTTOM_SPACE+ui.getHeight()*hd_ratio+SMALL_GAP, 27, hero.real_snow_pw * 27+16, 3);
                     // hero.position.y seem to be wrong
-                    batch.draw(imgPwd, (hero.position.x * 5-6)*SGH_SCALE_RATIO, BOTTOM_SPACE+ui.getHeight()+SMALL_GAP); // orig 83/160. TODO why this calc return 0, can .0f fix this ?
+                    //batch.draw(imgPwd, (hero.position.x * 5-6)*SGH_SCALE_RATIO, BOTTOM_SPACE+ui.getHeight()+SMALL_GAP); // orig 83/160. TODO why this calc return 0, can .0f fix this ?
+                    drawFitScreen(imgPwd, (hero.position.x * 5-6)*SGH_SCALE_RATIO, BOTTOM_SPACE+(ui.getHeight()+SMALL_GAP)*hd_ratio );
                 }
                 else {
-                    fillRect((int)(hero.position.x * 5 + 17)*SGH_SCALE_RATIO+3, (int)(BOTTOM_SPACE+ui.getHeight()+SMALL_GAP), 27, hero.real_snow_pw * 27+16, 3);
-                    batch.draw(imgPwd, (hero.position.x * 5+16)*SGH_SCALE_RATIO, BOTTOM_SPACE+ui.getHeight()+SMALL_GAP); // orig 83/160
+                    fillRect((int)(hero.position.x * 5 + 17)*SGH_SCALE_RATIO+3, (int)(BOTTOM_SPACE+(ui.getHeight()+SMALL_GAP)*hd_ratio), 27, hero.real_snow_pw * 27+16, 3);
+                    //batch.draw(imgPwd, (hero.position.x * 5+16)*SGH_SCALE_RATIO, BOTTOM_SPACE+ui.getHeight()+SMALL_GAP); // orig 83/160
+                    drawFitScreen(imgPwd, (hero.position.x * 5+16)*SGH_SCALE_RATIO, BOTTOM_SPACE+(ui.getHeight()+SMALL_GAP)*hd_ratio );
                 }
             }
         } // end pw_up = 1
         else if (hero.pw_up == 0) {
             if (hero.ppang <= -1) {
-                batch.draw(imgPok, hero.snow_x* 5* SGH_SCALE_RATIO, (hero.snow_y * 6 - 3)*SGH_SCALE_RATIO);
+                //batch.draw(imgPok, hero.snow_x* 5* SGH_SCALE_RATIO, (hero.snow_y * 6 - 3)*SGH_SCALE_RATIO);
+                drawFitScreen(imgPok, hero.snow_x* 5* SGH_SCALE_RATIO, (hero.snow_y * 6 - 3)*SGH_SCALE_RATIO);
                 hero.ppang -= 1;
                 if (hero.ppang == -3) {
                     hero.ppang = 0;
@@ -1942,15 +1971,19 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 if (s_item != -10)
                 {
                     if (hero.ppang < 3) {
-                        batch.draw(imgPPang, hero.snow_x * 5*SGH_SCALE_RATIO, (hero.snow_y * 7 - 6)*SGH_SCALE_RATIO );
+                        //batch.draw(imgPPang, hero.snow_x * 5*SGH_SCALE_RATIO, (hero.snow_y * 7 - 6)*SGH_SCALE_RATIO );
+                        drawFitScreen(imgPPang, hero.snow_x * 5*SGH_SCALE_RATIO, (hero.snow_y * 7 - 6)*SGH_SCALE_RATIO );
                     } else {
-                        batch.draw(imgPPang1, hero.snow_x * 5* SGH_SCALE_RATIO, (hero.snow_y * 7 - 6)*SGH_SCALE_RATIO );
+                        //batch.draw(imgPPang1, hero.snow_x * 5* SGH_SCALE_RATIO, (hero.snow_y * 7 - 6)*SGH_SCALE_RATIO );
+                        drawFitScreen(imgPPang1, hero.snow_x * 5* SGH_SCALE_RATIO, (hero.snow_y * 7 - 6)*SGH_SCALE_RATIO );
                     }
                 }
                 else if (hero.ppang < 4) {
-                    batch.draw(imgEffect[0], hero.snow_x * CELL_WIDTH, (hero.snow_y * 7 - 2)*SGH_SCALE_RATIO );
+                    //batch.draw(imgEffect[0], hero.snow_x * CELL_WIDTH, (hero.snow_y * 7 - 2)*SGH_SCALE_RATIO );
+                    drawFitScreen(imgEffect[0], hero.snow_x * CELL_WIDTH, (hero.snow_y * 7 - 2)*SGH_SCALE_RATIO );
                 } else {
-                    batch.draw(imgEffect[1], hero.snow_x * CELL_WIDTH, (hero.snow_y * 7 - 2)*SGH_SCALE_RATIO );
+                    //batch.draw(imgEffect[1], hero.snow_x * CELL_WIDTH, (hero.snow_y * 7 - 2)*SGH_SCALE_RATIO );
+                    drawFitScreen(imgEffect[1], hero.snow_x * CELL_WIDTH, (hero.snow_y * 7 - 2)*SGH_SCALE_RATIO );
                 }
                 if (this.hit_idx != 10) {
                     if (enemies[hit_idx].e_hp > 0)
@@ -1964,11 +1997,13 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     {
                         fillRect( (int)(boss.position.x * 5 + 12)*SGH_SCALE_RATIO, (int)(boss.position.y * 5 + 5)*SGH_SCALE_RATIO, 27, 135, 0); // (16711680); // FF0000
                         // draw boss hp bar
-                        batch.draw(boss.getImage(), (boss.position.x* 5 + 12)*SGH_SCALE_RATIO, (boss.position.y* 5 + 5)*SGH_SCALE_RATIO, 3*SGH_SCALE_RATIO, 15*SGH_SCALE_RATIO);
+                        //batch.draw(boss.getImage(), (boss.position.x* 5 + 12)*SGH_SCALE_RATIO, (boss.position.y* 5 + 5)*SGH_SCALE_RATIO, 3*SGH_SCALE_RATIO, 15*SGH_SCALE_RATIO);
+                        drawFitScreen(boss.getImage(), (boss.position.x* 5 + 12)*SGH_SCALE_RATIO, (boss.position.y* 5 + 5)*SGH_SCALE_RATIO);
                         fillRect( (int)(boss.position.x * 5 + 12)*SGH_SCALE_RATIO, (int)(boss.position.y * 5 + 5)*SGH_SCALE_RATIO, 27, (15 - 15 * boss.e_boss_hp / boss.max_e_boss_hp)*SGH_SCALE_RATIO, 4); // (9672090); // 0093959A gray
                     }
                     if (al == 1) {
-                        batch.draw(imgAl, (hero.snow_x * 5 + 6)*SGH_SCALE_RATIO, (hero.snow_y * 7 - 10)*SGH_SCALE_RATIO);
+                        //batch.draw(imgAl, (hero.snow_x * 5 + 6)*SGH_SCALE_RATIO, (hero.snow_y * 7 - 10)*SGH_SCALE_RATIO);
+                        drawFitScreen(imgAl, (hero.snow_x * 5 + 6)*SGH_SCALE_RATIO, (hero.snow_y * 7 - 10)*SGH_SCALE_RATIO);
                     }
                 }
                 hero.ppang += 1;
@@ -1991,7 +2026,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         if (p_mode == 1) {
             try
             {
-                batch.draw(ui, 0, BOTTOM_SPACE); // orig: y:109
+                //batch.draw(ui, 0, BOTTOM_SPACE); // orig: y:109
+                drawFitScreen(ui, 0, BOTTOM_SPACE); // orig: y:109
             }
             catch (Exception localException1) {}
             draw_item();
@@ -2006,14 +2042,18 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 // Be careful with * CELL_WIDTH; original snow_x do not multiple by CELL_WIDTH (5px). This will cause snow gap slide horizontal.
                 // e_snow_x is real position, not Cell map
                 // Be carefull with item and snow align centered, it require both scale item n shadow match.
-                batch.draw(imgShadow, enemies[j].e_snow_x, (enemies[j].e_snow_y * 5-5)*SGH_SCALE_RATIO ); // orig: y*6+17;
-                batch.draw(imgItem[enemies[j].e_wp], enemies[j].e_snow_x, (enemies[j].e_snow_y * 5 + 9 - enemies[j].e_snow_gap)*SGH_SCALE_RATIO ); // orig *6 + 13
+                //batch.draw(imgShadow, enemies[j].e_snow_x, (enemies[j].e_snow_y * 5-5)*SGH_SCALE_RATIO ); // orig: y*6+17;
+                drawFitScreen(imgShadow, enemies[j].e_snow_x, (enemies[j].e_snow_y * 5-5)*SGH_SCALE_RATIO );
+                //batch.draw(imgItem[enemies[j].e_wp], enemies[j].e_snow_x, (enemies[j].e_snow_y * 5 + 9 - enemies[j].e_snow_gap)*SGH_SCALE_RATIO ); // orig *6 + 13
+                drawFitScreen(imgItem[enemies[j].e_wp], enemies[j].e_snow_x, (enemies[j].e_snow_y * 5 + 9 - enemies[j].e_snow_gap)*SGH_SCALE_RATIO );
             }
         }
         if ((boss.e_boss_behv != 100) && (e_boss > 0))
         {
-            batch.draw(imgShadow, boss.e_boss_snow_x, boss.e_boss_snow_y * 6 + 17);
-            batch.draw(imgItem[boss.e_boss_wp], boss.e_boss_snow_x, (boss.e_boss_snow_y * 6 + 13 - boss.e_boss_snow_gap)*SGH_SCALE_RATIO );
+            //batch.draw(imgShadow, boss.e_boss_snow_x, boss.e_boss_snow_y * 6 + 17);
+            drawFitScreen(imgShadow, boss.e_boss_snow_x, boss.e_boss_snow_y * 6 + 17*hd_ratio);
+            //batch.draw(imgItem[boss.e_boss_wp], boss.e_boss_snow_x, (boss.e_boss_snow_y * 6 + 13 - boss.e_boss_snow_gap)*SGH_SCALE_RATIO );
+            drawFitScreen(imgItem[boss.e_boss_wp], boss.e_boss_snow_x, (boss.e_boss_snow_y * 6 + 13 - boss.e_boss_snow_gap)*SGH_SCALE_RATIO );
         }
         if (del != -1) {
             draw_item();
@@ -2021,16 +2061,17 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         if (hero.h_timer_p <= -1) {
             if (hero.h_timer_p != -5)
             {
-                batch.draw(imgH_ppang, (hero.position.x * 5 + 1)*SGH_SCALE_RATIO, 81*SGH_SCALE_RATIO); // Update geometry J2ME different
+                //batch.draw(imgH_ppang, (hero.position.x * 5 + 1)*SGH_SCALE_RATIO, 81*SGH_SCALE_RATIO); // Update geometry J2ME different
+                drawFitScreen(imgH_ppang, (hero.position.x * 5 + 1)*SGH_SCALE_RATIO, 81*SGH_SCALE_RATIO);
                 hero.h_timer_p -= 1;
             }
             else if (hero.h_timer_p == -5)
             {
                 hero.h_timer_p = 0;
-                fillRect(45, BOTTOM_SPACE+16, 81, 12*SGH_SCALE_RATIO, 0); // 16711680);    // FF0000
+                fillRect(45*hd_ratio, BOTTOM_SPACE+16*hd_ratio, 81, 12*SGH_SCALE_RATIO, 0); // 16711680);    // FF0000
                 // paramGraphics.setColor(9342606); // 8E8E8E gray
                 if (hero.hp > 0) {
-                     fillRect(45, BOTTOM_SPACE+ui.getHeight()-(12 - 12 * hero.hp / hero.max_hp)*SGH_SCALE_RATIO-24, 81, (12 - 12 * hero.hp / hero.max_hp)*SGH_SCALE_RATIO, 4);
+                     fillRect(45*hd_ratio, BOTTOM_SPACE+ui.getHeight()*hd_ratio-(12 - 12 * hero.hp / hero.max_hp)*SGH_SCALE_RATIO-24*hd_ratio, 81, (12 - 12 * hero.hp / hero.max_hp)*SGH_SCALE_RATIO, 4);
                 }
                 if (hero.getHp() <= 0)
                 {
@@ -2043,22 +2084,28 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         if (state == 2) // Draw s-t-a-g-e 1/2/3 etc animation
         {
             if (ani_step >= 3) {
-                batch.draw(imgStage[0], 20 * SGH_SCALE_RATIO,  VIEW_PORT_HEIGHT/2 + BOTTOM_SPACE);  // Anchor 20, below same value orig: 60 * SGH_SCALE_RATIO
+                //batch.draw(imgStage[0], 20 * SGH_SCALE_RATIO,  VIEW_PORT_HEIGHT/2 + BOTTOM_SPACE);  // Anchor 20, below same value orig: 60 * SGH_SCALE_RATIO
+                drawFitScreen(imgStage[0], 20 * SGH_SCALE_RATIO,  VIEW_PORT_HEIGHT/2 + BOTTOM_SPACE);  // Anchor 20, below same value orig: 60 * SGH_SCALE_RATIO
             }
             if (ani_step >= 6) {
-                batch.draw(imgStage[1], 35 * SGH_SCALE_RATIO, VIEW_PORT_HEIGHT/2 + BOTTOM_SPACE);
+                //batch.draw(imgStage[1], 35 * SGH_SCALE_RATIO, VIEW_PORT_HEIGHT/2 + BOTTOM_SPACE);
+                drawFitScreen(imgStage[1], 35 * SGH_SCALE_RATIO, VIEW_PORT_HEIGHT/2 + BOTTOM_SPACE);
             }
             if (ani_step >= 9) {
-                batch.draw(imgStage[2], 50 * SGH_SCALE_RATIO, VIEW_PORT_HEIGHT/2 + BOTTOM_SPACE);
+                //batch.draw(imgStage[2], 50 * SGH_SCALE_RATIO, VIEW_PORT_HEIGHT/2 + BOTTOM_SPACE);
+                drawFitScreen(imgStage[2], 50 * SGH_SCALE_RATIO, VIEW_PORT_HEIGHT/2 + BOTTOM_SPACE);
             }
             if (ani_step >= 12) {
-                batch.draw(imgStage[3], 65 * SGH_SCALE_RATIO, VIEW_PORT_HEIGHT/2 + BOTTOM_SPACE);
+                //batch.draw(imgStage[3], 65 * SGH_SCALE_RATIO, VIEW_PORT_HEIGHT/2 + BOTTOM_SPACE);
+                drawFitScreen(imgStage[3], 65 * SGH_SCALE_RATIO, VIEW_PORT_HEIGHT/2 + BOTTOM_SPACE);
             }
             if (ani_step >= 15) {
-                batch.draw(imgStage[4], 80 * SGH_SCALE_RATIO, VIEW_PORT_HEIGHT/2 + BOTTOM_SPACE);
+                //batch.draw(imgStage[4], 80 * SGH_SCALE_RATIO, VIEW_PORT_HEIGHT/2 + BOTTOM_SPACE);
+                drawFitScreen(imgStage[4], 80 * SGH_SCALE_RATIO, VIEW_PORT_HEIGHT/2 + BOTTOM_SPACE);
             }
             if (ani_step >= 19) {
-                batch.draw(imgStage_num, 95 * SGH_SCALE_RATIO, VIEW_PORT_HEIGHT/2 + BOTTOM_SPACE);
+                //batch.draw(imgStage_num, 95 * SGH_SCALE_RATIO, VIEW_PORT_HEIGHT/2 + BOTTOM_SPACE);
+                drawFitScreen(imgStage_num, 95 * SGH_SCALE_RATIO, VIEW_PORT_HEIGHT/2 + BOTTOM_SPACE);
             }
         }
     }
@@ -2072,7 +2119,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 // destroyImage(9);
                 // loadImage(100);
                 hero.pw_up = -1;
-                batch.draw(imgBack, 0, VIEW_PORT_HEIGHT);
+                //batch.draw(imgBack, 0, VIEW_PORT_HEIGHT);
+                drawFitScreen(imgBack, 0, VIEW_PORT_HEIGHT);
                 screen = 6;
                 hero.ppang = 50;
                 for (j = 0; j < e_num; j++)
@@ -2094,15 +2142,19 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             for (j = 0; j < e_num; j++)
             {
                 if (enemies[j].position.x != -10) {
-                    batch.draw(enemies[j].getImage(), enemies[j].position.x * 5*SGH_SCALE_RATIO, (enemies[j].position.y * 5 + 5)*SGH_SCALE_RATIO, enemies[j].getImage().getWidth(), enemies[j].getImage().getHeight());
+                    //batch.draw(enemies[j].getImage(), enemies[j].position.x * 5*SGH_SCALE_RATIO, (enemies[j].position.y * 5 + 5)*SGH_SCALE_RATIO, enemies[j].getImage().getWidth(), enemies[j].getImage().getHeight());
+                    drawFitScreen(enemies[j].getImage(), enemies[j].position.x * 5*SGH_SCALE_RATIO, (enemies[j].position.y * 5 + 5)*SGH_SCALE_RATIO);
                 }
                 if (enemies[j].e_behv != 100) {
-                    batch.draw(imgShadow, enemies[j].e_snow_x*CELL_WIDTH, (enemies[j].e_snow_y * 5-5)*SGH_SCALE_RATIO ); // orig: y*6+17;
-                    batch.draw(imgItem[enemies[j].e_wp], enemies[j].e_snow_x*CELL_WIDTH, (enemies[j].e_snow_y * 5 + 13 - enemies[j].e_snow_gap)*SGH_SCALE_RATIO ); // orig *6 + 13
+                    //batch.draw(imgShadow, enemies[j].e_snow_x*CELL_WIDTH, (enemies[j].e_snow_y * 5-5)*SGH_SCALE_RATIO ); // orig: y*6+17;
+                    drawFitScreen(imgShadow, enemies[j].e_snow_x*CELL_WIDTH, (enemies[j].e_snow_y * 5-5)*SGH_SCALE_RATIO );
+                    //batch.draw(imgItem[enemies[j].e_wp], enemies[j].e_snow_x*CELL_WIDTH, (enemies[j].e_snow_y * 5 + 13 - enemies[j].e_snow_gap)*SGH_SCALE_RATIO ); // orig *6 + 13
+                    drawFitScreen(imgItem[enemies[j].e_wp], enemies[j].e_snow_x*CELL_WIDTH, (enemies[j].e_snow_y * 5 + 13 - enemies[j].e_snow_gap)*SGH_SCALE_RATIO );
                 }
             }
             if (e_boss > 0) {
-                batch.draw(boss.getImage(), boss.position.x*CELL_WIDTH, boss.position.y*CELL_WIDTH); // idx
+                //batch.draw(boss.getImage(), boss.position.x*CELL_WIDTH, boss.position.y*CELL_WIDTH);
+                drawFitScreen(boss.getImage(), boss.position.x*CELL_WIDTH, boss.position.y*CELL_WIDTH);
             }
         }
         if (this.special == 1)
@@ -2111,7 +2163,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 if(special > 0) {
                     imgSp = new Texture("data/samsung-white/sp" + special + ".png");
                 }
-                batch.draw(imgSp, (158 - ani_step * 3)*SGH_SCALE_RATIO, 160*SGH_SCALE_RATIO-imgSp.getHeight());
+                //batch.draw(imgSp, (158 - ani_step * 3)*SGH_SCALE_RATIO, 160*SGH_SCALE_RATIO-imgSp.getHeight());
+                drawFitScreen(imgSp, (158 - ani_step * 3)*SGH_SCALE_RATIO, 160*SGH_SCALE_RATIO-imgSp.getHeight()*hd_ratio);
             }
         }
         else if (special == 2)
@@ -2120,16 +2173,19 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 if(special > 0) {
                     imgSp = new Texture("data/samsung-white/sp" + special + ".png");
                 }
-                batch.draw(imgSp, (158 - ani_step * 3)*SGH_SCALE_RATIO, 160*SGH_SCALE_RATIO-imgSp.getHeight());
+                //batch.draw(imgSp, (158 - ani_step * 3)*SGH_SCALE_RATIO, 160*SGH_SCALE_RATIO-imgSp.getHeight());
+                drawFitScreen(imgSp, (158 - ani_step * 3)*SGH_SCALE_RATIO, 160*SGH_SCALE_RATIO-imgSp.getHeight()*hd_ratio);
             }
         }
         else if ((special == 3) && (ani_step <= 45)) {
             if(imgSp == null) {
                 imgSp = new Texture("data/samsung-white/sp" + special + ".png");
             }
-            batch.draw(imgSp, (168 - ani_step * 3)*SGH_SCALE_RATIO, 160*SGH_SCALE_RATIO-imgSp.getHeight());
+            //batch.draw(imgSp, (168 - ani_step * 3)*SGH_SCALE_RATIO, 160*SGH_SCALE_RATIO-imgSp.getHeight());
+            drawFitScreen(imgSp, (168 - ani_step * 3)*SGH_SCALE_RATIO, 160*SGH_SCALE_RATIO-imgSp.getHeight()*hd_ratio);
         }
-        batch.draw(hero.getImage(), hero.position.x * 5 * SGH_SCALE_RATIO, BOTTOM_SPACE+ui.getHeight(), hero.getImage().getWidth(), hero.getImage().getHeight());
+        //batch.draw(hero.getImage(), hero.position.x * 5 * SGH_SCALE_RATIO, BOTTOM_SPACE+ui.getHeight(), hero.getImage().getWidth(), hero.getImage().getHeight());
+        drawFitScreen(hero.getImage(), hero.position.x * 5 * SGH_SCALE_RATIO, BOTTOM_SPACE+ui.getHeight()*hd_ratio);
     }
 
     public void make_e_num(int paramInt1, int paramInt2)
@@ -2315,32 +2371,43 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         {
             // setColor(10173); // #0027bd can use light blue
             fillRect(0, 40*SGH_SCALE_RATIO, SCREEN_WIDTH, 60*SGH_SCALE_RATIO, 1);
-            batch.draw(imgSpecial[0], 44*SGH_SCALE_RATIO, 90*SGH_SCALE_RATIO);
-            batch.draw(imgSpecial[1], 44*SGH_SCALE_RATIO, 99*SGH_SCALE_RATIO);
+            //batch.draw(imgSpecial[0], 44*SGH_SCALE_RATIO, 90*SGH_SCALE_RATIO);
+            drawFitScreen(imgSpecial[0], 44*SGH_SCALE_RATIO, 90*SGH_SCALE_RATIO);
+            //batch.draw(imgSpecial[1], 44*SGH_SCALE_RATIO, 99*SGH_SCALE_RATIO);
+            drawFitScreen(imgSpecial[1], 44*SGH_SCALE_RATIO, 99*SGH_SCALE_RATIO);
         }
         else if (ani_step == 8)
         {
-            batch.draw(imgSpecial[0], 44*SGH_SCALE_RATIO, 90*SGH_SCALE_RATIO);
-            batch.draw(imgSpecial[1], 48*SGH_SCALE_RATIO, 99*SGH_SCALE_RATIO);
+            //batch.draw(imgSpecial[0], 44*SGH_SCALE_RATIO, 90*SGH_SCALE_RATIO);
+            drawFitScreen(imgSpecial[0], 44*SGH_SCALE_RATIO, 90*SGH_SCALE_RATIO);
+            //batch.draw(imgSpecial[1], 48*SGH_SCALE_RATIO, 99*SGH_SCALE_RATIO);
+            drawFitScreen(imgSpecial[1], 48*SGH_SCALE_RATIO, 99*SGH_SCALE_RATIO);
         }
         else if (ani_step == 16)
         {
-            batch.draw(imgSpecial[0], 44*SGH_SCALE_RATIO, 90*SGH_SCALE_RATIO);
-            batch.draw(imgSpecial[1], 51*SGH_SCALE_RATIO, 99*SGH_SCALE_RATIO);
+            //batch.draw(imgSpecial[0], 44*SGH_SCALE_RATIO, 90*SGH_SCALE_RATIO);
+            drawFitScreen(imgSpecial[0], 44*SGH_SCALE_RATIO, 90*SGH_SCALE_RATIO);
+            //batch.draw(imgSpecial[1], 51*SGH_SCALE_RATIO, 99*SGH_SCALE_RATIO);
+            drawFitScreen(imgSpecial[1], 51*SGH_SCALE_RATIO, 99*SGH_SCALE_RATIO);
         }
         else if (ani_step == 23)
         {
-            batch.draw(imgSpecial[0], 44*SGH_SCALE_RATIO, 90*SGH_SCALE_RATIO);
-            batch.draw(imgSpecial[1], 54*SGH_SCALE_RATIO, 99*SGH_SCALE_RATIO);
+            //batch.draw(imgSpecial[0], 44*SGH_SCALE_RATIO, 90*SGH_SCALE_RATIO);
+            drawFitScreen(imgSpecial[0], 44*SGH_SCALE_RATIO, 90*SGH_SCALE_RATIO);
+            //batch.draw(imgSpecial[1], 54*SGH_SCALE_RATIO, 99*SGH_SCALE_RATIO);
+            drawFitScreen(imgSpecial[1], 54*SGH_SCALE_RATIO, 99*SGH_SCALE_RATIO);
         }
         else if (ani_step == 30)
         {
-            batch.draw(imgSpecial[0], 44*SGH_SCALE_RATIO, 90*SGH_SCALE_RATIO);
-            batch.draw(imgSpecial[1], 55*SGH_SCALE_RATIO, 99*SGH_SCALE_RATIO);
+            //batch.draw(imgSpecial[0], 44*SGH_SCALE_RATIO, 90*SGH_SCALE_RATIO);
+            drawFitScreen(imgSpecial[0], 44*SGH_SCALE_RATIO, 90*SGH_SCALE_RATIO);
+            //batch.draw(imgSpecial[1], 55*SGH_SCALE_RATIO, 99*SGH_SCALE_RATIO);
+            drawFitScreen(imgSpecial[1], 55*SGH_SCALE_RATIO, 99*SGH_SCALE_RATIO);
         }
         else if (ani_step == 37)
         {
-            batch.draw(imgSpecial[2], 58*SGH_SCALE_RATIO, 98*SGH_SCALE_RATIO);
+            //batch.draw(imgSpecial[2], 58*SGH_SCALE_RATIO, 98*SGH_SCALE_RATIO);
+            drawFitScreen(imgSpecial[2], 58*SGH_SCALE_RATIO, 98*SGH_SCALE_RATIO);
         }
         else if (ani_step == 50)
         {
@@ -2387,7 +2454,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             // setColor(16775065); // FFF799 light yellow
             fillRect(118*SGH_SCALE_RATIO, 49*SGH_SCALE_RATIO, 8*SGH_SCALE_RATIO, 8*SGH_SCALE_RATIO, 2);
             if (hero.wp != 0) {
-                batch.draw(this.imgItem[hero.wp], 122*SGH_SCALE_RATIO, 49*SGH_SCALE_RATIO + BOTTOM_SPACE);
+                //batch.draw(this.imgItem[hero.wp], 122*SGH_SCALE_RATIO, 49*SGH_SCALE_RATIO + BOTTOM_SPACE);
+                drawFitScreen(this.imgItem[hero.wp], 122*SGH_SCALE_RATIO, 49*SGH_SCALE_RATIO + BOTTOM_SPACE);
             }
         }
         if (hero.mana != 0)
@@ -2561,12 +2629,12 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
          MPlay(3);
     }
-    public void fillRect(int x, int y, int width, int height, int color) {
+    public void fillRect(float x, float y, float width, float height, int color) {
         // Hard code default width x height of color img: 12x12 px
-        int scaleY = height / 12;
-        int scaleX = width / 12;
+        float scaleY = height / 12*hd_ratio;
+        float scaleX = width / 12*hd_ratio;
         // (Texture, float x, float y, float originX, float originY, float width, float height, float scaleX, float scaleY, float rotation, int srcX, int srcY, int srcWidth, int srcHeight, boolean flipX, boolean flipY)
-        batch.draw(imgColor[color], x, y, 0, 0, imgColor[color].getWidth(), imgColor[color].getHeight(), scaleX, scaleY, 0, 0, 0, imgColor[color].getWidth()*scaleX, imgColor[color].getHeight()*scaleY, false, false);
+        batch.draw(imgColor[color], x, y, 0, 0, imgColor[color].getWidth(), imgColor[color].getHeight(), scaleX, scaleY, 0, 0, 0, (int)(imgColor[color].getWidth()*scaleX), (int)(imgColor[color].getHeight()*scaleY), false, false);
     }
     public void drawRect(int x, int y, int width, int height, int color) {
 
@@ -2695,6 +2763,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     public void call_vib(int paramInt) {
         // if (this.v_mode == 1) { }
         Gdx.input.vibrate(paramInt*1000);
+    }
+    public void drawFitScreen(Texture texture, float x, float y) {
+        batch.draw(texture, x, y, 0, 0, texture.getWidth(), texture.getHeight(), hd_ratio, hd_ratio, 0, 0, 0, texture.getWidth(), texture.getHeight(), false, false);
     }
 
 }
