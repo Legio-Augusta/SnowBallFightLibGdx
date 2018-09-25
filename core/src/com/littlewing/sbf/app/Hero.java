@@ -6,7 +6,9 @@ package com.littlewing.sbf.app;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Rectangle;
@@ -46,8 +48,9 @@ public class Hero {
     public Texture[] imgHero;
     private Sprite sprite;
     public Item item;
-    private Music music;
+    // private Music music;
     Preferences prefs = Gdx.app.getPreferences("gamestate");
+    public static AssetManager manager;
 
     public Hero(Vector2 pos) {
         this.position = pos;
@@ -60,6 +63,12 @@ public class Hero {
             imgHero[m] = new Texture("data/samsung-white/hero" + m + ".png");
         }
         mana = getPrefs().getInteger("mana", 20);
+
+        manager = new AssetManager();
+        manager.load("data/audio/4_oh_oh.wav", Sound.class);
+        manager.load("data/audio/6_snow_fly.wav", Sound.class);
+
+        manager.finishLoading();
     }
 
     public Texture getImage() {
@@ -201,14 +210,16 @@ public class Hero {
                 }
             }
             // MPlay(4);
-            Gdx.input.vibrate(1*1000);
+            Gdx.input.vibrate(500);
+            this.manager.get("data/audio/4_oh_oh.wav", Sound.class).play();
+            /**
             music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/four.mp3"));
             if(music != null) {
                 if (!music.isPlaying()) {
                     music.play();
                     music.setLooping(false);
                 }
-            }
+            }*/
         }
     }
 
@@ -225,13 +236,8 @@ public class Hero {
         h_timer = 0;
         pw_up = 2;
         // MPlay(2);
-        music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/fire.mp3"));
-        if(music != null) {
-            if (!music.isPlaying()) {
-                music.play();
-                music.setLooping(false);
-            }
-        }
+        this.manager.get("data/audio/6_snow_fly.wav", Sound.class).play();
+        // music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/fire.mp3"));
     }
     protected Preferences getPrefs() {
         if(prefs==null){

@@ -67,7 +67,7 @@ public class VictoryScreen extends DefaultScreen {
         batch.draw(snowWhiteBg, 0, BOTTOM_SPACE+ui.getHeight()*hd_ratio, snowBoardHeight, snowBoardHeight);
         //batch.draw(imgBack, 0, VIEW_PORT_HEIGHT+BOTTOM_SPACE/2);
         //batch.draw(ui, 0, BOTTOM_SPACE);
-//
+
         //batch.draw(imgVictory, SCREEN_WIDTH/6, VIEW_PORT_HEIGHT/2+BOTTOM_SPACE);
         //batch.draw(imgHero_v, SCREEN_WIDTH/2 - imgHero_v.getWidth()/2, VIEW_PORT_HEIGHT/2);
         //batch.draw(imgV, SCREEN_WIDTH/2+16, VIEW_PORT_HEIGHT/2+imgHero_v.getHeight()/4);

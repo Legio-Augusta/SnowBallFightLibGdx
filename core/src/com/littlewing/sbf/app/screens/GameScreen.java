@@ -3,7 +3,9 @@ package com.littlewing.sbf.app.screens;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -159,7 +161,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private Texture touch_pad_knob;
     BitmapFont font;
     private Music music;
-    // Ray collisionRay;
+    public static AssetManager manager;
+    private String current_music = "";
 
     public GameScreen(Game game, int param_screen, int param_school) {
         super(game);
@@ -186,10 +189,20 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         stage = last_stage;
         school = param_school;
 
-        //camera = new OrthographicCamera();
-        //camera.setToOrtho(true, SCREEN_WIDTH, SCREEN_HEIGHT);
+        manager = new AssetManager();
+        // TODO edit sound for louder; investigate sound vs music
+        // Some player like notation player3, audacity... that contribute to make these mmf back to live.
+        manager.load("data/audio/night_opening.wav", Sound.class); // Music.class
+        manager.load("data/audio/1_use_item.wav", Sound.class);
+        manager.load("data/audio/6_snow_fly.wav", Sound.class);
+        manager.load("data/audio/5_hit.wav", Sound.class);
+        manager.load("data/audio/4_oh_oh.wav", Sound.class);
+        manager.load("data/audio/special.mp3", Sound.class);
+        manager.load("data/audio/lose.mp3", Sound.class);
+        manager.load("data/audio/victory.mp3", Sound.class);
 
-        // Calculate global var width/height, view port ...
+        manager.finishLoading();
+
         create();
         this.screen = param_screen;
 
@@ -1654,7 +1667,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         // convert touch event to key event (getGameAction)
         touchPoint.set(Gdx.input.getX(),Gdx.input.getY(), 0);
 
-        Gdx.app.log("INFO", "touch " + touchPoint.x + " y "+ (SCREEN_HEIGHT-touchPoint.y) + " bound x "+ upBtnRect.toString() + " saved "+ downBtnRect.toString());
+        // Gdx.app.log("INFO", "touch " + touchPoint.x + " y "+ (SCREEN_HEIGHT-touchPoint.y) + " bound x "+ upBtnRect.toString() + " saved "+ downBtnRect.toString());
         game_action = getGameAction();
 
         if(isTouchedSpeedUp()) { // smaller value, shorter sleep
@@ -1795,6 +1808,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         return OverlapTester.pointInRectangle(optionBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
     }
     protected boolean isTouchedOK() {
+        Gdx.input.vibrate(5);
         Rectangle textureBounds=new Rectangle(SCREEN_WIDTH-(fireBtnTexture.getWidth()+50)*hd_ratio, SCREEN_HEIGHT-(50+fireBtnTexture.getHeight())*hd_ratio, fireBtnTexture.getWidth()*hd_ratio,fireBtnTexture.getHeight()*hd_ratio);
         return textureBounds.contains(touchPoint.x, touchPoint.y);
     }
@@ -2734,30 +2748,31 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         String str = null;
         // if (s_play == 1)
         if (paramInt == 0) {
-            str = "9.mid";
+            str = "data/audio/night_opening.wav"; // 9.mmf
         } else if (paramInt == 1) {
-            str = "one.mid"; // /1.mmf
+            str = "data/audio/1_use_item.wav"; // /1.mmf
         } else if (paramInt == 2) {
-            str = "lose.mp3"; // /6.mmf
+            str = "data/audio/6_snow_fly.wav"; // /6.mmf
         } else if (paramInt == 3) {
-            str = "hit.mp3"; // /5.mmf
+            str = "data/audio/5_hit.wav"; // /5.mmf
         } else if (paramInt == 4) {
-            str = "four.mp3"; // /4.mmf
+            str = "data/audio/4_oh_oh.wav"; // /4.mmf
         } else if (paramInt == 5) {
-            str = "special.mp3"; // /8.mmf
+            str = "data/audio/special.mp3"; // /8.mmf
         } else if (paramInt == 6) {
-            str = "lose.mp3"; // /3.mmf
+            str = "data/audio/lose.mp3"; // /3.mmf
         } else if (paramInt == 7) {
-            str = "victory.mp3"; // 0.mid
+            str = "data/audio/victory.mp3"; // 0.mmf
         }
-        music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/"+str));
-        music.setVolume(0.5f);
+        // music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/"+str));
+        this.manager.get(str, Sound.class).play();
+        /** music.setVolume(0.5f);
         if(music != null) {
             if (!music.isPlaying()) {
                 music.play();
                 music.setLooping(false);
             }
-        }
+        }*/
     }
 
     public void call_vib(int paramInt) {

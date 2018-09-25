@@ -20,6 +20,7 @@ public class LogoScreen extends DefaultScreen {
     SpriteBatch batch;
     float time = 0;
     public Music music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/9.mid"));
+    // public Music music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/night_opening.wav"));
 
     public LogoScreen(Game game) {
         super(game);
