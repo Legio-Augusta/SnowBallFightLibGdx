@@ -13,15 +13,15 @@ android {
             jniLibs.srcDirs = ['libs']
         }
 
-        instrumentTest.setRoot('tests')
+        androidTest.setRoot('tests')
     }
     buildToolsVersion '27.0.3'
     defaultConfig {
-        applicationId "wait4u.littlewing.snowballfight"
+        applicationId "com.littlewing.sbf.app"
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 1
-        versionName "1.0"
+        versionCode 3
+        versionName "1.2a"
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -61,7 +61,7 @@ task run(type: Exec) {
 idea {
     module {
         sourceDirs += file("src");
-        scopes = [ COMPILE: [plus:[project.configurations.compile]]]        
+        scopes = [ COMPILE: [plus:[project.configurations.compile]]]
 
         iml {
             withXml {
