@@ -16,20 +16,22 @@ buildscript {
         androidGradleToolsVersion = json.androidGradleToolVersion
         gwtVersion = json.gwtVersion
         gwtGradleVersion = json.gwtPluginVersion
+        roboVMVersion = json.robovmVersion
     }
 
     repositories {
-        jcenter()
+        mavenLocal()
         mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        jcenter()
         google()
     }
 
     dependencies {
         classpath "de.richsource.gradle.plugins:gwt-gradle-plugin:0.6"
-        classpath 'com.android.tools.build:gradle:3.1.3'
-        classpath 'org.codehaus.groovy:gradle-groovy-android-plugin:0.3.5'
-        classpath "com.excelsiorjet:excelsior-jet-gradle-plugin:0.7.0"
+        classpath 'com.android.tools.build:gradle:3.4.1'
+        classpath 'com.mobidevelop.robovm:robovm-gradle-plugin:2.3.8'
     }
 }
 
@@ -49,14 +51,6 @@ allprojects {
     }
 }
 
-project(":core") {
-    apply plugin: "java"
-
-    dependencies {
-        compile "com.badlogicgames.gdx:gdx:$gdxVersion"
-    }
-}
-
 project(":android") {
     apply plugin: "android"
 
@@ -68,5 +62,30 @@ project(":android") {
         natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86"
         natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi"
         natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
+    }
+}
+
+project(":ios") {
+    apply plugin: "java-library"
+    apply plugin: "robovm"
+
+
+    dependencies {
+        implementation project(":core")
+        api "com.mobidevelop.robovm:robovm-rt:$roboVMVersion"
+        api "com.mobidevelop.robovm:robovm-cocoatouch:$roboVMVersion"
+        api "com.badlogicgames.gdx:gdx-backend-robovm:$gdxVersion"
+        api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-ios"
+        api "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-ios"
+
+    }
+}
+
+project(":core") {
+    apply plugin: "java"
+
+    dependencies {
+        compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+        compile "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
     }
 }
