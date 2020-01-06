@@ -19,7 +19,7 @@ public class LogoScreen extends DefaultScreen {
     Texture logo;
     SpriteBatch batch;
     float time = 0;
-    public Music music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/9.mid"));
+    //public Music music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/9.mid"));
     // public Music music = Gdx.audio.newMusic(Gdx.files.internal("data/audio/night_opening.wav"));
 
     public LogoScreen(Game game) {
@@ -41,12 +41,12 @@ public class LogoScreen extends DefaultScreen {
         int SCREEN_HEIGHT = Gdx.graphics.getHeight();
         int SCREEN_WIDTH = Gdx.graphics.getWidth();
 
-        if(music != null) {
-            if(!music.isPlaying()) {
-                music.play();
-                music.setLooping(false);
-            }
-        }
+        // if(music != null) {
+        //     if(!music.isPlaying()) {
+        //         music.play();
+        //         music.setLooping(false);
+        //     }
+        // }
         batch.begin();
         //batch.draw(logo, 0, 400);
         float hd_ratio = (float)SCREEN_WIDTH/(float)logo.getWidth();
@@ -62,7 +62,7 @@ public class LogoScreen extends DefaultScreen {
     public void hide() {
         batch.dispose();
         logo.dispose();
-        music.dispose();
+        //music.dispose();
     }
     public void resize(int width, int height) {
         batch.getProjectionMatrix().setToOrtho2D(0, 0, width, height);
