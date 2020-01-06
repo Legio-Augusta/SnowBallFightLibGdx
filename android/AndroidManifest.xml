@@ -12,16 +12,6 @@
         android:icon="@drawable/ic_launcher"
         android:label="SnowBallFight"
         android:theme="@style/AppTheme" >
-        <activity
-            android:name="com.littlewing.sbf.app.AndroidLauncher"
-            android:label="Pax Britannica"
-            android:configChanges="keyboard|keyboardHidden|orientation"
-            android:screenOrientation="portrait" >
-            <intent-filter>
-                <category android:name="android.intent.category.LAUNCHER" />
-                <!--<action android:name="android.intent.action.MAIN" />-->
-            </intent-filter>
-        </activity>
 
         <activity
             android:name="com.littlewing.sbf.app.SnowBallFightLauncher"
