@@ -51,7 +51,6 @@ allprojects {
     }
 }
 
-
 project(":android") {
     apply plugin: "android"
 
@@ -65,6 +64,20 @@ project(":android") {
         natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
     }
 }
+
+//project(":ios") {
+//    apply plugin: "java-library"
+//    apply plugin: "robovm"
+//
+//    dependencies {
+//        implementation project(":core")
+//        api "com.mobidevelop.robovm:robovm-rt:$roboVMVersion"
+//        api "com.mobidevelop.robovm:robovm-cocoatouch:$roboVMVersion"
+//        api "com.badlogicgames.gdx:gdx-backend-robovm:$gdxVersion"
+//        api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-ios"
+//        api "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-ios"
+//    }
+//}
 
 project(":core") {
     apply plugin: "java"

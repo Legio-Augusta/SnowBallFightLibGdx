@@ -14,7 +14,7 @@
         android:theme="@style/AppTheme" >
 
         <activity
-            android:name="com.littlewing.sbf.app.SnowBallFightLauncher"
+            android:name="com.littlewing.sbf.game.SnowBallFightJ2MELauncher"
             android:label="SnowBallFight"
             android:configChanges="keyboard|keyboardHidden|orientation"
             android:screenOrientation="portrait" >
