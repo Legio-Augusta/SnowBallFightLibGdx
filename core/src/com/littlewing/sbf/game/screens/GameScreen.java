@@ -9,6 +9,7 @@ import java.util.Random;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -287,7 +288,29 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        this.key_code = 0;
+        batch.begin();
 
+        touchPoint.set(Gdx.input.getX(),Gdx.input.getY(), 0);
+
+        Gdx.app.log("DEBUG", "touch " + touchPoint.x + " y "+ (SCREEN_HEIGHT-touchPoint.y) + " key_code "+ this.key_code);
+        game_action = getGameAction(pointer);
+
+        if (isTouchedMenuLeft()) {
+            this.key_code = KEY_LEFT_MENU;
+            Gdx.input.vibrate(5);
+        } else if (isTouchedMenuRight()) {
+            this.key_code = KEY_RIGHT_MENU;
+            Gdx.input.vibrate(5);
+        } else if (isTouchedNum3()) {
+            this.key_code = 57;
+        }
+
+        Gdx.input.vibrate(5);
+        this.key_code = 57;
+
+        keyPressed(this.key_code);
+        batch.end();
 
         return false;
     }
@@ -321,7 +344,20 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     @Override
     public void render(float delta) {
+        Gdx.gl20.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        camera.position.x = SCREEN_WIDTH/2;
+        camera.position.y = SCREEN_HEIGHT/2;
+        camera.update();
 
+        batch.enableBlending();
+        batch.begin();
+
+        // run();
+
+        // drawTouchPad();
+        drawUI();
+        batch.end();
     }
 
     @Override
@@ -350,7 +386,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
         Gdx.input.setInputProcessor(this); // TODO use an InputProcessor object
 
-        // loadTextures();
+        loadTextures();
         // this.sbfme.startApp();
 
         font = new BitmapFont();
@@ -556,6 +592,38 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
 
         return 0;
+    }
+
+    protected void drawUI() {
+        // It seem single image can have it's own event Listener such as: touchDown/Up; See bellow
+        // https://github.com/BrentAureli/ControllerDemo/blob/master/core/src/com/brentaureli/overlaydemo/Controller.java
+        // TODO use custom IMAGE addEventListener for more UI refine. Can image used as Texture ?
+        batch.draw(fireBtnTexture, SCREEN_WIDTH-(50+fireBtnTexture.getWidth())*SCALE, (int)(50*SCALE), fireBtnTexture.getWidth()*SCALE, fireBtnTexture.getHeight()*SCALE);
+        batch.draw(imgKeyNum3, SCREEN_WIDTH-(50+fireBtnTexture.getWidth()+fireBtnTexture.getWidth()/2 + imgKeyNum3.getWidth())*SCALE, (40 + imgSpeedUp.getHeight())*SCALE, imgKeyNum3.getWidth()*SCALE, imgKeyNum3.getHeight()*SCALE);
+        batch.draw(imgSpeedUp, SCREEN_WIDTH-(50+fireBtnTexture.getWidth()+fireBtnTexture.getWidth()/2 + imgSpeedUp.getWidth())*SCALE, 20*SCALE, imgSpeedUp.getWidth()*SCALE, imgSpeedUp.getHeight()*SCALE);
+        batch.draw(imgSpeedDown, SCREEN_WIDTH-(50+fireBtnTexture.getWidth()+fireBtnTexture.getWidth()/2 + 2*imgSpeedDown.getWidth())*SCALE, 20*SCALE, imgSpeedDown.getWidth()*SCALE, imgSpeedDown.getHeight()*SCALE);
+        batch.draw(touch_pad, 20*SCALE, 20*SCALE, touch_pad.getWidth()*SCALE, touch_pad.getHeight()*SCALE);
+        batch.draw(touch_pad_knob, (20+touch_pad.getWidth()/2-touch_pad_knob.getWidth()/2)*SCALE, (20+touch_pad.getHeight()/2-touch_pad_knob.getHeight()/2)*SCALE, touch_pad_knob.getWidth()*SCALE, touch_pad_knob.getHeight()*SCALE);
+    }
+
+    private void loadTextures() {
+        fireBtnTexture = new Texture("data/samsung-white/fire.png");
+
+        /**
+         * #0 for red
+         * #1 for light blue, #3 light blue 2 6DCFF6
+         * #2 for light yellow, #4 gray 93959A #5 for white
+         */
+        imgColor = new Texture[6];
+        for (int i = 0; i < 6; i++) {
+            imgColor[i] = new Texture("data/samsung-white/color-" + i + ".png");
+        }
+
+        imgKeyNum3 = new Texture("data/samsung-white/use_item_btn.png");
+        imgSpeedUp = new Texture("data/samsung-white/right_btn.png");
+        imgSpeedDown = new Texture("data/samsung-white/left_btn.png");
+        touch_pad = new Texture("data/gui/touchBackground.png");
+        touch_pad_knob = new Texture("data/gui/touchKnob.png");
     }
 
     // end Android GDX
