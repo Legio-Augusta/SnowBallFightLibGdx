@@ -96,6 +96,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private Texture imgLose;
     private Texture imgHero_l;
     private Texture imgStage_num;
+    private Texture ui; // Customized
+
     private Texture[] imgStage;
     private int stage;
     private int last_stage = 31; // orig.11
@@ -201,6 +203,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     Rectangle leftBtnRect = new Rectangle(20*SCALE, (20+(200/6))*SCALE, 70*SCALE, 140*SCALE);
     Rectangle rightBtnRect = new Rectangle((20+(400/3))*SCALE, (20+(200/6))*SCALE, 2*70*SCALE, 140*SCALE);
     Rectangle optionBtnRect = new Rectangle(SCREEN_WIDTH/2+150*SCALE, SCREEN_HEIGHT/8, SCREEN_WIDTH/2-180*SCALE, 70*SCALE);
+//    Rectangle leftMenuBtn = new Rectangle(SCREEN_WIDTH-(275+400)*SCALE, 20*SCALE, 200*SCALE, 100*SCALE);
     Rectangle leftMenuBtn = new Rectangle(SCREEN_WIDTH-(275+400)*SCALE, 20*SCALE, 200*SCALE, 100*SCALE);
     Rectangle rightMenuBtn = new Rectangle(SCREEN_WIDTH-(275+200)*SCALE, 20*SCALE, 200*SCALE, 100*SCALE);
 
@@ -254,8 +257,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         this.item_price[5] = 12;
         this.item_price[6] = 10;
         this.item_price[7] = 12;
-        printScore("hero", 0);
-        printScore("config", 1);
+//        printScore("hero", 0);
+//        printScore("config", 1);
         this.item_slot[0] = 3;
         this.item_slot[1] = 5;
         this.stage = this.last_stage;
@@ -267,6 +270,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         create();
 
         touchPoint = new Vector3();
+
     }
 
     // Android GDX
@@ -288,13 +292,13 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        this.key_code = 0;
+        // this.key_code = 0;
         batch.begin();
 
         touchPoint.set(Gdx.input.getX(),Gdx.input.getY(), 0);
 
-        Gdx.app.log("DEBUG", "touch " + touchPoint.x + " y "+ (SCREEN_HEIGHT-touchPoint.y) + " key_code "+ this.key_code);
-        game_action = getGameAction(pointer);
+        Gdx.app.log("DEBUG", "touch " + touchPoint.x + " y "+ (SCREEN_HEIGHT-touchPoint.y) + " key_code "+ this.key_code + " scrn "+ this.screen);
+        game_action = getGameAction2(pointer);
 
         if (isTouchedMenuLeft()) {
             this.key_code = KEY_LEFT_MENU;
@@ -309,7 +313,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         Gdx.input.vibrate(5);
         this.key_code = 57;
 
-        keyPressed(this.key_code);
+        keyPressed();
         batch.end();
 
         return false;
@@ -317,7 +321,31 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        // if(isTouchedMenuLeft() || isTouchedMenuRight() || isTouchedOK() || isTouchedUp() || isTouchedDown() || isTouchedLeft() || isTouchedRight()) {
+        if(isTouchedLeft() || isTouchedRight()) {
+            // Only apply tricky way on fighting scene
+//            if(this.archAngel.screen == 25) {
+//                if (this.archAngel.mainGameScreen.gamestage1 == 1) {
+                    // normal play not boss scene
+                    // Use key_code 53 (NUM5 ~ fire) for clear key_code, action LEFT
+                    this.key_code = 53; // Fix me This is tricky way to implement touch & hold
+                    keyPressed();
+                    this.game_action = 0;
+//                }
+//            }
+        }
 
+        if(isTouchedUp() || isTouchedDown()) {
+//            if(this.archAngel.mainGameScreen.gamespeed <= 140 && this.archAngel.mainGameScreen.gamespeed >= 20) {
+//                if (this.archAngel.mainGameScreen.gamestage1 == 1) {
+                    // normal play not boss scene
+                    // Use key_code 53 (NUM5 ~ fire) for clear key_code, action LEFT
+                    this.key_code = 53; // Fix me This is tricky way to implement touch & hold
+                    keyPressed();
+                    this.game_action = 0;
+//                }
+//            }
+        }
 
         return false;
     }
@@ -392,6 +420,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         font = new BitmapFont();
         font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         font.getData().setScale(6);
+        Gdx.app.log("DEBUG", " on create ");
     }
 
     public void resize(int width, int height) {
@@ -400,26 +429,26 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     }
 
     protected boolean isTouchedUp() {
-        // this.key_code = -1;
+        this.key_code = -1;
         return OverlapTester.pointInRectangle(upBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
     }
     protected boolean isTouchedDown() {
-        // this.key_code = -2;
+        this.key_code = -2;
         return OverlapTester.pointInRectangle(downBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
     }
     protected boolean isTouchedLeft() {
-        // this.key_code = -3;
+        this.key_code = -3;
         return OverlapTester.pointInRectangle(leftBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
     }
     protected boolean isTouchedRight() {
-        // this.key_code = -4;
+        this.key_code = -4;
         return OverlapTester.pointInRectangle(rightBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
     }
     protected boolean isTouchedOption() {
         return OverlapTester.pointInRectangle(optionBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
     }
     protected boolean isTouchedOK() {
-        // this.key_code = KEY_OK;
+        this.key_code = KEY_OK;
         Rectangle textureBounds = new Rectangle(SCREEN_WIDTH-(fireBtnTexture.getWidth()+50)*SCALE, SCREEN_HEIGHT-(50+fireBtnTexture.getHeight())*SCALE, fireBtnTexture.getWidth()*SCALE,fireBtnTexture.getHeight()*SCALE);
         return textureBounds.contains(touchPoint.x, touchPoint.y);
     }
@@ -428,11 +457,12 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         return textureBounds.contains(touchPoint.x, touchPoint.y);
     }
     protected boolean isTouchedMenuLeft() {
-        // this.key_code = KEY_LEFT_MENU;
+        Gdx.app.log("DEBUG Clip", "x: " + leftMenuBtn.x + " y " + leftMenuBtn.y + " w " + leftMenuBtn.getWidth() + " h " + leftMenuBtn.getHeight());
+        this.key_code = KEY_LEFT_MENU;
         return OverlapTester.pointInRectangle(leftMenuBtn, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
     }
     protected boolean isTouchedMenuRight() {
-        // this.key_code = KEY_RIGHT_MENU;
+        this.key_code = KEY_RIGHT_MENU;
         return OverlapTester.pointInRectangle(rightMenuBtn, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
     }
 
@@ -563,7 +593,15 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         font.draw(paramGraphics, paramString, (int)(paramInt1 * MOBI_SCL), position_y);
     }
 
-    public int getGameAction(int pointer) {
+    /*
+     * Simulate J2ME keyCode
+     * https://docs.oracle.com/javame/config/cldc/ref-impl/midp2.0/jsr118/constant-values.html#javax.microedition.lcdui.Canvas.UP
+     * */
+    public int getGameAction(int keyCode) {
+        return game_action;
+    }
+
+    public int getGameAction2(int pointer) {
         if(isTouchedUp()) {
             Gdx.input.vibrate(5);
             this.key_code = -1;
@@ -606,7 +644,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         batch.draw(touch_pad_knob, (20+touch_pad.getWidth()/2-touch_pad_knob.getWidth()/2)*SCALE, (20+touch_pad.getHeight()/2-touch_pad_knob.getHeight()/2)*SCALE, touch_pad_knob.getWidth()*SCALE, touch_pad_knob.getHeight()*SCALE);
     }
 
-    private void loadTextures() {
+    private void loadTexturesOld() {
         fireBtnTexture = new Texture("data/samsung-white/fire.png");
 
         /**
@@ -622,6 +660,67 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         imgKeyNum3 = new Texture("data/samsung-white/use_item_btn.png");
         imgSpeedUp = new Texture("data/samsung-white/right_btn.png");
         imgSpeedDown = new Texture("data/samsung-white/left_btn.png");
+        touch_pad = new Texture("data/gui/touchBackground.png");
+        touch_pad_knob = new Texture("data/gui/touchKnob.png");
+    }
+
+    private void loadTextures() {
+        fireBtnTexture = new Texture("data/samsung-white/fire.png");
+
+        if(school <= 0) {
+            school = 1;
+        }
+        imgBack = new Texture("data/samsung-white/back"+school+".png");
+        imgAl = new Texture("data/samsung-white/al.png");
+        imgShadow = new Texture("data/samsung-white/shadow0.png");
+        imgPok = new Texture("data/samsung-white/pok.png");
+        imgPPang = new Texture("data/samsung-white/bbang0.png");
+        imgPPang1 = new Texture("data/samsung-white/bbang1.png");
+        imgH_ppang = new Texture("data/samsung-white/h_bbang.png");
+        imgSnow_g = new Texture("data/samsung-white/snow_gauge.png");
+        imgPwd = new Texture("data/samsung-white/power.png");
+
+        // TODO init Item object item value, not just Texture
+        imgItem = new Texture[9];
+        for (int m = 0; m < 9; m++) {
+            imgItem[m] = new Texture("data/samsung-white/item" + m + ".png");
+        }
+        imgItem_hyo = new Texture[2];
+        imgItem_hyo[0] = new Texture("data/samsung-white/hyo0.png");
+        imgItem_hyo[1] = new Texture("data/samsung-white/hyo1.png");
+
+        imgSpecial = new Texture[3];
+        for (int i = 0; i < 3; i++) {
+            imgSpecial[i] = new Texture("data/samsung-white/special" + i + ".png");
+        }
+        // TODO use texture region
+        imgEffect = new Texture[2];
+        imgEffect[0] = new Texture("data/samsung-white/effect0.png");
+        imgEffect[1] = new Texture("data/samsung-white/effect1.png");
+
+        if(tmp_stage <= 8) {
+            tmp_stage = 1;
+        }
+        imgStage_num = new Texture("data/samsung-white/stage"+ tmp_stage + ".png"); // tmp_stage +
+        ui = new Texture("data/samsung-white/ui.png");  // h:160p (1080p)
+        imgStage = new Texture[5];
+        for (int i = 0; i < 5; i++) {
+            imgStage[i] = new Texture("data/samsung-white/word-" + i + ".png");
+        }
+
+        /**
+         * #0 for red
+         * #1 for light blue, #3 light blue 2 6DCFF6
+         * #2 for light yellow, #4 gray 93959A #5 for white
+         */
+        imgColor = new Texture[6];
+        for (int i = 0; i < 6; i++) {
+            imgColor[i] = new Texture("data/samsung-white/color-" + i + ".png");
+        }
+
+        imgKeyNum3 = new Texture("data/samsung-white/use_item_btn.png");
+        imgSpeedUp = new Texture("data/samsung-white/speed_up.png");
+        imgSpeedDown = new Texture("data/samsung-white/speed_down.png");
         touch_pad = new Texture("data/gui/touchBackground.png");
         touch_pad_knob = new Texture("data/gui/touchKnob.png");
     }
@@ -2333,11 +2432,12 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 }
             }
             else {
-                try
-                {
-                    Thread.sleep(100L);
-                }
-                catch (Exception localException2) {}
+                Gdx.app.log("DEBUG", "is there no one else?");
+//                try
+//                {
+//                    Thread.sleep(100L);
+//                }
+//                catch (Exception localException2) {}
             }
         }
     }
@@ -3233,8 +3333,16 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
     }
 
-    public void keyPressed(int paramInt)
+    public void keyPressed() // int paramInt J2ME simulate from virtual Droid/iOS keyboard
     {
+        int paramInt = this.key_code;
+        // this.screen = 3; // init
+        // paramInt = 35;
+
+        // this.m_mode = 4; // init game
+
+        this.screen = -1; // Init Logo screen
+
         int i;
         int j;
         if ((this.screen == 6) && (this.state == 1))
@@ -3460,6 +3568,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
         else if (this.screen == 3)
         {
+            Gdx.app.log("DEBUG", "kkk init");
+            Gdx.app.log("DEBUG", " game action " + getGameAction(paramInt));
             if (getGameAction(paramInt) == 1)
             {
                 j = this.h_y - 8;
@@ -3490,6 +3600,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             }
             else if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == -7))
             {
+                Gdx.app.log("DEBUG", "mmode " + this.m_mode);
+
                 if ((this.m_mode == 0) || (this.m_mode == 1))
                 {
                     loadImage(31);
@@ -3504,6 +3616,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     }
                     destroyImage(3);
                     this.message = "Loading";
+                    Gdx.app.log("DEBUG", "init game ...");
                     init_game(k);
                 }
             }
@@ -3749,13 +3862,13 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             // repaint();
             System.gc();
         }
-        else if (this.screen == -1)
+        else if (this.screen == -1) // TODO use constant // Logo start Screen LOGO_SCREEN
         {
             loadImage(-2);
             this.screen = -2;
             // repaint();
         }
-        else if (this.screen == -2)
+        else if (this.screen == -2) // SAMSUNG_FUNCLUB_SCREEN
         {
             loadImage(2);
             this.screen = 1;
@@ -3781,6 +3894,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             this.screen = 300;
             // repaint();
         }
+
     }
 
     public void MPlay(int paramInt)
@@ -3828,5 +3942,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     {
         this.p_mode = 1;
         this.d_gauge = 2;
+    }
+
+    private static class Const {
+        public static final String BAR_VALUE = "BAR";
+        public static final int LOGO_SCREEN = -1;
+        public static final int SAMSUNG_FUNCLUB_SCREEN = -2;
     }
 }
