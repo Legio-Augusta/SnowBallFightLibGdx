@@ -14,6 +14,10 @@ public class J2ME_API_Port {
     private static int VIEW_PORT_HEIGHT = (int)SCREEN_HEIGHT*3/4;
     private static int BOTTOM_SPACE = (int)(SCREEN_HEIGHT/8 + 20*MOBI_SCL); // 20 as Java phone reserved top bar shift y
 
+
+    // private static int SCREEN_HEIGHT = Gdx.graphics.getHeight();
+    float SCALE = (float)SCREEN_HEIGHT/1920;
+
     private Texture[] imgColor; // For fillRect with color; TODO color constant and add remain color png
 
     public J2ME_API_Port() {
@@ -139,6 +143,12 @@ public class J2ME_API_Port {
 
     public void drawImage(SpriteBatch batch, Texture image, int x, int y, int anchor_x) {
 
+        int img_height = (int)(image.getHeight()*SCALE);
+        int position_y = (int) ((MOBI_H - y -20)*MOBI_SCL - img_height + BOTTOM_SPACE); // anchor 20
+
+        // Fix me hard code position
+        // if(spriteIdx == 3) {} // && (paramInt1 == 3) // this.msr_media.equals("font")
+        batch.draw(image, (int)(x*MOBI_SCL), position_y, image.getWidth()*SCALE, image.getHeight()*SCALE); // 20 anchor
     }
 
 }
