@@ -36,11 +36,11 @@ public class TitleMenuScreen extends DefaultScreen {
     @Override
     public void show() {
         // TODO handle screen ratio
-        imgMM = new Texture("data/samsung-white/mm.png");
-        title = new Texture("data/samsung-white/title.png");
-        imgPl = new Texture("data/samsung-white/play.png");
-        imgBk = new Texture("data/samsung-white/bk.png");
-        samsung_blue = new Texture("data/samsung-white/samsung_blue.png");
+        imgMM = new Texture("data/sprites/mm.png");
+        title = new Texture("data/sprites/title.png");
+        imgPl = new Texture("data/sprites/play.png");
+        imgBk = new Texture("data/sprites/bk.png");
+        samsung_blue = new Texture("data/sprites/samsung_blue.png");
         batch = new SpriteBatch();
             }
 

@@ -8,7 +8,9 @@ import java.util.Random;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -97,6 +99,26 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private Texture imgHero_l;
     private Texture imgStage_num;
     private Texture ui; // Customized
+
+    // GDX added to fix J2ME
+
+    private Texture txt1;
+    private Texture txt2;
+    private Texture txt4;
+    private Texture txt4b;
+
+
+    private Texture title;
+    private Texture present;
+    private Texture sam_logo;
+    private Texture http1;
+    private Texture http2;
+    private Texture allClear;
+
+    private String current_music = "";
+    public int af = 1;
+    public static AssetManager manager;
+    // End GDX added to fix J2ME
 
     private Texture[] imgStage;
     private int stage;
@@ -208,6 +230,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     Rectangle rightMenuBtn = new Rectangle(SCREEN_WIDTH-(275+200)*SCALE, 20*SCALE, 200*SCALE, 100*SCALE);
 
     private int game_action = 0;
+
+    // Careful with key_code, it's different from Mobile brands, manufacturers
     private int key_code = 0;
     private static final int GAME_ACTION_OK = 8; // simulate KEY, gameAction in J2ME
     private static final int GAME_ACTION_LEFT = 2;
@@ -292,18 +316,13 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        // this.key_code = 0;
+        this.key_code = 0;
         batch.begin();
 
         touchPoint.set(Gdx.input.getX(),Gdx.input.getY(), 0);
 
         Gdx.app.log("DEBUG", "touch " + touchPoint.x + " y "+ (SCREEN_HEIGHT-touchPoint.y) + " key_code "+ this.key_code + " scrn "+ this.screen);
         game_action = getGameAction2(pointer);
-
-        Texture present = new Texture("data/samsung-white/present.png");
-        fireBtnTexture = new Texture("data/samsung-white/fire.png");
-        batch.draw(present, 100, 500, present.getWidth()*SCALE, present.getHeight()*SCALE);
-        batch.draw(present, 100, 300, fireBtnTexture.getWidth()*SCALE, fireBtnTexture.getHeight()*SCALE);
 
         if (isTouchedMenuLeft()) {
             this.key_code = KEY_LEFT_MENU;
@@ -402,7 +421,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         font = new BitmapFont();
         font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         font.getData().setScale(6);
-        this.dbg(" on create ");
     }
 
     public void resize(int width, int height) {
@@ -536,25 +554,37 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     }
 
     /**
+     * Fix me: scale J2ME?
      *
      * drawImage2(paramGraphics, this.img_arr_a[paramInt1], paramInt2, paramInt3, 20);
      *
      * @param paramGraphics
-     * @param spriteIdx image sprite index
      * @param pos_x positon x (240x320 J2ME geometry)
      * @param pos_y positon y
+     * @param anchor
+     * @param spriteIdx image sprite index [not used, from AA]
      * 20 => anchor point; It seem this gap is reserved for phone top bar: signal strength, datetime ...
      */
-    public void drawImage2(SpriteBatch paramGraphics, Texture image, int spriteIdx, int pos_x, int pos_y)
+    /**
+     * J2ME MIDP 2.0
+     * public void drawImage(Image img,
+     *                       int x,
+     *                       int y,
+     *                       int anchor) // anchor - the anchor point for positioning the image
+     */
+    public void drawImage2(SpriteBatch paramGraphics, Texture image, int pos_x, int pos_y, int anchor)
     {
         // 53 as BOTTOM_SPACE (~ 240 = 480/2) 240/4.5 ~= 53 (tile cell)
+        if (image == null) {
+            this.dbg("Null image drawImage2");
+            return;
+        }
+
         int img_height = (int)(image.getHeight()*SCALE);
         int position_y = (int) ((MOBI_H - pos_y-20)*MOBI_SCL - img_height + BOTTOM_SPACE); // anchor 20
 
         // Fix me hard code position
-        // if(spriteIdx == 3) {} // && (paramInt1 == 3) // this.msr_media.equals("font")
-//        paramGraphics.draw(image, (int)(pos_x*MOBI_SCL), position_y, image.getWidth()*SCALE, image.getHeight()*SCALE); // 20 anchor
-        batch.draw(image, (int)(100), 100, image.getWidth()*SCALE, image.getHeight()*SCALE); // 20 anchor
+        batch.draw(image, (int)(pos_x*MOBI_SCL), position_y, image.getWidth()*SCALE, image.getHeight()*SCALE); // 20 anchor
     }
 
     public void drawImage(SpriteBatch paramGraphics)
@@ -682,7 +712,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     }
 
     private void loadTexturesOld() {
-        fireBtnTexture = new Texture("data/samsung-white/fire.png");
+        fireBtnTexture = new Texture("data/sprites/fire.png");
 
         /**
          * #0 for red
@@ -691,58 +721,58 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
          */
         imgColor = new Texture[6];
         for (int i = 0; i < 6; i++) {
-            imgColor[i] = new Texture("data/samsung-white/color-" + i + ".png");
+            imgColor[i] = new Texture("data/sprites/color-" + i + ".png");
         }
 
-        imgKeyNum3 = new Texture("data/samsung-white/use_item_btn.png");
-        imgSpeedUp = new Texture("data/samsung-white/right_btn.png");
-        imgSpeedDown = new Texture("data/samsung-white/left_btn.png");
+        imgKeyNum3 = new Texture("data/sprites/use_item_btn.png");
+        imgSpeedUp = new Texture("data/sprites/right_btn.png");
+        imgSpeedDown = new Texture("data/sprites/left_btn.png");
         touch_pad = new Texture("data/gui/touchBackground.png");
         touch_pad_knob = new Texture("data/gui/touchKnob.png");
     }
 
     private void loadTextures() {
-        fireBtnTexture = new Texture("data/samsung-white/fire.png");
+        fireBtnTexture = new Texture("data/sprites/fire.png");
 
         if (school <= 0) {
             school = 1;
         }
-        imgBack = new Texture("data/samsung-white/back" + school + ".png");
-        imgAl = new Texture("data/samsung-white/al.png");
-        imgShadow = new Texture("data/samsung-white/shadow0.png");
-        imgPok = new Texture("data/samsung-white/pok.png");
-        imgPPang = new Texture("data/samsung-white/bbang0.png");
-        imgPPang1 = new Texture("data/samsung-white/bbang1.png");
-        imgH_ppang = new Texture("data/samsung-white/h_bbang.png");
-        imgSnow_g = new Texture("data/samsung-white/snow_gauge.png");
-        imgPwd = new Texture("data/samsung-white/power.png");
+        imgBack = new Texture("data/sprites/back" + school + ".png");
+        imgAl = new Texture("data/sprites/al.png");
+        imgShadow = new Texture("data/sprites/shadow0.png");
+        imgPok = new Texture("data/sprites/pok.png");
+        imgPPang = new Texture("data/sprites/bbang0.png");
+        imgPPang1 = new Texture("data/sprites/bbang1.png");
+        imgH_ppang = new Texture("data/sprites/h_bbang.png");
+        imgSnow_g = new Texture("data/sprites/snow_gauge.png");
+        imgPwd = new Texture("data/sprites/power.png");
 
         // TODO init Item object item value, not just Texture
         imgItem = new Texture[9];
         for (int m = 0; m < 9; m++) {
-            imgItem[m] = new Texture("data/samsung-white/item" + m + ".png");
+            imgItem[m] = new Texture("data/sprites/item" + m + ".png");
         }
         imgItem_hyo = new Texture[2];
-        imgItem_hyo[0] = new Texture("data/samsung-white/hyo0.png");
-        imgItem_hyo[1] = new Texture("data/samsung-white/hyo1.png");
+        imgItem_hyo[0] = new Texture("data/sprites/hyo0.png");
+        imgItem_hyo[1] = new Texture("data/sprites/hyo1.png");
 
         imgSpecial = new Texture[3];
         for (int i = 0; i < 3; i++) {
-            imgSpecial[i] = new Texture("data/samsung-white/special" + i + ".png");
+            imgSpecial[i] = new Texture("data/sprites/special" + i + ".png");
         }
         // TODO use texture region
         imgEffect = new Texture[2];
-        imgEffect[0] = new Texture("data/samsung-white/effect0.png");
-        imgEffect[1] = new Texture("data/samsung-white/effect1.png");
+        imgEffect[0] = new Texture("data/sprites/effect0.png");
+        imgEffect[1] = new Texture("data/sprites/effect1.png");
 
         if (tmp_stage <= 8) {
             tmp_stage = 1;
         }
-        imgStage_num = new Texture("data/samsung-white/stage" + tmp_stage + ".png"); // tmp_stage +
-        ui = new Texture("data/samsung-white/ui.png");  // h:160p (1080p)
+        imgStage_num = new Texture("data/sprites/stage" + tmp_stage + ".png"); // tmp_stage +
+        ui = new Texture("data/sprites/ui.png");  // h:160p (1080p)
         imgStage = new Texture[5];
         for (int i = 0; i < 5; i++) {
-            imgStage[i] = new Texture("data/samsung-white/word-" + i + ".png");
+            imgStage[i] = new Texture("data/sprites/word-" + i + ".png");
         }
 
         /**
@@ -752,25 +782,127 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
          */
         imgColor = new Texture[6];
         for (int i = 0; i < 6; i++) {
-            imgColor[i] = new Texture("data/samsung-white/color-" + i + ".png");
+            imgColor[i] = new Texture("data/sprites/color-" + i + ".png");
         }
 
-        imgKeyNum3 = new Texture("data/samsung-white/use_item_btn.png");
-        imgSpeedUp = new Texture("data/samsung-white/speed_up.png");
-        imgSpeedDown = new Texture("data/samsung-white/speed_down.png");
+        imgKeyNum3 = new Texture("data/sprites/use_item_btn.png");
+        imgSpeedUp = new Texture("data/sprites/speed_up.png");
+        imgSpeedDown = new Texture("data/sprites/speed_down.png");
         touch_pad = new Texture("data/gui/touchBackground.png");
         touch_pad_knob = new Texture("data/gui/touchKnob.png");
+
+        // Old load textures
+        int i;
+
+        this.imgMM = new Texture("data/sprites/mm.png");
+        this.imgBk = new Texture("data/sprites/bk.png");
+        this.imgSl = new Texture("data/sprites/sl.png");
+        this.imgPl = new Texture("data/sprites/play.png");
+        this.imgCh = new Texture("data/sprites/check.png");
+
+        // 6
+        this.imgHero = new Texture[5];
+        this.imgEnemy = new Texture[4];
+        this.imgItem = new Texture[9];
+        this.imgItem_hyo = new Texture[2];
+        this.imgItem_hyo[0] = new Texture("data/sprites/hyo0.png");
+        this.imgItem_hyo[1] = new Texture("data/sprites/hyo1.png");
+        for (i = 0; i < 5; i++) {
+            this.imgHero[i] = new Texture("data/sprites/hero" + i + ".png");
+        }
+        if (get_random(2) == 0) {
+            for (int j = 0; j < 4; j++) {
+                this.imgEnemy[j] = new Texture("data/sprites/enemy0" + j + ".png");
+            }
+        } else {
+            for (int k = 0; k < 4; k++) {
+                this.imgEnemy[k] = new Texture("data/sprites/enemy1" + k + ".png");
+            }
+        }
+        for (int m = 0; m < 9; m++) {
+            this.imgItem[m] = new Texture("data/sprites/item" + m + ".png");
+        }
+        //System.gc();
+        this.imgSnow_g = new Texture("data/sprites/snow_gauge.png");
+        this.imgPwd = new Texture("data/sprites/power.png");
+        this.imgShadow = new Texture("data/sprites/shadow0.png");
+        this.imgPok = new Texture("data/sprites/pok.png");
+        this.imgPPang = new Texture("data/sprites/bbang0.png");
+        this.imgPPang1 = new Texture("data/sprites/bbang1.png");
+        this.imgH_ppang = new Texture("data/sprites/h_bbang.png");
+        this.imgCh = new Texture("data/sprites/check.png");
+        this.imgAl = new Texture("data/sprites/al.png");
+        this.imgEffect = new Texture[2];
+        this.imgEffect[0] = new Texture("data/sprites/effect0.png");
+        this.imgEffect[1] = new Texture("data/sprites/effect1.png");
+
+        // 100
+        this.imgBack = new Texture("data/sprites/back" + this.school + ".png");
+
+        // 7
+        this.imgBoss = new Texture[4];
+        for (i = 0; i < 4; i++) { // e_boss = 0 as init, but image start = 1;  fixme
+            this.imgBoss[i] = new Texture("data/sprites/boss" + (this.e_boss + 1) + i + ".png");
+        }
+
+        // -6
+        this.imgStage = new Texture[5];
+        for (i = 0; i < 5; i++) {
+            this.imgStage[i] = new Texture("data/sprites/word-" + i + ".png");
+        }
+        this.imgStage_num = new Texture("data/sprites/stage" + this.tmp_stage + ".png");
+
+        // 8
+        this.imgSpecial = new Texture[3];
+        for (i = 0; i < 3; i++) {
+            this.imgSpecial[i] = new Texture("data/sprites/special" + i + ".png");
+        }
+        this.gameOn = true;
+
+        // 9
+        this.imgSp = new Texture("data/sprites/sp" + (this.special+1) + ".png"); // fixme 0+1
+
+        // 3
+        this.imgVill = new Texture("data/sprites/village.png");
+        this.imgCh = new Texture("data/sprites/hero_icon.png");
+        this.imgSchool = new Texture("data/sprites/school.png");
+
+        // 31 fix me, this should be load all at start
+        if (this.m_mode == 1) {
+            this.imgShop = new Texture("data/sprites/shop0.png");
+        }
+        if (this.m_mode == 0) {
+            this.imgShop = new Texture("data/sprites/shop1.png");
+        }
+
+        // 200 VICTORY ?
+        this.imgVictory = new Texture("data/sprites/victory.png");
+        this.imgV = new Texture("data/sprites/v.png");
+        this.imgHero_v = new Texture("data/sprites/hero-vic.png");
+
+        // 65336
+        this.imgLose = new Texture("data/sprites/lose.png");
+        this.imgHero_l = new Texture("data/sprites/hero-lose.png");
+
+        // 1
+        this.imgNum = new Texture[10];
+        for (i = 0; i < 10; i++) {
+            this.imgNum[i] = new Texture("data/sprites/" + i + ".png");
+        }
+        this.imgLogo = new Texture("data/sprites/logo.png");
+
     }
 
     private void loadTextures(int paramInt) { // paramInt custom for
         // old loadImage(int paramInt)
         this.dbg("load texture param = " + paramInt);
+
         if (paramInt == 2) {
-            this.imgMM = new Texture("data/samsung-white/mm.png");
-            this.imgBk = new Texture("data/samsung-white/bk.png");
-            this.imgSl = new Texture("data/samsung-white/sl.png");
-            this.imgPl = new Texture("data/samsung-white/play.png");
-            this.imgCh = new Texture("data/samsung-white/check.png");
+            this.imgMM = new Texture("data/sprites/mm.png");
+            this.imgBk = new Texture("data/sprites/bk.png");
+            this.imgSl = new Texture("data/sprites/sl.png");
+            this.imgPl = new Texture("data/sprites/play.png");
+            this.imgCh = new Texture("data/sprites/check.png");
         }
         else
         {
@@ -781,101 +913,101 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 this.imgEnemy = new Texture[4];
                 this.imgItem = new Texture[9];
                 this.imgItem_hyo = new Texture[2];
-                this.imgItem_hyo[0] = new Texture("data/samsung-white/hyo0.png");
-                this.imgItem_hyo[1] = new Texture("data/samsung-white/hyo1.png");
+                this.imgItem_hyo[0] = new Texture("data/sprites/hyo0.png");
+                this.imgItem_hyo[1] = new Texture("data/sprites/hyo1.png");
                 for (i = 0; i < 5; i++) {
-                    this.imgHero[i] = new Texture("data/samsung-white/hero" + i + ".png");
+                    this.imgHero[i] = new Texture("data/sprites/hero" + i + ".png");
                 }
                 if (get_random(2) == 0) {
                     for (int j = 0; j < 4; j++) {
-                        this.imgEnemy[j] = new Texture("data/samsung-white/enemy0" + j + ".png");
+                        this.imgEnemy[j] = new Texture("data/sprites/enemy0" + j + ".png");
                     }
                 } else {
                     for (int k = 0; k < 4; k++) {
-                        this.imgEnemy[k] = new Texture("data/samsung-white/enemy1" + k + ".png");
+                        this.imgEnemy[k] = new Texture("data/sprites/enemy1" + k + ".png");
                     }
                 }
                 for (int m = 0; m < 9; m++) {
-                    this.imgItem[m] = new Texture("data/samsung-white/item" + m + ".png");
+                    this.imgItem[m] = new Texture("data/sprites/item" + m + ".png");
                 }
                 //System.gc();
-                this.imgSnow_g = new Texture("data/samsung-white/snow_gauge.png");
-                this.imgPwd = new Texture("data/samsung-white/power.png");
-                this.imgShadow = new Texture("data/samsung-white/shadow0.png");
-                this.imgPok = new Texture("data/samsung-white/pok.png");
-                this.imgPPang = new Texture("data/samsung-white/bbang0.png");
-                this.imgPPang1 = new Texture("data/samsung-white/bbang1.png");
-                this.imgH_ppang = new Texture("data/samsung-white/h_bbang.png");
-                this.imgCh = new Texture("data/samsung-white/check.png");
-                this.imgAl = new Texture("data/samsung-white/al.png");
+                this.imgSnow_g = new Texture("data/sprites/snow_gauge.png");
+                this.imgPwd = new Texture("data/sprites/power.png");
+                this.imgShadow = new Texture("data/sprites/shadow0.png");
+                this.imgPok = new Texture("data/sprites/pok.png");
+                this.imgPPang = new Texture("data/sprites/bbang0.png");
+                this.imgPPang1 = new Texture("data/sprites/bbang1.png");
+                this.imgH_ppang = new Texture("data/sprites/h_bbang.png");
+                this.imgCh = new Texture("data/sprites/check.png");
+                this.imgAl = new Texture("data/sprites/al.png");
                 this.imgEffect = new Texture[2];
-                this.imgEffect[0] = new Texture("data/samsung-white/effect0.png");
-                this.imgEffect[1] = new Texture("data/samsung-white/effect1.png");
+                this.imgEffect[0] = new Texture("data/sprites/effect0.png");
+                this.imgEffect[1] = new Texture("data/sprites/effect1.png");
             }
             else if (paramInt == 100)
             {
-                this.imgBack = new Texture("data/samsung-white/back" + this.school + ".png");
+                this.imgBack = new Texture("data/sprites/back" + this.school + ".png");
             }
             else if (paramInt == 7)
             {
                 this.imgBoss = new Texture[4];
                 for (i = 0; i < 4; i++) {
-                    this.imgBoss[i] = new Texture("data/samsung-white/boss" + this.e_boss + i + ".png");
+                    this.imgBoss[i] = new Texture("data/sprites/boss" + this.e_boss + i + ".png");
                 }
             }
             else if (paramInt == -6)
             {
                 this.imgStage = new Texture[5];
                 for (i = 0; i < 5; i++) {
-                    this.imgStage[i] = new Texture("data/samsung-white/word-" + i + ".png");
+                    this.imgStage[i] = new Texture("data/sprites/word-" + i + ".png");
                 }
-                this.imgStage_num = new Texture("data/samsung-white/stage" + this.tmp_stage + ".png");
+                this.imgStage_num = new Texture("data/sprites/stage" + this.tmp_stage + ".png");
             }
-            else if (paramInt == 8)
+            else if (paramInt == 8) // EFFECT ?
             {
                 this.imgSpecial = new Texture[3];
                 for (i = 0; i < 3; i++) {
-                    this.imgSpecial[i] = new Texture("data/samsung-white/special" + i + ".png");
+                    this.imgSpecial[i] = new Texture("data/sprites/special" + i + ".png");
                 }
                 this.gameOn = true;
             }
             else if (paramInt == 9)
             {
-                this.imgSp = new Texture("data/samsung-white/sp" + this.special + ".png");
+                this.imgSp = new Texture("data/sprites/sp" + this.special + ".png");
             }
             else if (paramInt == 3)
             {
-                this.imgVill = new Texture("data/samsung-white/village.png");
-                this.imgCh = new Texture("data/samsung-white/hero_icon.png");
-                this.imgSchool = new Texture("data/samsung-white/school.png");
+                this.imgVill = new Texture("data/sprites/village.png");
+                this.imgCh = new Texture("data/sprites/hero_icon.png");
+                this.imgSchool = new Texture("data/sprites/school.png");
             }
             else if (paramInt == 31)
             {
                 if (this.m_mode == 1) {
-                    this.imgShop = new Texture("data/samsung-white/shop0.png");
+                    this.imgShop = new Texture("data/sprites/shop0.png");
                 }
                 if (this.m_mode == 0) {
-                    this.imgShop = new Texture("data/samsung-white/shop1.png");
+                    this.imgShop = new Texture("data/sprites/shop1.png");
                 }
             }
-            else if (paramInt == 200)
+            else if (paramInt == 200) // VICTORY ?
             {
-                this.imgVictory = new Texture("data/samsung-white/victory.png");
-                this.imgV = new Texture("data/samsung-white/v.png");
-                this.imgHero_v = new Texture("data/samsung-white/hero-vic.png");
+                this.imgVictory = new Texture("data/sprites/victory.png");
+                this.imgV = new Texture("data/sprites/v.png");
+                this.imgHero_v = new Texture("data/sprites/hero-vic.png");
             }
             else if (paramInt == 65336)
             {
-                this.imgLose = new Texture("data/samsung-white/lose.png");
-                this.imgHero_l = new Texture("data/samsung-white/hero-lose.png");
+                this.imgLose = new Texture("data/sprites/lose.png");
+                this.imgHero_l = new Texture("data/sprites/hero-lose.png");
             }
             else if (paramInt == 1)
             {
                 this.imgNum = new Texture[10];
                 for (i = 0; i < 10; i++) {
-                    this.imgNum[i] = new Texture("data/samsung-white/" + i + ".png");
+                    this.imgNum[i] = new Texture("data/sprites/" + i + ".png");
                 }
-                this.imgLogo = new Texture("data/samsung-white/logo.png");
+                this.imgLogo = new Texture("data/sprites/logo.png");
             }
         }
     }
@@ -1023,11 +1155,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         {
             if (paramInt == 2)
             {
-                this.imgMM = new Texture("data/samsung-white/mm.png");
-                this.imgBk = new Texture("data/samsung-white/bk.png");
-                this.imgSl = new Texture("data/samsung-white/sl.png");
-                this.imgPl = new Texture("data/samsung-white/play.png");
-                this.imgCh = new Texture("data/samsung-white/check.png");
+                this.imgMM = new Texture("data/sprites/mm.png");
+                this.imgBk = new Texture("data/sprites/bk.png");
+                this.imgSl = new Texture("data/sprites/sl.png");
+                this.imgPl = new Texture("data/sprites/play.png");
+                this.imgCh = new Texture("data/sprites/check.png");
             }
             else
             {
@@ -1038,101 +1170,101 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     this.imgEnemy = new Texture[4];
                     this.imgItem = new Texture[9];
                     this.imgItem_hyo = new Texture[2];
-                    this.imgItem_hyo[0] = new Texture("data/samsung-white/hyo0.png");
-                    this.imgItem_hyo[1] = new Texture("data/samsung-white/hyo1.png");
+                    this.imgItem_hyo[0] = new Texture("data/sprites/hyo0.png");
+                    this.imgItem_hyo[1] = new Texture("data/sprites/hyo1.png");
                     for (i = 0; i < 5; i++) {
-                        this.imgHero[i] = new Texture("data/samsung-white/hero" + i + ".png");
+                        this.imgHero[i] = new Texture("data/sprites/hero" + i + ".png");
                     }
                     if (get_random(2) == 0) {
                         for (int j = 0; j < 4; j++) {
-                            this.imgEnemy[j] = new Texture("data/samsung-white/enemy0" + j + ".png");
+                            this.imgEnemy[j] = new Texture("data/sprites/enemy0" + j + ".png");
                         }
                     } else {
                         for (int k = 0; k < 4; k++) {
-                            this.imgEnemy[k] = new Texture("data/samsung-white/enemy1" + k + ".png");
+                            this.imgEnemy[k] = new Texture("data/sprites/enemy1" + k + ".png");
                         }
                     }
                     for (int m = 0; m < 9; m++) {
-                        this.imgItem[m] = new Texture("data/samsung-white/item" + m + ".png");
+                        this.imgItem[m] = new Texture("data/sprites/item" + m + ".png");
                     }
                     System.gc();
-                    this.imgSnow_g = new Texture("data/samsung-white/snow_gauge.png");
-                    this.imgPwd = new Texture("data/samsung-white/power.png");
-                    this.imgShadow = new Texture("data/samsung-white/shadow0.png");
-                    this.imgPok = new Texture("data/samsung-white/pok.png");
-                    this.imgPPang = new Texture("data/samsung-white/bbang0.png");
-                    this.imgPPang1 = new Texture("data/samsung-white/bbang1.png");
-                    this.imgH_ppang = new Texture("data/samsung-white/h_bbang.png");
-                    this.imgCh = new Texture("data/samsung-white/check.png");
-                    this.imgAl = new Texture("data/samsung-white/al.png");
+                    this.imgSnow_g = new Texture("data/sprites/snow_gauge.png");
+                    this.imgPwd = new Texture("data/sprites/power.png");
+                    this.imgShadow = new Texture("data/sprites/shadow0.png");
+                    this.imgPok = new Texture("data/sprites/pok.png");
+                    this.imgPPang = new Texture("data/sprites/bbang0.png");
+                    this.imgPPang1 = new Texture("data/sprites/bbang1.png");
+                    this.imgH_ppang = new Texture("data/sprites/h_bbang.png");
+                    this.imgCh = new Texture("data/sprites/check.png");
+                    this.imgAl = new Texture("data/sprites/al.png");
                     this.imgEffect = new Texture[2];
-                    this.imgEffect[0] = new Texture("data/samsung-white/effect0.png");
-                    this.imgEffect[1] = new Texture("data/samsung-white/effect1.png");
+                    this.imgEffect[0] = new Texture("data/sprites/effect0.png");
+                    this.imgEffect[1] = new Texture("data/sprites/effect1.png");
                 }
                 else if (paramInt == 100)
                 {
-                    this.imgBack = new Texture("data/samsung-white/back" + this.school + ".png");
+                    this.imgBack = new Texture("data/sprites/back" + this.school + ".png");
                 }
                 else if (paramInt == 7)
                 {
                     this.imgBoss = new Texture[4];
                     for (i = 0; i < 4; i++) {
-                        this.imgBoss[i] = new Texture("data/samsung-white/boss" + this.e_boss + i + ".png");
+                        this.imgBoss[i] = new Texture("data/sprites/boss" + this.e_boss + i + ".png");
                     }
                 }
                 else if (paramInt == -6)
                 {
                     this.imgStage = new Texture[5];
                     for (i = 0; i < 5; i++) {
-                        this.imgStage[i] = new Texture("data/samsung-white/word-" + i + ".png");
+                        this.imgStage[i] = new Texture("data/sprites/word-" + i + ".png");
                     }
-                    this.imgStage_num = new Texture("data/samsung-white/stage" + this.tmp_stage + ".png");
+                    this.imgStage_num = new Texture("data/sprites/stage" + this.tmp_stage + ".png");
                 }
                 else if (paramInt == 8)
                 {
                     this.imgSpecial = new Texture[3];
                     for (i = 0; i < 3; i++) {
-                        this.imgSpecial[i] = new Texture("data/samsung-white/special" + i + ".png");
+                        this.imgSpecial[i] = new Texture("data/sprites/special" + i + ".png");
                     }
                     this.gameOn = true;
                 }
                 else if (paramInt == 9)
                 {
-                    this.imgSp = new Texture("data/samsung-white/sp" + this.special + ".png");
+                    this.imgSp = new Texture("data/sprites/sp" + this.special + ".png");
                 }
                 else if (paramInt == 3)
                 {
-                    this.imgVill = new Texture("data/samsung-white/village.png");
-                    this.imgCh = new Texture("data/samsung-white/hero_icon.png");
-                    this.imgSchool = new Texture("data/samsung-white/school.png");
+                    this.imgVill = new Texture("data/sprites/village.png");
+                    this.imgCh = new Texture("data/sprites/hero_icon.png");
+                    this.imgSchool = new Texture("data/sprites/school.png");
                 }
                 else if (paramInt == 31)
                 {
                     if (this.m_mode == 1) {
-                        this.imgShop = new Texture("data/samsung-white/shop0.png");
+                        this.imgShop = new Texture("data/sprites/shop0.png");
                     }
                     if (this.m_mode == 0) {
-                        this.imgShop = new Texture("data/samsung-white/shop1.png");
+                        this.imgShop = new Texture("data/sprites/shop1.png");
                     }
                 }
                 else if (paramInt == 200)
                 {
-                    this.imgVictory = new Texture("data/samsung-white/victory.png");
-                    this.imgV = new Texture("data/samsung-white/v.png");
-                    this.imgHero_v = new Texture("data/samsung-white/hero-vic.png");
+                    this.imgVictory = new Texture("data/sprites/victory.png");
+                    this.imgV = new Texture("data/sprites/v.png");
+                    this.imgHero_v = new Texture("data/sprites/hero-vic.png");
                 }
                 else if (paramInt == 65336)
                 {
-                    this.imgLose = new Texture("data/samsung-white/lose.png");
-                    this.imgHero_l = new Texture("data/samsung-white/hero-lose.png");
+                    this.imgLose = new Texture("data/sprites/lose.png");
+                    this.imgHero_l = new Texture("data/sprites/hero-lose.png");
                 }
                 else if (paramInt == 1)
                 {
                     this.imgNum = new Texture[10];
                     for (i = 0; i < 10; i++) {
-                        this.imgNum[i] = new Texture("data/samsung-white/" + i + ".png");
+                        this.imgNum[i] = new Texture("data/sprites/" + i + ".png");
                     }
-                    this.imgLogo = new Texture("data/samsung-white/logo.png");
+                    this.imgLogo = new Texture("data/sprites/logo.png");
                 }
             }
         }
@@ -1251,7 +1383,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
         this.state = 2;
         this.ani_step = 0;
-        startThread();
+        // startThread();
         this.gameOn = true;
     }
 
@@ -1431,13 +1563,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         this.e_boss_fire_time = 2;
     }
 
+    // It seem paint have problem, AA moved to run(); may be control flow or blank batch issues.
     public void paint(SpriteBatch paramGraphics)
     {
-        Texture present = new Texture("data/samsung-white/present.png");
-        batch.draw(present, 100, 500, present.getWidth()*SCALE, present.getHeight()*SCALE);
-
         int j;
-        if (this.screen == 6)
+        if (this.screen == 6) // RUNNING
         {
             helper.drawImage(paramGraphics, this.imgBack, 0, 0, 20);
             // paramGraphics.setColor(16777215);
@@ -1567,14 +1697,14 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             }
             if (this.p_mode == 1)
             {
-                try
-                {
-                    drawImage2(paramGraphics, new Texture("/ui.png"), 0, 109, 20);
-                }
-                catch (Exception localException1) {}
+                //try
+                //{
+                    drawImage2(paramGraphics, ui, 0, 109, 20); // ui.png
+                //}
+                //catch (Exception localException1) {}
                 draw_item(paramGraphics);
                 this.p_mode = 2;
-                System.gc();
+                //System.gc();
             }
             if (this.d_gauge != 0) {
                 draw_gauge(paramGraphics);
@@ -1638,7 +1768,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     drawImage2(paramGraphics, this.imgStage_num, 95, 60, 20);
                 }
             }
-        }
+        } // END RUNNING State check (screen = 6)
         else if (this.screen == 2)
         {
             drawImage2(paramGraphics, this.imgMM, 0, 0, 20);
@@ -1931,10 +2061,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             drawImage2(paramGraphics, this.imgBk, 2, 115, 20);
             destroyImage(2);
             // paramGraphics.setColor(16777164);
-            try
-            {
+            //try
+            //{
                 if (this.m_mode == 1) {
-                    drawImage2(paramGraphics, new Texture("/txt4.png"), 5, 25, 20);
+                    drawImage2(paramGraphics, txt4, 5, 25, 20);
                 }
                 if (this.m_mode == 2)
                 {
@@ -1942,11 +2072,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     fillRect(paramGraphics, 6, 45, 10, 10, 16777164);
                     fillRect(paramGraphics, 6, 61, 10, 10, 16777164);
                     fillRect(paramGraphics, 6, 84, 10, 10, 16777164);
-                    drawImage2(paramGraphics, new Texture("data/samsung-white/item1.png"), 7, 24, 20);
-                    drawImage2(paramGraphics, new Texture("data/samsung-white/item2.png"), 7, 46, 20);
-                    drawImage2(paramGraphics, new Texture("data/samsung-white/item3.png"), 7, 62, 20);
-                    drawImage2(paramGraphics, new Texture("data/samsung-white/item4.png"), 7, 85, 20);
-                    drawImage2(paramGraphics, new Texture("data/samsung-white/txt2.png"), 23, 25, 20);
+                    drawImage2(paramGraphics, imgItem[1], 7, 24, 20); // item1.png
+                    drawImage2(paramGraphics, imgItem[2], 7, 46, 20); // item2.png
+                    drawImage2(paramGraphics, imgItem[3], 7, 62, 20); // item3.png
+                    drawImage2(paramGraphics, imgItem[4], 7, 85, 20); // item4.png
+                    drawImage2(paramGraphics, txt2, 23, 25, 20); // txt2.png
                 }
                 if (this.m_mode == 3)
                 {
@@ -1954,15 +2084,15 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     fillRect(paramGraphics, 6, 38, 10, 10, 16777164);
                     fillRect(paramGraphics, 6, 53, 10, 10, 16777164);
                     fillRect(paramGraphics, 6, 67, 10, 10, 16777164);
-                    drawImage2(paramGraphics, new Texture("data/samsung-white/item5.png"), 7, 24, 20);
-                    drawImage2(paramGraphics, new Texture("data/samsung-white/item6.png"), 7, 39, 20);
-                    drawImage2(paramGraphics, new Texture("data/samsung-white/item7.png"), 7, 54, 20);
-                    drawImage2(paramGraphics, new Texture("data/samsung-white/item8.png"), 7, 68, 20);
-                    drawImage2(paramGraphics, new Texture("data/samsung-white/txt1.png"), 23, 25, 20);
+                    drawImage2(paramGraphics, imgItem[5], 7, 24, 20); // item5.png
+                    drawImage2(paramGraphics, imgItem[6], 7, 39, 20); // item6.png
+                    drawImage2(paramGraphics, imgItem[7], 7, 54, 20); // item7.png
+                    drawImage2(paramGraphics, imgItem[8], 7, 68, 20); // item8.png
+                    drawImage2(paramGraphics, txt1, 23, 25, 20); // txt1.png
                 }
-            }
-            catch (Exception localException2) {}
-            System.gc();
+            //}
+            //catch (Exception localException2) {}
+            //System.gc();
         }
         else if (this.screen == 200)
         {
@@ -2043,28 +2173,25 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 //            try
 //            {
 
-            present = new Texture("data/samsung-white/present.png");
-            batch.draw(present, 100, 500, present.getWidth()*SCALE, present.getHeight()*SCALE);
-
             // TODO fix wrong param: idx, x, y -> y = 0x10 | 0x1 is wrong
 
-                drawImage2(batch, new Texture("data/samsung-white/present.png"), 64, 5, 0x10 | 0x1);
-                drawImage2(batch, new Texture("data/samsung-white/sam_logo.png"), 64, 28, 0x10 | 0x1);
-                drawImage2(batch, new Texture("data/samsung-white/http1.png"), 7, 77, 20);
-                drawImage2(batch, new Texture("data/samsung-white/http2.png"), 7, 103, 20);
+                drawImage2(batch, present, 64, 5, 0x10 | 0x1); // present.png
+                drawImage2(batch, sam_logo, 64, 28, 0x10 | 0x1); // sam_logo.png
+                drawImage2(batch, http1, 7, 77, 20); // http1.png
+                drawImage2(batch, http2, 7, 103, 20); // http2.png
 //            }
 //            catch (Exception localException3) {}
-            //System.gc();
+            System.gc();
         }
         else if (this.screen == 1000)
         {
             // paramGraphics.setColor(16777215);
             fillRect(paramGraphics, 0, 25, 120, 85, 16777215);
-            try
-            {
-                drawImage2(paramGraphics, new Texture("/allClear.png"), 64, 10, 0x10 | 0x1);
-            }
-            catch (Exception localException4) {}
+            //try
+            //{
+                drawImage2(paramGraphics, allClear, 64, 10, 0x10 | 0x1); // allClear.png
+            //}
+            //catch (Exception localException4) {}
         }
         else if (this.screen == -5)
         {
@@ -2073,44 +2200,34 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             // paramGraphics.setColor(0);
             drawRect(paramGraphics, 0, 19, 127, 90, 0);
             drawRect(paramGraphics, 0, 21, 127, 86, 0);
-            try
-            {
-                drawImage2(paramGraphics, new Texture("/txt4b.png"), 4, 30, 20);
-            }
-            catch (Exception localException5) {}
-            System.gc();
+            //try
+            //{
+                drawImage2(paramGraphics, txt4b, 4, 30, 20); // txt4b
+            //}
+            //catch (Exception localException5) {}
+            //System.gc();
         }
         else if (this.screen == 1)
         {
             drawImage2(paramGraphics, this.imgMM, 0, 0, 20);
-            try
-            {
-                drawImage2(paramGraphics, new Texture("/title.png"), 64, 35, 0x10 | 0x1);
-            }
-            catch (Exception localException6) {}
+            //try
+            //{
+                drawImage2(paramGraphics, title, 64, 35, 0x10 | 0x1); // title.png
+            //}
+            //catch (Exception localException6) {}
             drawImage2(paramGraphics, this.imgPl, 68, 115, 20);
             drawImage2(paramGraphics, this.imgBk, 2, 115, 20);
-            System.gc();
+            //System.gc();
         }
 
-        Texture sam_logo = new Texture("data/samsung-white/sam_logo.png");
-        batch.draw(sam_logo, 100, 700, sam_logo.getWidth()*SCALE, sam_logo.getHeight()*SCALE);
-        drawImage2(batch, new Texture("data/samsung-white/http1.png"), 7, 83, 20);
-    }
-
-    public void paint2(SpriteBatch paramGraphics)
-    {
-        Texture present = new Texture("data/samsung-white/h_bbang.png");
-        batch.draw(present, 300, 1500, present.getWidth()*SCALE, present.getHeight()*SCALE);
-
-        Texture sam_logo = new Texture("data/samsung-white/h_bbang.png");
-        batch.draw(sam_logo, 100, 1900, sam_logo.getWidth()*SCALE, sam_logo.getHeight()*SCALE);
-        drawImage2(batch, new Texture("data/samsung-white/h_bbang.png"), 7, 100, 20);
     }
 
     public void repaint() { // Override orig J2ME
-        this.dbg("††† in repaint");
-        this.paint2(this.batch);
+        this.dbg("††† in repaint " + rnd.nextInt() + " screen =" + this.screen);
+        // this.paint(this.batch);
+//        if (this.screen == -2) {
+//            this.screen = Const.RUNNING_SCREEN; // 3 - VILLAGE_SCREEN; 6 - running
+//        }
     }
 
     public void draw_text_box(SpriteBatch paramGraphics, String paramString)
@@ -2126,12 +2243,17 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     public void draw_text(SpriteBatch paramGraphics)
     {
-        int i = this.message.length();
         // paramGraphics.setColor(44783);
         fillRect(paramGraphics, 0, 52, 128, 19, 44783);
         // paramGraphics.setColor(20361);
         drawRect(paramGraphics, 0, 52, 127, 19, 20361);
         // paramGraphics.setColor(0);
+
+        if (this.message == null) {
+            this.dbg("Null message");
+            return;
+        }
+        int i = this.message.length();
         drawString(paramGraphics, this.message, 64, 53, 0x10 | 0x1, 0);
         this.message = "";
     }
@@ -2365,23 +2487,14 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     public void run()
     {
-        Texture present = new Texture("data/samsung-white/present.png");
-        fireBtnTexture = new Texture("data/samsung-white/fire.png");
-        batch.draw(present, 100, 500, present.getWidth()*SCALE, present.getHeight()*SCALE);
-        batch.draw(present, 100, 300, fireBtnTexture.getWidth()*SCALE, fireBtnTexture.getHeight()*SCALE);
-
-//        return;
 //        for (;;)
 //        {
 //            this.dbg("infinite loop run() ");
         /**/
             if (this.gameOn)
             {
-                if(this.screen != -2) {
-                    this.dbg("this.screen " + this.screen);
-                }
 
-                if (this.screen == 6)
+                if (this.screen == 6) // RUNNING
                 {
                     if (this.state == 1)
                     {
@@ -2549,7 +2662,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     repaint();
                     // serviceRepaints();
                 }
-                else if (this.screen == 9)
+                else if (this.screen == 9) // SPECIAL_SCREEN
                 {
                     if ((this.ani_step < 46) && (this.ani_step >= 0)) {
                         this.ani_step += 1;
@@ -2557,7 +2670,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     repaint();
                     // serviceRepaints();
                 }
-                else if (this.screen == 200)
+                else if (this.screen == 200) // VICTORY
                 {
                     if ((this.ani_step < 51) && (this.ani_step >= 0))
                     {
@@ -2569,7 +2682,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     {
                         this.gameOn = false;
                         destroyImage(200);
-                        System.gc();
+                        //System.gc();
                         if (this.state != 10)
                         {
                             loadImage(2);
@@ -2620,7 +2733,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     MPlay(6);
                     this.screen = 65335;
                 }
-                else if (this.screen == 65335)
+                else if (this.screen == 65335) // LOSE_SCREEN
                 {
                     if (this.ani_step <= 100)
                     {
@@ -2640,9 +2753,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 }
             }
             else {
-                Gdx.app.log("DEBUG", "is there no one else?");
-
-                /**/
 //                try
 //                {
 //                    Thread.sleep(100L);
@@ -2651,11 +2761,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             } /**/
 //        }
 
-        Texture sam_logo = new Texture("data/samsung-white/sam_logo.png");
-        batch.draw(sam_logo, 100, 500, sam_logo.getWidth()*SCALE, sam_logo.getHeight()*SCALE);
-        drawImage2(batch, new Texture("data/samsung-white/http1.png"), 7, 53, 20);
-
-        //repaint();
+        paint(batch);
     }
 
     public void setPower()
@@ -3557,11 +3663,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
         // this.m_mode = 4; // init game
 
-        this.screen = -1; // Init Logo screen
-
         int i;
         int j;
-        if ((this.screen == 6) && (this.state == 1))
+        if ((this.screen == 6) && (this.state == 1)) // RUNNING
         {
             if ((getGameAction(paramInt) == 2) || (paramInt == 52))
             {
@@ -3642,9 +3746,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             }
             else if (((paramInt == 35) || (paramInt == -7)) && (this.game_state == 0))
             {
-                this.m_mode = 1;
-                this.gameOn = false;
-                this.screen = 100;
+                // this.m_mode = 1;
+                // this.gameOn = false;
+                // this.screen = 100;
                 repaint();
             }
             else if ((paramInt == 51) && (this.game_state == 0))
@@ -3782,9 +3886,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             }
             repaint();
         }
-        else if (this.screen == 3)
+        else if (this.screen == 3) // VILLAGE_SCREEN
         {
-            Gdx.app.log("DEBUG", "kkk init");
             Gdx.app.log("DEBUG", " game action " + getGameAction(paramInt));
             if (getGameAction(paramInt) == 1)
             {
@@ -3835,7 +3938,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     Gdx.app.log("DEBUG", "init game ...");
                     init_game(k);
                 }
-            }
+            } // END cond VILLAGE_SCREEN
             else if ((paramInt == 42) || (paramInt == -6))
             {
                 destroyImage(3);
@@ -4004,9 +4107,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             }
             repaint();
         }
-        else if (this.screen == -5)
+        else if (this.screen == -5) // MANUAL
         {
-            this.screen = 100;
+            // this.screen = 100;
             repaint();
         }
         else if (this.screen == -88)
@@ -4076,7 +4179,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             this.ani_step = 0;
             this.screen = 3;
             repaint();
-            // System.gc();
+            System.gc();
         }
         else if (this.screen == -1) // TODO use constant // Logo start Screen LOGO_SCREEN
         {
@@ -4089,8 +4192,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             loadImage(2);
             this.screen = 1;
             repaint();
-            this.dbg("exit ");
-            System.exit(0);
+            this.dbg("exit SAMSUNG_FUNCLUB_SCREEN");
         }
         else if (this.screen == 1)
         {
@@ -4100,7 +4202,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 this.screen = -88; // NEW_GAME_MENU_SCREEN
                 this.m_mode = 1;
             }
-            else if ((paramInt == 42) || (paramInt == -6))
+            // https://j2me.fandom.com/wiki/Canvas_KeyCodes
+            // -6 = CK (Center key = OK ?)
+            // temporary use key_code as KEmulator
+            else if ( (paramInt == 42) || (paramInt == -6) || (paramInt == -5) || (getGameAction(paramInt) == GAME_ACTION_OK) )
             {
                 this.screen = 2;
             }
@@ -4109,7 +4214,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         else if (this.screen == 1000) // ALL_CLEAR
         {
             loadImage(2);
-            // System.gc();
+            System.gc();
             this.screen = 300;
             repaint();
         }
@@ -4123,8 +4228,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         if (this.s_play == 1)
         {
             String str2 = null;
-            try
-            {
+            //try
+            //{
                 if (paramInt == 0) {
                     str2 = "/9.mmf";
                 } else if (paramInt == 1) {
@@ -4144,9 +4249,51 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 }
                 str1 = new String(str2);
 //        this.audioClip = new AudioClip(1, str1);
-            }
-            catch (Exception localException) {}
+            //}
+            //catch (Exception localException) {}
 //      this.audioClip.play(1, 3);
+        }
+    }
+
+    // TODO make plasma, missile sound louder use tool like Audacity. But low volume my be processText good effect simulate explosion far away
+    public void playSound(String paramString, int paramInt)
+    {
+        this.current_music = paramString; // Use for stop sound
+
+        if (this.af == 0) {
+            return;
+        }
+        if (this.music != null)
+        {
+            // this.music.stop();
+            // this.music = null;
+        }
+        try
+        {
+            /*String str = new String("/mmf/" + paramString + ".mid");
+            this.aq = null;
+            this.aq = new AudioClip(3, str);
+            this.aq.play(paramInt, 3);*/
+            if(this.music != null){
+                // this.music.dispose();
+            }
+
+            this.music = null;
+            // this.music = Gdx.audio.newMusic(Gdx.files.internal("audio/"+ paramString + ".wav"));
+            this.manager.get("audio/"+ paramString + ".wav", Sound.class).play();
+
+            /// this.music.setVolume(0.5f);
+            /**
+             if(this.music != null) {
+             if (! this.music.isPlaying()) {
+             this.music.play();
+             this.music.setLooping(false);
+             }
+             }*/
+        }
+        catch (Exception localException)
+        {
+            System.out.println("Error play sound");
         }
     }
 
@@ -4176,15 +4323,21 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         public static final int VILLAGE_SCREEN = 3;
         public static final int SOUND_SPEED_SETTING_SCREEN = 4;
         public static final int GUIDE_MENU_SCREEN = 5;
+        public static final int RUNNING_SCREEN = 6;
+
         public static final int SPECIAL_ANIMATION_SCREEN = 8;
         public static final int SPECIAL_SCREEN = 9;
         public static final int SHOP_SCREEN = 31;
         public static final int TEXT_SCREEN = 77;
 
+        public static final int SOUND_SETTING_SCREEN = 100;
         public static final int VICTORY_SCREEN = 200;
+        public static final int VICTORY_SCREEN2 = 201;
         public static final int GOD_JOB_SCREEN = 300;
 
         public static final int ALL_CLEAR_SCREEN = 1000;
         public static final int LOSE_SCREEN = 65335;
+        public static final int LOSE_SCREEN2 = 65336;
+
     }
 }

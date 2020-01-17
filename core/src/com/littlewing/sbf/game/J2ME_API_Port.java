@@ -23,7 +23,7 @@ public class J2ME_API_Port {
     public J2ME_API_Port() {
         imgColor = new Texture[6];
         for (int i = 0; i < 6; i++) {
-            imgColor[i] = new Texture("data/samsung-white/color-" + i + ".png");
+            imgColor[i] = new Texture("data/sprites/color-" + i + ".png");
         }
     }
 

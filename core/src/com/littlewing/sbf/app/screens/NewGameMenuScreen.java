@@ -40,12 +40,12 @@ public class NewGameMenuScreen extends  DefaultScreen {
         font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         font.getData().setScale(6*hd_ratio);
 
-        imgMM = new Texture("data/samsung-white/mm.png");
-        title = new Texture("data/samsung-white/title.png");
-        imgSl = new Texture("data/samsung-white/sl.png");
-        imgBk = new Texture("data/samsung-white/bk.png");
-        imgCh = new Texture("data/samsung-white/check.png");
-        samsung_blue = new Texture("data/samsung-white/samsung_blue.png");
+        imgMM = new Texture("data/sprites/mm.png");
+        title = new Texture("data/sprites/title.png");
+        imgSl = new Texture("data/sprites/sl.png");
+        imgBk = new Texture("data/sprites/bk.png");
+        imgCh = new Texture("data/sprites/check.png");
+        samsung_blue = new Texture("data/sprites/samsung_blue.png");
         batch = new SpriteBatch();
     }
 

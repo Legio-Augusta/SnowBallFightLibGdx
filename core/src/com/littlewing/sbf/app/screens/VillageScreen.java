@@ -43,10 +43,10 @@ public class VillageScreen extends DefaultScreen {
         font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         font.getData().setScale(6*hd_ratio);
 
-        imgVill = new Texture("data/samsung-white/village.png");
-        imgSchool = new Texture("data/samsung-white/school.png");
-        samsung_blue = new Texture("data/samsung-white/samsung_blue.png");
-        heroIcon = new Texture("data/samsung-white/hero_icon.png");
+        imgVill = new Texture("data/sprites/village.png");
+        imgSchool = new Texture("data/sprites/school.png");
+        samsung_blue = new Texture("data/sprites/samsung_blue.png");
+        heroIcon = new Texture("data/sprites/hero_icon.png");
         batch = new SpriteBatch();
     }
     public void render(float delta) {

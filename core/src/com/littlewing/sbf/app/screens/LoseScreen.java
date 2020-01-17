@@ -24,8 +24,8 @@ public class LoseScreen extends DefaultScreen {
 
     @Override
     public void show() {
-        imgLose = new Texture("data/samsung-white/lose.png");
-        imgHero_l = new Texture("data/samsung-white/hero-lose.png");
+        imgLose = new Texture("data/sprites/lose.png");
+        imgHero_l = new Texture("data/sprites/hero-lose.png");
         batch = new SpriteBatch();
         if(music != null) {
             if(!music.isPlaying()) {

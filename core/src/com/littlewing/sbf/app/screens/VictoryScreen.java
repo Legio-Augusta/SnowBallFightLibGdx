@@ -33,13 +33,13 @@ public class VictoryScreen extends DefaultScreen {
 
     @Override
     public void show() {
-        imgVictory = new Texture("data/samsung-white/victory.png");
-        imgV = new Texture("data/samsung-white/v.png");
-        imgHero_v = new Texture("data/samsung-white/hero-vic.png");
+        imgVictory = new Texture("data/sprites/victory.png");
+        imgV = new Texture("data/sprites/v.png");
+        imgHero_v = new Texture("data/sprites/hero-vic.png");
 
-        imgBack = new Texture("data/samsung-white/back1.png");
-        snowWhiteBg = new Texture("data/samsung-white/white_bg.png");
-        ui = new Texture("data/samsung-white/ui.png");
+        imgBack = new Texture("data/sprites/back1.png");
+        snowWhiteBg = new Texture("data/sprites/white_bg.png");
+        ui = new Texture("data/sprites/ui.png");
 
         batch = new SpriteBatch();
     }

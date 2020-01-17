@@ -28,11 +28,11 @@ public class SamsungFunclubScreen extends DefaultScreen {
     @Override
     public void show() {
         // TODO handle screen ratio
-        samsung_blue = new Texture(Gdx.files.internal("data/samsung-white/samsung_blue.png"));
-        present = new Texture(Gdx.files.internal("data/samsung-white/present.png")); // 150
-        sam_logo = new Texture(Gdx.files.internal("data/samsung-white/sam_logo.png")); // 370
-        http1 = new Texture(Gdx.files.internal("data/samsung-white/http1.png")); // 208
-        http2 = new Texture(Gdx.files.internal("data/samsung-white/http2.png"));
+        samsung_blue = new Texture(Gdx.files.internal("data/sprites/samsung_blue.png"));
+        present = new Texture(Gdx.files.internal("data/sprites/present.png")); // 150
+        sam_logo = new Texture(Gdx.files.internal("data/sprites/sam_logo.png")); // 370
+        http1 = new Texture(Gdx.files.internal("data/sprites/http1.png")); // 208
+        http2 = new Texture(Gdx.files.internal("data/sprites/http2.png"));
         batch = new SpriteBatch();
     }
 

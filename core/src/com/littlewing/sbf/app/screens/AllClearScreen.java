@@ -27,7 +27,7 @@ public class AllClearScreen extends DefaultScreen {
 
     @Override
     public void show() {
-        imgAllClear = new Texture("data/samsung-white/allClear2.jpg");
+        imgAllClear = new Texture("data/sprites/allClear2.jpg");
 
         batch = new SpriteBatch();
     }
