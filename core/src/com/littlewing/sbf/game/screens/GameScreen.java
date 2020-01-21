@@ -20,6 +20,9 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+
 
 import com.littlewing.sbf.game.OverlapTester;
 import com.littlewing.sbf.game.J2ME_API_Port;
@@ -42,6 +45,7 @@ import com.littlewing.sbf.game.J2ME_API_Port;
  * https://qph.fs.quoracdn.net/main-qimg-4f8b79be77bb76e9103a8ee0e6c35f2b
  * viewport vs pixel
  * mi note 7 1080 x 2340
+ * Mi note 7 real GDX resolution seem 2130 -> about 210 pixels have been reserved for top notch ?
  * 1200 x 1920 (Nexus 7) 600x960
  * 1440 x 2960 (S9) 360x740
  * S7 1440 x 2560 (old remember this guy when it can change Resolution setin) 360x640
@@ -135,7 +139,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private int mana = 0;
     private int hp;
     private int max_hp;
-    private int dem;
+    private int dem; // Damage by special effect
     private int wp;
     private int snow_pw;
     private int real_snow_pw;
@@ -201,12 +205,13 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private int al;
     private int d_gauge;
 
-    public J2ME_API_Port helper = new J2ME_API_Port();
+    public J2ME_API_Port j2me_port = new J2ME_API_Port();
 
     private static float MOBI_SCL = (float)Gdx.graphics.getWidth()/240; // FIXME 4.5 is not integer
     private static int MOBI_H = 320;  // JavaME height = 320px
     private static int MOBI_W = 240; // Original Java Phone resolution.
-    float SCALE = (float)SCREEN_HEIGHT/1920;
+    // float SCALE = (float)SCREEN_HEIGHT/1920;
+    float SCALE = (float)SCREEN_WIDTH/1080;
 
     OrthographicCamera camera;
     SpriteBatch batch;
@@ -220,7 +225,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private static int BOTTOM_SPACE = (int)(SCREEN_HEIGHT/8 + 20*MOBI_SCL); // May be change for fit touch button
 
     // Use rectangle until figure out how to work with BoundingBox multi input.
-    Rectangle upBtnRect = new Rectangle((20+(200/3))*SCALE, (20+(400/3))*SCALE, 72*SCALE, 70*SCALE);
+    Rectangle upBtnRect = new Rectangle((20+(200/3))*SCALE, (20+(400/3))*SCALE, 72*SCALE + 150, 70*SCALE); // + 150 Jan-21
     Rectangle downBtnRect = new Rectangle((20+(200/3))*SCALE, 20*SCALE, 72*SCALE, 70*SCALE);
     Rectangle leftBtnRect = new Rectangle(20*SCALE, (20+(200/6))*SCALE, 70*SCALE, 140*SCALE);
     Rectangle rightBtnRect = new Rectangle((20+(400/3))*SCALE, (20+(200/6))*SCALE, 2*70*SCALE, 140*SCALE);
@@ -228,6 +233,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 //    Rectangle leftMenuBtn = new Rectangle(SCREEN_WIDTH-(275+400)*SCALE, 20*SCALE, 200*SCALE, 100*SCALE);
     Rectangle leftMenuBtn = new Rectangle(SCREEN_WIDTH-(275+400)*SCALE, 20*SCALE, 200*SCALE, 100*SCALE);
     Rectangle rightMenuBtn = new Rectangle(SCREEN_WIDTH-(275+200)*SCALE, 20*SCALE, 200*SCALE, 100*SCALE);
+    // Separate speed button, reuse use item btn
 
     private int game_action = 0;
 
@@ -238,16 +244,18 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private static final int GAME_ACTION_RIGHT = 5;
     private static final int GAME_ACTION_UP = 8;
     private static final int GAME_ACTION_DOWN = 6;
-    private static final int KEY_RIGHT_MENU = -7; // action = 0
+    private static final int KEY_RIGHT_MENU = 35; // action = 0 // KEY_RIGHT_MENU = 35 ? -7 (from AA)
     private static final int KEY_LEFT_MENU = -6;  // action = 0
     private static final int KEY_OK = -5;
+    private static final int KEY_STAR = 0;
+    private static final int KEY_NUM_3 = 0; // for item mode
+    private static final int KEY_SHARP = 0;
 
     Vector3 touchPoint;
-    TouchStatus touchStatus = TouchStatus.NONE;
+    // TouchStatus should be use Enum
 
-    enum TouchStatus {
-        TOUCH_DOWN, TOUCH_UP, NONE
-    }
+    private ShapeRenderer shapeRenderer;
+    private Rectangle rectangle;
 
     Preferences prefs = Gdx.app.getPreferences("gamestate");
     private static final String PREF_VIBRATION      = "vibration";
@@ -268,6 +276,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     BitmapFont font;
     private Music music;
     Viewport viewport;
+
+    private int shitty = 0; // debug flag
 
     public GameScreen(Game game)
     {
@@ -321,20 +331,22 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
         touchPoint.set(Gdx.input.getX(),Gdx.input.getY(), 0);
 
-        Gdx.app.log("DEBUG", "touch " + touchPoint.x + " y "+ (SCREEN_HEIGHT-touchPoint.y) + " key_code "+ this.key_code + " scrn "+ this.screen);
-        game_action = getGameAction2(pointer);
+        // Gdx.app.log("DEBUG", "touch " + touchPoint.x + " y "+ (SCREEN_HEIGHT-touchPoint.y) + " key_code "+ this.key_code + " scrn "+ this.screen);
+        game_action = getGameAction2(); // pointer
 
-        if (isTouchedMenuLeft()) {
-            this.key_code = KEY_LEFT_MENU;
-            Gdx.input.vibrate(5);
-            this.dbg("menu left †††");
-        } else if (isTouchedMenuRight()) {
-            this.key_code = KEY_RIGHT_MENU;
-            Gdx.input.vibrate(5);
-            this.dbg("menu right †††");
-        } else if (isTouchedNum3()) {
-            this.key_code = 57;
-            this.dbg("menu num3 opt †††");
+        if(isTouchedSpeedUp()) { // smaller value, shorter sleep
+            if(game_speed >= 12) {
+                Gdx.input.vibrate(5);
+                game_speed -= 8;
+            }
+            // setGameSpeed(game_speed);
+        }
+        if(isTouchedSpeedDown()) {
+            if(game_speed <= 128) {
+                Gdx.input.vibrate(5);
+                game_speed += 8;
+            }
+            // setGameSpeed(game_speed);
         }
 
         Gdx.input.vibrate(5);
@@ -368,7 +380,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     @Override
     public void show() {
-
+        shapeRenderer = new ShapeRenderer();
+        this.rectangle = new Rectangle(0,0,10,10);
     }
 
     @Override
@@ -387,6 +400,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         // drawTouchPad();
         drawUI();
         batch.end();
+
+        shapeRenderer.begin(ShapeType.Line);
+//        shapeRenderer.begin();
+        //shapeRenderer.rect(rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getHeight());
+        shapeRenderer.end();
     }
 
     @Override
@@ -457,13 +475,22 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         return textureBounds.contains(touchPoint.x, touchPoint.y);
     }
     protected boolean isTouchedMenuLeft() {
-        Gdx.app.log("DEBUG Clip", "x: " + leftMenuBtn.x + " y " + leftMenuBtn.y + " w " + leftMenuBtn.getWidth() + " h " + leftMenuBtn.getHeight());
+        // Gdx.app.log("DEBUG Clip", "x: " + leftMenuBtn.x + " y " + leftMenuBtn.y + " w " + leftMenuBtn.getWidth() + " h " + leftMenuBtn.getHeight());
         this.key_code = KEY_LEFT_MENU;
         return OverlapTester.pointInRectangle(leftMenuBtn, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
     }
     protected boolean isTouchedMenuRight() {
-        this.key_code = KEY_RIGHT_MENU;
+        //this.key_code = KEY_RIGHT_MENU;
         return OverlapTester.pointInRectangle(rightMenuBtn, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
+    }
+
+    protected boolean isTouchedSpeedUp() {
+        // return OverlapTester.pointInRectangle(speedUpBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
+        return false;
+    }
+    protected boolean isTouchedSpeedDown() {
+        // return OverlapTester.pointInRectangle(speedDownBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
+        return false;
     }
 
     protected Preferences getPrefs() {
@@ -583,8 +610,14 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         int img_height = (int)(image.getHeight()*SCALE);
         int position_y = (int) ((MOBI_H - pos_y-20)*MOBI_SCL - img_height + BOTTOM_SPACE); // anchor 20
 
+        if (shitty == 0) {
+            shitty++;
+             this.dbg("††† MOBI_SCL " + MOBI_SCL + " x " + pos_x*MOBI_SCL + " y " +position_y + " screen height " + SCREEN_HEIGHT);
+            // bot 356
+        }
+
         // Fix me hard code position
-        batch.draw(image, (int)(pos_x*MOBI_SCL), position_y, image.getWidth()*SCALE, image.getHeight()*SCALE); // 20 anchor
+        batch.draw(image, (int)(pos_x*MOBI_SCL), position_y - 200, image.getWidth()*SCALE, image.getHeight()*SCALE); // 20 anchor
     }
 
     public void drawImage(SpriteBatch paramGraphics)
@@ -663,36 +696,36 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         return game_action;
     }
 
-    public int getGameAction2(int pointer) {
+    public int getGameAction2() { // int pointer
         if(isTouchedUp()) {
-            this.dbg("††† up ---");
             Gdx.input.vibrate(15);
             this.key_code = -1;
+            this.dbg("††† up ↑-↑-↑-" + "keycode= " + this.key_code + " game action= " + GAME_ACTION_UP + touchPoint.x + " y " + touchPoint.y);
             return GAME_ACTION_UP;
         }
         if(isTouchedDown()) { // Careful with game state, ie. item_mode = 0
-            this.dbg("††† down ---");
             Gdx.input.vibrate(15);
             this.key_code = -2;
+            this.dbg("††† down ↓-↓-↓-↓" + touchPoint.x + " y " + touchPoint.y);
             return GAME_ACTION_DOWN;
         }
         if(isTouchedLeft() && Gdx.input.isTouched()) {
-            this.dbg("††† << ---");
             Gdx.input.vibrate(15);
             this.key_code = -3;
+            this.dbg("††† << ---"  + touchPoint.x + " y " + touchPoint.y);
             return GAME_ACTION_LEFT;
         }
         if(isTouchedRight()) {
-            this.dbg("††† >> ---");
             this.key_code = -4;
             Gdx.input.vibrate(15);
+            this.dbg("††† >> ---" + touchPoint.x + " y " + touchPoint.y);
             return GAME_ACTION_RIGHT;
         }
 
         if(isTouchedOK()) {
-            this.dbg("††† ok ---");
             this.key_code = KEY_OK; // -5
             Gdx.input.vibrate(15);
+            this.dbg("††† OK ---" + touchPoint.x + " y " + touchPoint.y);
             return GAME_ACTION_OK;
         }
 
@@ -907,7 +940,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         else
         {
             int i;
-            if (paramInt == 6)
+            if (paramInt == 6) // GAME_ACTION_DOWN
             {
                 this.imgHero = new Texture[5];
                 this.imgEnemy = new Texture[4];
@@ -1361,7 +1394,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         this.h_x = 5;
         this.h_y = 8;
         this.h_idx = 0;
-        this.max_hp = 106;
+        this.max_hp = 10600; // fixme
         this.hp = this.max_hp;
         this.wp = 0;
         this.pw_up = 0;
@@ -1569,7 +1602,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         int j;
         if (this.screen == 6) // RUNNING
         {
-            helper.drawImage(paramGraphics, this.imgBack, 0, 0, 20);
+            j2me_port.drawImage(paramGraphics, this.imgBack, 0, 0, 20);
             // paramGraphics.setColor(16777215);
             fillRect(paramGraphics, 0, 25, 128, 84, 16777215);
             drawImage2(paramGraphics, this.imgHero[this.h_idx], this.h_x * 5, 83, 0x10 | 0x1);
@@ -2223,7 +2256,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     }
 
     public void repaint() { // Override orig J2ME
-        this.dbg("††† in repaint " + rnd.nextInt() + " screen =" + this.screen);
+        // this.dbg("††† in repaint " + rnd.nextInt() + " screen =" + this.screen);
         // this.paint(this.batch);
 //        if (this.screen == -2) {
 //            this.screen = Const.RUNNING_SCREEN; // 3 - VILLAGE_SCREEN; 6 - running
@@ -2560,12 +2593,12 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                             }
                             else if ((this.e_move_dir[i] == 0) && (this.e_hp[i] > 0) && (this.e_ppang_item[i] != 2))
                             {
-                                System.out.println("E move dir = 0 AI: " + this.e_move_dir[0] + " " + this.e_move_dir[1]+ " --x-- " + this.e_x[0] + " "+ this.e_x[1]);
+                                //System.out.println("E move dir = 0 AI: " + this.e_move_dir[0] + " " + this.e_move_dir[1]+ " --x-- " + this.e_x[0] + " "+ this.e_x[1]);
                                 e_move_ai(i);
                             }
                             else if ((this.e_move_dir[i] < 100) && (this.e_move_dir[i] != 0) && (this.e_hp[i] > 0))
                             {
-                                System.out.println("E move dir < 100: " + this.e_move_dir[0] + " " + this.e_move_dir[1]+ " --x-- " + this.e_x[0] + " "+ this.e_x[1]);
+                                //System.out.println("E move dir < 100: " + this.e_move_dir[0] + " " + this.e_move_dir[1]+ " --x-- " + this.e_x[0] + " "+ this.e_x[1]);
                                 e_move(i);
                             }
                         }
@@ -2680,7 +2713,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     }
                     else
                     {
-                        this.gameOn = false;
+                        this.gameOn = false; // Game ending here.
                         destroyImage(200);
                         //System.gc();
                         if (this.state != 10)
@@ -3322,8 +3355,14 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             this.dem = 12;
         }
         this.d_gauge = 1;
-        MPlay(5);
-        call_vib(3);
+        //MPlay(5);  // Something weird here, may be MPlay and call_vib on Real devices have some special effect
+        // that make gameOn back to true.
+        // I remmember that in this running state there are some (or may be often) similar bug on real divices.
+        // It hang on this special screen.
+        // call_vib(3);
+        this.gameOn = true; // nickfarrow 21-Jan
+        // Effect run OK, but special-effect (freeze, cleaner) is not updated by special
+        // TODO fix effect/special effect not match
     }
 
     public void decs_e_hp(int paramInt)
@@ -3655,13 +3694,22 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
     }
 
+    /*
+     *    https://docs.oracle.com/javame/config/cldc/ref-impl/midp2.0/jsr118/constant-values.html#javax.microedition.lcdui.Canvas.UP
+     *    key code = -5 game action = 8 OK
+     *    key code = 35 game action = 0 #
+     *    key code = -2 game action = 6 DOWN
+     *    key code = -4 game action = 5 LEFT
+     *    key code = -1 game action = 1 UP ~ OK
+     *    key code = 35 game action = 0 #
+     *    key code = 49 game action = 9 KEY_2 = UP ?
+     *    key code = 51 game action = 10 KEY_3 (use item)
+     *    key code = -7 game action = 0 RIGHT_MENU
+     */
     public void keyPressed() // int paramInt J2ME simulate from virtual Droid/iOS keyboard
     {
+        getGameAction2(); //
         int paramInt = this.key_code;
-        // this.screen = 3; // init
-        // paramInt = 35;
-
-        // this.m_mode = 4; // init game
 
         int i;
         int j;
@@ -3713,7 +3761,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     repaint();
                 }
             }
-            else if ((getGameAction(paramInt) == 6) || (paramInt == 56))
+            else if ((getGameAction(paramInt) == 6) || (paramInt == 56)) // GAME_ACTION_DOWN = 6
             {
                 if (this.mana >= 12) {
                     use_special();
@@ -3746,10 +3794,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             }
             else if (((paramInt == 35) || (paramInt == -7)) && (this.game_state == 0))
             {
-                // this.m_mode = 1;
-                // this.gameOn = false;
-                // this.screen = 100;
+                this.m_mode = 1;
+                this.gameOn = false;
+                this.screen = 100;
                 repaint();
+                this.dbg("††† m_mode " + this.m_mode + " screen " + this.screen + " on " + this.gameOn);
             }
             else if ((paramInt == 51) && (this.game_state == 0))
             {
@@ -3787,7 +3836,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     this.m_mode -= 1;
                 }
             }
-            else if (getGameAction(paramInt) == 6)
+            else if (getGameAction(paramInt) == 6)  // GAME_ACTION_DOWN = 6
             {
                 if (this.m_mode == 5) {
                     this.m_mode = 1;
@@ -3851,7 +3900,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     this.m_mode -= 1;
                 }
             }
-            else if (getGameAction(paramInt) == 6)
+            else if (getGameAction(paramInt) == 6)   // GAME_ACTION_DOWN = 6
             {
                 if (this.m_mode >= 4) {
                     this.m_mode = 1;
@@ -3896,7 +3945,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     this.h_y = j;
                 }
             }
-            else if (getGameAction(paramInt) == 6)
+            else if (getGameAction(paramInt) == 6)   // GAME_ACTION_DOWN = 6
             {
                 j = this.h_y + 8;
                 if (hero_move(this.h_x, j, 1) > 0) {
@@ -3953,7 +4002,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             if (getGameAction(paramInt) == 1) {
                 this.s_item = 0;
             }
-            if (getGameAction(paramInt) == 6) {
+            if (getGameAction(paramInt) == 6) {    // GAME_ACTION_DOWN = 6
                 this.s_item = 1;
             }
             if (getGameAction(paramInt) == 2)
@@ -4033,7 +4082,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     this.m_mode -= 1;
                 }
             }
-            if (getGameAction(paramInt) == 6) {
+            if (getGameAction(paramInt) == 6) {    // GAME_ACTION_DOWN = 6
                 if (this.m_mode == 3) {
                     this.m_mode = 1;
                 } else {
@@ -4078,7 +4127,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     this.m_mode -= 1;
                 }
             }
-            if (getGameAction(paramInt) == 6) {
+            if (getGameAction(paramInt) == 6) {    // GAME_ACTION_DOWN = 6
                 if (this.m_mode == 3) {
                     this.m_mode = 1;
                 } else {
@@ -4121,7 +4170,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     this.m_mode -= 1;
                 }
             }
-            if (getGameAction(paramInt) == 6) {
+            if (getGameAction(paramInt) == 6) {    // GAME_ACTION_DOWN = 6
                 if (this.m_mode >= 2) {
                     this.m_mode = 1;
                 } else {
@@ -4133,13 +4182,14 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 if (paramInt > 48) {
                     this.m_mode = (paramInt - 48);
                 }
-                if (this.m_mode == 1)
+                if (this.m_mode == 1) // this one seem on INIT()
                 {
                     this.last_stage = 11;
                     this.stage = 11;
                     this.saved_gold = 0;
                     this.mana = 0;
-                    addScore("hero", 0);
+                    // addScore("hero", 0);
+                    this.dbg("††† mana 0");
                 }
                 destroyImage(2);
                 loadImage(3);
