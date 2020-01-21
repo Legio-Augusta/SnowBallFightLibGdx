@@ -122,6 +122,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private String current_music = "";
     public int af = 1;
     public static AssetManager manager;
+    private String curent_music = "";
     // End GDX added to fix J2ME
 
     private Texture[] imgStage;
@@ -208,14 +209,14 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     public J2ME_API_Port j2me_port = new J2ME_API_Port();
 
     private static int OLD_MOBI_H = 160;  // JavaME height = 320px
-    private static int OLD_MOBI_W = 128; // Original Java Phone resolution.
+    private static int OLD_MOBI_W = 128; // Original Java Phone resolution. Damn many orig png have 128x => it should be 128 width tho.
     private static float MOBI_SCL = (float)Gdx.graphics.getWidth()/ OLD_MOBI_W; // FIXME 4.5 is not integer
     // SGH T199 128x160 ; E250 128x160
     // SGH M300 128x169 -> my scale 240 x 320 is wrong.
     // float SCALE = (float)SCREEN_HEIGHT/1920;
     float SCALE = (float)SCREEN_WIDTH/1080;
 
-    private static float SCALED_IMG_RATIO = 20 / 3; // Scaled png from original one.
+    private static float SCALED_IMG_RATIO = 9; // Scaled png from original one.
 
     OrthographicCamera camera;
     SpriteBatch batch;
@@ -279,6 +280,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private Texture touch_pad_knob;
     BitmapFont font;
     private Music music;
+    private Music music_opening = Gdx.audio.newMusic(Gdx.files.internal("data/audio/night.wav"));
+    private Music music_donald_christmas = Gdx.audio.newMusic(Gdx.files.internal("data/audio/Donald_Christmas.mp3"));
     Viewport viewport;
 
     private int shitty = 0; // debug flag
@@ -286,7 +289,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     public GameScreen(Game game)
     {
         super(game);
-        // this.SJ = paramSnowBallFight;
         this.item_price[0] = 5;
         this.item_price[1] = 8;
         this.item_price[2] = 8;
@@ -295,8 +297,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         this.item_price[5] = 12;
         this.item_price[6] = 10;
         this.item_price[7] = 12;
-//        printScore("hero", 0);
-//        printScore("config", 1);
         this.item_slot[0] = 3;
         this.item_slot[1] = 5;
         this.stage = this.last_stage;
@@ -304,11 +304,25 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         Gdx.input.setInputProcessor(this);
         Gdx.input.setCatchBackKey( true );
 
+        manager = new AssetManager();
+        // TODO edit sound for louder; investigate sound vs music
+        // Some player like notation player3, audacity... that contribute to make these mmf back to live.
+        manager.load("data/audio/night_opening.mp3", Sound.class); // Music.class
+        manager.load("data/audio/1_use_item.wav", Sound.class);
+        manager.load("data/audio/6_snow_fly.wav", Sound.class);
+        manager.load("data/audio/5_hit.wav", Sound.class);
+        manager.load("data/audio/4_oh_oh.wav", Sound.class);
+        manager.load("data/audio/special.mp3", Sound.class);
+        manager.load("data/audio/lose.mp3", Sound.class);
+        manager.load("data/audio/victory.mp3", Sound.class);
+        manager.load("data/audio/Donald_Christmas.mp3", Sound.class);
+
+        manager.finishLoading();
+
         // Calculate global var width/height, view port ...
         create();
 
         touchPoint = new Vector3();
-
     }
 
     // Android GDX
@@ -385,7 +399,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     @Override
     public void show() {
         shapeRenderer = new ShapeRenderer();
-        this.rectangle = new Rectangle(0,0,10,10);
+        this.rectangle = new Rectangle(0,0,100,100);
     }
 
     @Override
@@ -401,14 +415,24 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
         run();
 
+        this.playOpeningMusic();
+
         // drawTouchPad();
         drawUI();
         batch.end();
 
         shapeRenderer.begin(ShapeType.Line);
-//        shapeRenderer.begin();
-        //shapeRenderer.rect(rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getHeight());
+        shapeRenderer.rect(rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getHeight());
         shapeRenderer.end();
+    }
+
+    private void playOpeningMusic() {
+        if(music_opening != null) {
+            if(!music_opening.isPlaying()) {
+                music_opening.play();
+                music_opening.setLooping(false);
+            }
+        }
     }
 
     @Override
@@ -717,7 +741,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         if(isTouchedUp()) {
             Gdx.input.vibrate(15);
             this.key_code = -1;
-            this.dbg("††† up ↑-↑-↑-" + "keycode= " + this.key_code + " game action= " + GAME_ACTION_UP + touchPoint.x + " y " + touchPoint.y);
+            this.dbg("††† up ↑-↑-↑-" + "keycode= " + this.key_code + " game action= " + GAME_ACTION_UP + " " + touchPoint.x + " y " + touchPoint.y);
             return GAME_ACTION_UP;
         }
         if(isTouchedDown()) { // Careful with game state, ie. item_mode = 0
@@ -2210,7 +2234,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         {
             loadImage(1);
             drawImage2(paramGraphics, this.imgLogo, 0, 0, 20);
-            // MPlay(0);
+            MPlay(0);
             // destroyImage(1);
         }
         else if (this.screen == -2) // SamSung Funclub
@@ -3372,7 +3396,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             this.dem = 12;
         }
         this.d_gauge = 1;
-        //MPlay(5);  // Something weird here, may be MPlay and call_vib on Real devices have some special effect
+        MPlay(5);  // Something weird here, may be MPlay and call_vib on Real devices have some special effect
         // that make gameOn back to true.
         // I remmember that in this running state there are some (or may be often) similar bug on real divices.
         // It hang on this special screen.
@@ -3873,7 +3897,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     this.s_play = 2;
                 }
             }
-            else if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == -7)) {
+            // GAME_ACTION_UP = 8
+            else if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == -7)) {  // GAME_ACTION_UP = 8
                 if (this.m_mode == 2)
                 {
                     goto_menu();
@@ -3925,6 +3950,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     this.m_mode += 1;
                 }
             }
+            // GAME_ACTION_UP = 8
             else if ((paramInt == 35) || (getGameAction(paramInt) == 8) || ((paramInt >= 49) && (paramInt <= 52)) || (paramInt == -7))
             {
                 if (paramInt > 48) {
@@ -3983,7 +4009,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     this.h_x = i;
                 }
             }
-            else if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == -7))
+            // GAME_ACTION_UP = 8
+            else if ((paramInt == 35) || (getGameAction2() == 8) || (paramInt == -7))   // GAME_ACTION_UP = 8 ; getGameAction(paramInt)
             {
                 Gdx.app.log("DEBUG", "mmode " + this.m_mode);
 
@@ -4031,7 +4058,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             else if ((getGameAction(paramInt) == 5) && (this.b_item != 3)) {
                 this.b_item += 1;
             }
-            if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == -7)) {
+            if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == -7)) {   // GAME_ACTION_UP = 8
                 if (this.s_item == 1)
                 {
                     this.m_mode = -1;
@@ -4151,6 +4178,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     this.m_mode += 1;
                 }
             }
+            // GAME_ACTION_UP = 8
             if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == 49) || (paramInt == 50) || (paramInt == 51) || (paramInt == -7))
             {
                 if (paramInt > 48) {
@@ -4194,6 +4222,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     this.m_mode += 1;
                 }
             }
+            // GAME_ACTION_UP = 8
             if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == 49) || (paramInt == 50) || (paramInt == -7))
             {
                 if (paramInt > 48) {
@@ -4206,7 +4235,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     this.saved_gold = 0;
                     this.mana = 0;
                     // addScore("hero", 0);
-                    this.dbg("††† mana 0");
                 }
                 destroyImage(2);
                 loadImage(3);
@@ -4288,42 +4316,41 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     }
 
-    public void MPlay(int paramInt)
-    {
-        String str1 = null;
-//    this.audioClip = null;
-        if (this.s_play == 1)
-        {
-            String str2 = null;
-            //try
-            //{
-                if (paramInt == 0) {
-                    str2 = "/9.mmf";
-                } else if (paramInt == 1) {
-                    str2 = "/1.mmf";
-                } else if (paramInt == 2) {
-                    str2 = "/6.mmf";
-                } else if (paramInt == 3) {
-                    str2 = "/5.mmf";
-                } else if (paramInt == 4) {
-                    str2 = "/4.mmf";
-                } else if (paramInt == 5) {
-                    str2 = "/8.mmf";
-                } else if (paramInt == 6) {
-                    str2 = "/3.mmf";
-                } else if (paramInt == 7) {
-                    str2 = "/0.mmf";
-                }
-                str1 = new String(str2);
-//        this.audioClip = new AudioClip(1, str1);
-            //}
-            //catch (Exception localException) {}
-//      this.audioClip.play(1, 3);
+    // TODO use best (I forgot tool) for convert mmf to midi and/or to mp3.
+    // Default FormatFactory seem to lost some track of original sound.
+    public void MPlay(int paramInt) {
+        if (paramInt == 0) {
+            // str = "data/audio/night_opening.wav"; // 9.mmf
+            // this.playSound("9", 0, true);
+            // this.playSound("Donald_Christmas", 0, true);
+        } else if (paramInt == 1) {
+            //str = "data/audio/1_use_item.wav"; // /1.mmf
+            this.playSound("1_use_item", 0, false);
+        } else if (paramInt == 2) {
+            //str = "data/audio/6_snow_fly.wav"; // /6.mmf
+            this.playSound("6_snow_fly", 0, false);
+        } else if (paramInt == 3) {
+            //str = "data/audio/5_hit.wav"; // /5.mmf
+            this.playSound("5_hit", 0, false);
+        } else if (paramInt == 4) {
+            //str = "data/audio/4_oh_oh.wav"; // /4.mmf
+            this.playSound("4_oh_oh", 0, false);
+        } else if (paramInt == 5) {
+            //str = "data/audio/special.mp3"; // /8.mmf
+            this.playSound("special", 0, true);
+        } else if (paramInt == 6) {
+            //str = "data/audio/lose.mp3"; // /3.mmf
+            this.playSound("lose", 0, true);
+        } else if (paramInt == 7) {
+            //str = "data/audio/victory.mp3"; // 0.mmf
+            this.playSound("victory", 0, true);
+        } else if (paramInt == 10) {
+            this.playSound("Donald_Christmas", 0, true);
         }
     }
 
     // TODO make plasma, missile sound louder use tool like Audacity. But low volume my be processText good effect simulate explosion far away
-    public void playSound(String paramString, int paramInt)
+    public void playSound(String paramString, int paramInt, boolean isMP3)
     {
         this.current_music = paramString; // Use for stop sound
 
@@ -4337,17 +4364,18 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
         try
         {
-            /*String str = new String("/mmf/" + paramString + ".mid");
-            this.aq = null;
-            this.aq = new AudioClip(3, str);
-            this.aq.play(paramInt, 3);*/
             if(this.music != null){
                 // this.music.dispose();
+                this.music = null;
             }
+            this.music_donald_christmas = null;
+            this.music_opening = null;
 
-            this.music = null;
-            // this.music = Gdx.audio.newMusic(Gdx.files.internal("audio/"+ paramString + ".wav"));
-            this.manager.get("audio/"+ paramString + ".wav", Sound.class).play();
+            if(!isMP3) {
+                this.manager.get("data/audio/"+ paramString + ".wav", Sound.class).play();
+            } else {
+                this.manager.get("data/audio/"+ paramString + ".mp3", Sound.class).play();
+            }
 
             /// this.music.setVolume(0.5f);
             /**
@@ -4363,6 +4391,18 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             System.out.println("Error play sound");
         }
     }
+
+    public void stopSound()
+    {
+        if (this.music != null)
+        {
+            this.music.stop();
+            this.music = null;
+        }
+        // It seem only music can stop, sound only play one ?
+        // this.manager.get("audio/"+ this.current_music + ".wav", Sound.class).play();
+    }
+
 
     public void call_vib(int paramInt)
     {
