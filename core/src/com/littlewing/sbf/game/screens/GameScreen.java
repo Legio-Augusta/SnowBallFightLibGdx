@@ -207,11 +207,15 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     public J2ME_API_Port j2me_port = new J2ME_API_Port();
 
-    private static float MOBI_SCL = (float)Gdx.graphics.getWidth()/240; // FIXME 4.5 is not integer
-    private static int MOBI_H = 320;  // JavaME height = 320px
-    private static int MOBI_W = 240; // Original Java Phone resolution.
+    private static int OLD_MOBI_H = 160;  // JavaME height = 320px
+    private static int OLD_MOBI_W = 128; // Original Java Phone resolution.
+    private static float MOBI_SCL = (float)Gdx.graphics.getWidth()/ OLD_MOBI_W; // FIXME 4.5 is not integer
+    // SGH T199 128x160 ; E250 128x160
+    // SGH M300 128x169 -> my scale 240 x 320 is wrong.
     // float SCALE = (float)SCREEN_HEIGHT/1920;
     float SCALE = (float)SCREEN_WIDTH/1080;
+
+    private static float SCALED_IMG_RATIO = 20 / 3; // Scaled png from original one.
 
     OrthographicCamera camera;
     SpriteBatch batch;
@@ -575,7 +579,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         // (Texture, float x, float destroy_n_e, float originX, float originY, float width, float height, float scaleX, float scaleY, float rotation, int srcX, int srcY, int srcWidth, int srcHeight, boolean flipX, boolean flipY)
         int pos_x = (int) (MOBI_SCL*x);
         // TODO add func to map int color to simpled version of color
-        int pos_y = (int) ((MOBI_H - y)*MOBI_SCL - imgColor[color].getHeight()*scaleY + BOTTOM_SPACE);
+        int pos_y = (int) ((OLD_MOBI_H - y)*MOBI_SCL - imgColor[color].getHeight()*scaleY + BOTTOM_SPACE);
 
         batch.draw(imgColor[color], pos_x, pos_y, 0, 0, imgColor[color].getWidth(), imgColor[color].getHeight(), scaleX, scaleY, 0, 0, 0, (int)(imgColor[color].getWidth()*scaleX), (int)(imgColor[color].getHeight()*scaleY), false, false);
     }
@@ -592,12 +596,19 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
      * @param spriteIdx image sprite index [not used, from AA]
      * 20 => anchor point; It seem this gap is reserved for phone top bar: signal strength, datetime ...
      */
+
     /**
      * J2ME MIDP 2.0
      * public void drawImage(Image img,
      *                       int x,
      *                       int y,
      *                       int anchor) // anchor - the anchor point for positioning the image
+     */
+
+    /**
+     * Orig images have been scaled by 20/3 ratio; TODO scale to 9/2 ratio as 1080 / 240 or try best fit for most devices.
+     * Use GDX scale on draw image.
+     * Refine scaled image is pain in the ass.
      */
     public void drawImage2(SpriteBatch paramGraphics, Texture image, int pos_x, int pos_y, int anchor)
     {
@@ -608,16 +619,22 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
 
         int img_height = (int)(image.getHeight()*SCALE);
-        int position_y = (int) ((MOBI_H - pos_y-20)*MOBI_SCL - img_height + BOTTOM_SPACE); // anchor 20
+        int position_y = (int) ((OLD_MOBI_H - pos_y-20)*MOBI_SCL - img_height + BOTTOM_SPACE); // anchor 20
 
         if (shitty == 0) {
             shitty++;
-             this.dbg("††† MOBI_SCL " + MOBI_SCL + " x " + pos_x*MOBI_SCL + " y " +position_y + " screen height " + SCREEN_HEIGHT);
+             this.dbg("††† MOBI_SCL " + MOBI_SCL + " x " + pos_x*MOBI_SCL + " scr width " + SCREEN_WIDTH + " screen height " + SCREEN_HEIGHT);
             // bot 356
         }
 
         // Fix me hard code position
-        batch.draw(image, (int)(pos_x*MOBI_SCL), position_y - 200, image.getWidth()*SCALE, image.getHeight()*SCALE); // 20 anchor
+        // batch.draw(image, (int)(pos_x*MOBI_SCL), position_y - 200, image.getWidth()*SCALE, image.getHeight()*SCALE); // 20 anchor
+
+        // TODO draw Image with scale param, can anchor to 1080x1920 work without / with minimal change in geometry ?
+
+        float scaleX = (float) (MOBI_SCL / SCALED_IMG_RATIO);
+        float scaleY = (float) (MOBI_SCL / SCALED_IMG_RATIO); // (9/2)*(3/20) = 27 / 40
+        paramGraphics.draw(image, (int)(pos_x*MOBI_SCL), position_y, 0, 0, image.getWidth(), image.getHeight(), scaleX, scaleY, 0, 0, 0, (int)(image.getWidth()), (int)(image.getHeight()), false, false);
     }
 
     public void drawImage(SpriteBatch paramGraphics)
@@ -641,7 +658,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             return;
         }
 
-        int position_y = (int) ((MOBI_H-paramInt2-20)*MOBI_SCL + BOTTOM_SPACE); // anchor 20
+        int position_y = (int) ((OLD_MOBI_H -paramInt2-20)*MOBI_SCL + BOTTOM_SPACE); // anchor 20
         switch(paramInt3) {
             case 1:
                 font.setColor(1, 0, 0, 1); // red
@@ -676,7 +693,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             return;
         }
 
-        int position_y = (int) ((MOBI_H-paramInt2-20)*MOBI_SCL + BOTTOM_SPACE); // anchor 20
+        int position_y = (int) ((OLD_MOBI_H -paramInt2-20)*MOBI_SCL + BOTTOM_SPACE); // anchor 20
         switch(paramInt3) {
             case 1:
                 font.setColor(1, 0, 0, 1); // red
@@ -745,7 +762,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     }
 
     private void loadTexturesOld() {
-        fireBtnTexture = new Texture("data/sprites/fire.png");
+        fireBtnTexture = new Texture("data/gui/fire.png");
 
         /**
          * #0 for red
@@ -754,18 +771,18 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
          */
         imgColor = new Texture[6];
         for (int i = 0; i < 6; i++) {
-            imgColor[i] = new Texture("data/sprites/color-" + i + ".png");
+            imgColor[i] = new Texture("data/gui/color-" + i + ".png");
         }
 
-        imgKeyNum3 = new Texture("data/sprites/use_item_btn.png");
-        imgSpeedUp = new Texture("data/sprites/right_btn.png");
-        imgSpeedDown = new Texture("data/sprites/left_btn.png");
+        imgKeyNum3 = new Texture("data/gui/use_item_btn.png");
+        imgSpeedUp = new Texture("data/gui/right_btn.png");
+        imgSpeedDown = new Texture("data/gui/left_btn.png");
         touch_pad = new Texture("data/gui/touchBackground.png");
         touch_pad_knob = new Texture("data/gui/touchKnob.png");
     }
 
     private void loadTextures() {
-        fireBtnTexture = new Texture("data/sprites/fire.png");
+        fireBtnTexture = new Texture("data/gui/fire.png");
 
         if (school <= 0) {
             school = 1;
@@ -815,12 +832,12 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
          */
         imgColor = new Texture[6];
         for (int i = 0; i < 6; i++) {
-            imgColor[i] = new Texture("data/sprites/color-" + i + ".png");
+            imgColor[i] = new Texture("data/gui/color-" + i + ".png");
         }
 
-        imgKeyNum3 = new Texture("data/sprites/use_item_btn.png");
-        imgSpeedUp = new Texture("data/sprites/speed_up.png");
-        imgSpeedDown = new Texture("data/sprites/speed_down.png");
+        imgKeyNum3 = new Texture("data/gui/use_item_btn.png");
+        imgSpeedUp = new Texture("data/gui/speed_up.png");
+        imgSpeedDown = new Texture("data/gui/speed_down.png");
         touch_pad = new Texture("data/gui/touchBackground.png");
         touch_pad_knob = new Texture("data/gui/touchKnob.png");
 
@@ -1188,11 +1205,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         {
             if (paramInt == 2)
             {
-                this.imgMM = new Texture("data/sprites/mm.png");
-                this.imgBk = new Texture("data/sprites/bk.png");
-                this.imgSl = new Texture("data/sprites/sl.png");
-                this.imgPl = new Texture("data/sprites/play.png");
-                this.imgCh = new Texture("data/sprites/check.png");
+                this.imgMM = new Texture("sprites/mm.png");
+                this.imgBk = new Texture("sprites/bk.png");
+                this.imgSl = new Texture("sprites/sl.png");
+                this.imgPl = new Texture("sprites/play.png");
+                this.imgCh = new Texture("sprites/check.png");
             }
             else
             {
@@ -1203,101 +1220,101 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     this.imgEnemy = new Texture[4];
                     this.imgItem = new Texture[9];
                     this.imgItem_hyo = new Texture[2];
-                    this.imgItem_hyo[0] = new Texture("data/sprites/hyo0.png");
-                    this.imgItem_hyo[1] = new Texture("data/sprites/hyo1.png");
+                    this.imgItem_hyo[0] = new Texture("sprites/hyo0.png");
+                    this.imgItem_hyo[1] = new Texture("sprites/hyo1.png");
                     for (i = 0; i < 5; i++) {
-                        this.imgHero[i] = new Texture("data/sprites/hero" + i + ".png");
+                        this.imgHero[i] = new Texture("sprites/hero" + i + ".png");
                     }
                     if (get_random(2) == 0) {
                         for (int j = 0; j < 4; j++) {
-                            this.imgEnemy[j] = new Texture("data/sprites/enemy0" + j + ".png");
+                            this.imgEnemy[j] = new Texture("sprites/enemy0" + j + ".png");
                         }
                     } else {
                         for (int k = 0; k < 4; k++) {
-                            this.imgEnemy[k] = new Texture("data/sprites/enemy1" + k + ".png");
+                            this.imgEnemy[k] = new Texture("sprites/enemy1" + k + ".png");
                         }
                     }
                     for (int m = 0; m < 9; m++) {
-                        this.imgItem[m] = new Texture("data/sprites/item" + m + ".png");
+                        this.imgItem[m] = new Texture("sprites/item" + m + ".png");
                     }
                     System.gc();
-                    this.imgSnow_g = new Texture("data/sprites/snow_gauge.png");
-                    this.imgPwd = new Texture("data/sprites/power.png");
-                    this.imgShadow = new Texture("data/sprites/shadow0.png");
-                    this.imgPok = new Texture("data/sprites/pok.png");
-                    this.imgPPang = new Texture("data/sprites/bbang0.png");
-                    this.imgPPang1 = new Texture("data/sprites/bbang1.png");
-                    this.imgH_ppang = new Texture("data/sprites/h_bbang.png");
-                    this.imgCh = new Texture("data/sprites/check.png");
-                    this.imgAl = new Texture("data/sprites/al.png");
+                    this.imgSnow_g = new Texture("sprites/snow_gauge.png");
+                    this.imgPwd = new Texture("sprites/power.png");
+                    this.imgShadow = new Texture("sprites/shadow0.png");
+                    this.imgPok = new Texture("sprites/pok.png");
+                    this.imgPPang = new Texture("sprites/bbang0.png");
+                    this.imgPPang1 = new Texture("sprites/bbang1.png");
+                    this.imgH_ppang = new Texture("sprites/h_bbang.png");
+                    this.imgCh = new Texture("sprites/check.png");
+                    this.imgAl = new Texture("sprites/al.png");
                     this.imgEffect = new Texture[2];
-                    this.imgEffect[0] = new Texture("data/sprites/effect0.png");
-                    this.imgEffect[1] = new Texture("data/sprites/effect1.png");
+                    this.imgEffect[0] = new Texture("sprites/effect0.png");
+                    this.imgEffect[1] = new Texture("sprites/effect1.png");
                 }
                 else if (paramInt == 100)
                 {
-                    this.imgBack = new Texture("data/sprites/back" + this.school + ".png");
+                    this.imgBack = new Texture("sprites/back" + this.school + ".png");
                 }
                 else if (paramInt == 7)
                 {
                     this.imgBoss = new Texture[4];
                     for (i = 0; i < 4; i++) {
-                        this.imgBoss[i] = new Texture("data/sprites/boss" + this.e_boss + i + ".png");
+                        this.imgBoss[i] = new Texture("sprites/boss" + this.e_boss + i + ".png");
                     }
                 }
                 else if (paramInt == -6)
                 {
                     this.imgStage = new Texture[5];
                     for (i = 0; i < 5; i++) {
-                        this.imgStage[i] = new Texture("data/sprites/word-" + i + ".png");
+                        this.imgStage[i] = new Texture("sprites/word-" + i + ".png");
                     }
-                    this.imgStage_num = new Texture("data/sprites/stage" + this.tmp_stage + ".png");
+                    this.imgStage_num = new Texture("sprites/stage" + this.tmp_stage + ".png");
                 }
                 else if (paramInt == 8)
                 {
                     this.imgSpecial = new Texture[3];
                     for (i = 0; i < 3; i++) {
-                        this.imgSpecial[i] = new Texture("data/sprites/special" + i + ".png");
+                        this.imgSpecial[i] = new Texture("sprites/special" + i + ".png");
                     }
                     this.gameOn = true;
                 }
                 else if (paramInt == 9)
                 {
-                    this.imgSp = new Texture("data/sprites/sp" + this.special + ".png");
+                    this.imgSp = new Texture("sprites/sp" + this.special + ".png");
                 }
                 else if (paramInt == 3)
                 {
-                    this.imgVill = new Texture("data/sprites/village.png");
-                    this.imgCh = new Texture("data/sprites/hero_icon.png");
-                    this.imgSchool = new Texture("data/sprites/school.png");
+                    this.imgVill = new Texture("sprites/village.png");
+                    this.imgCh = new Texture("sprites/hero_icon.png");
+                    this.imgSchool = new Texture("sprites/school.png");
                 }
                 else if (paramInt == 31)
                 {
                     if (this.m_mode == 1) {
-                        this.imgShop = new Texture("data/sprites/shop0.png");
+                        this.imgShop = new Texture("sprites/shop0.png");
                     }
                     if (this.m_mode == 0) {
-                        this.imgShop = new Texture("data/sprites/shop1.png");
+                        this.imgShop = new Texture("sprites/shop1.png");
                     }
                 }
                 else if (paramInt == 200)
                 {
-                    this.imgVictory = new Texture("data/sprites/victory.png");
-                    this.imgV = new Texture("data/sprites/v.png");
-                    this.imgHero_v = new Texture("data/sprites/hero-vic.png");
+                    this.imgVictory = new Texture("sprites/victory.png");
+                    this.imgV = new Texture("sprites/v.png");
+                    this.imgHero_v = new Texture("sprites/hero-vic.png");
                 }
                 else if (paramInt == 65336)
                 {
-                    this.imgLose = new Texture("data/sprites/lose.png");
-                    this.imgHero_l = new Texture("data/sprites/hero-lose.png");
+                    this.imgLose = new Texture("sprites/lose.png");
+                    this.imgHero_l = new Texture("sprites/hero-lose.png");
                 }
                 else if (paramInt == 1)
                 {
                     this.imgNum = new Texture[10];
                     for (i = 0; i < 10; i++) {
-                        this.imgNum[i] = new Texture("data/sprites/" + i + ".png");
+                        this.imgNum[i] = new Texture("sprites/" + i + ".png");
                     }
-                    this.imgLogo = new Texture("data/sprites/logo.png");
+                    this.imgLogo = new Texture("sprites/logo.png");
                 }
             }
         }
