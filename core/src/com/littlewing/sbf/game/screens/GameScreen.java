@@ -22,7 +22,8 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Vector2;
 
 import com.littlewing.sbf.game.OverlapTester;
 import com.littlewing.sbf.game.J2ME_API_Port;
@@ -63,7 +64,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private int screen = -1;
     private boolean gameOn = true;
     private String message;
-    private int m_mode = 1;
+    private int m_mode = 1;  // For shop
     private int s_play = 1;
     private int v_mode = 1;
     //  AudioClip audioClip = null;
@@ -75,11 +76,17 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private Texture imgSl;
     private Texture imgPl;
     private Texture imgCh;
+    private Texture imgHeroIcon; // nickfarrow addition fix
     private Texture[] imgNum;
     private Texture imgBack;
+    private Texture[] imgBacks; // nickfarrow
     private Texture[] imgHero;
     private Texture[] imgEnemy;
     private Texture[] imgBoss;
+    private Texture[] imgBoss1; // nickfarrow
+    private Texture[] imgBoss2; // nickfarrow
+    private Texture[] imgBoss3; // nickfarrow
+    private Texture[] imgBoss4; // nickfarrow
     private Texture imgAl;
     private Texture imgShadow;
     private Texture imgPok;
@@ -93,8 +100,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private Texture imgVill;
     private Texture imgSchool;
     private Texture imgShop;
+    private Texture[] imgShops; // nickfarrow
     private Texture[] imgSpecial;
     private Texture imgSp;
+    private Texture[] imgSps; // nickfarrow
     private Texture[] imgEffect;
     private Texture imgVictory;
     private Texture imgV;
@@ -102,6 +111,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private Texture imgLose;
     private Texture imgHero_l;
     private Texture imgStage_num;
+    private Texture[] imgStage_nums; // nickfarrow
     private Texture ui; // Customized
 
     // GDX added to fix J2ME
@@ -111,7 +121,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private Texture txt4;
     private Texture txt4b;
 
-
     private Texture title;
     private Texture present;
     private Texture sam_logo;
@@ -120,14 +129,14 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private Texture allClear;
 
     private String current_music = "";
-    public int af = 1;
+    public int af = 1; // sound on/off ?
     public static AssetManager manager;
     private String curent_music = "";
     // End GDX added to fix J2ME
 
     private Texture[] imgStage;
     private int stage;
-    private int last_stage = 31; // orig.11
+    private int last_stage = 11;
     private int tmp_stage;
     private int school;
     private int state;
@@ -163,7 +172,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private int item_c_num = 2;
     private int item_d_num;
     private int b_item;
-    private int s_item;
+    private int s_item; // shop
     private int[] e_x;
     private int[] e_y;
     private int e_num;
@@ -206,13 +215,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private int al;
     private int d_gauge;
 
-    public J2ME_API_Port j2me_port = new J2ME_API_Port();
-
     private static int OLD_MOBI_H = 160;  // JavaME height = 320px
     private static int OLD_MOBI_W = 128; // Original Java Phone resolution. Damn many orig png have 128x => it should be 128 width tho.
     private static float MOBI_SCL = (float)Gdx.graphics.getWidth()/ OLD_MOBI_W; // FIXME 4.5 is not integer
     // SGH T199 128x160 ; E250 128x160
-    // SGH M300 128x169 -> my scale 240 x 320 is wrong.
+    // SGH M300 128x160 -> my scale 240 x 320 is wrong.
     // float SCALE = (float)SCREEN_HEIGHT/1920;
     float SCALE = (float)SCREEN_WIDTH/1080;
 
@@ -221,6 +228,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     OrthographicCamera camera;
     SpriteBatch batch;
     Texture fireBtnTexture;
+    Texture snowWhiteBg;
 
     // Ratio 3:4 ~ 9:12 So with ratio 9:16 we lost (not use) 4/16 = 1/4 of height.
     // Ie. 1920 we will cut 1/4 = 480px to keep ratio 3:4 1080:1440.
@@ -230,20 +238,25 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private static int BOTTOM_SPACE = (int)(SCREEN_HEIGHT/8 + 20*MOBI_SCL); // May be change for fit touch button
 
     // Use rectangle until figure out how to work with BoundingBox multi input.
-    Rectangle upBtnRect = new Rectangle((20+(200/3))*SCALE, (20+(400/3))*SCALE, 72*SCALE + 150, 70*SCALE); // + 150 Jan-21
+    Rectangle upBtnRect = new Rectangle((20+(200/3))*SCALE, (20+(400/3))*SCALE, 72*SCALE, 70*SCALE+ 150); // + 150 Jan-21
+
     Rectangle downBtnRect = new Rectangle((20+(200/3))*SCALE, 20*SCALE, 72*SCALE, 70*SCALE);
+
     Rectangle leftBtnRect = new Rectangle(20*SCALE, (20+(200/6))*SCALE, 70*SCALE, 140*SCALE);
     Rectangle rightBtnRect = new Rectangle((20+(400/3))*SCALE, (20+(200/6))*SCALE, 2*70*SCALE, 140*SCALE);
+
     Rectangle optionBtnRect = new Rectangle(SCREEN_WIDTH/2+150*SCALE, SCREEN_HEIGHT/8, SCREEN_WIDTH/2-180*SCALE, 70*SCALE);
-//    Rectangle leftMenuBtn = new Rectangle(SCREEN_WIDTH-(275+400)*SCALE, 20*SCALE, 200*SCALE, 100*SCALE);
+
+    Rectangle speedUpBtnRect = new Rectangle(SCREEN_WIDTH-(275+400)*SCALE, 20*SCALE + 100*SCALE + 20, 200*SCALE, 100*SCALE);
+    Rectangle speedDownBtnRect = new Rectangle(SCREEN_WIDTH-(275+200)*SCALE, 20*SCALE + 100*SCALE + 20, 200*SCALE, 100*SCALE);
+
     Rectangle leftMenuBtn = new Rectangle(SCREEN_WIDTH-(275+400)*SCALE, 20*SCALE, 200*SCALE, 100*SCALE);
     Rectangle rightMenuBtn = new Rectangle(SCREEN_WIDTH-(275+200)*SCALE, 20*SCALE, 200*SCALE, 100*SCALE);
-    // Separate speed button, reuse use item btn
 
-    private int game_action = 0;
+    private int game_action = DUMP_ACTION_STATE;
 
     // Careful with key_code, it's different from Mobile brands, manufacturers
-    private int key_code = 0;
+    private int key_code = DUMP_ACTION_STATE; // 0
     private static final int GAME_ACTION_OK = 8; // simulate KEY, gameAction in J2ME
     private static final int GAME_ACTION_LEFT = 2;
     private static final int GAME_ACTION_RIGHT = 5;
@@ -255,6 +268,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private static final int KEY_STAR = 0;
     private static final int KEY_NUM_3 = 0; // for item mode
     private static final int KEY_SHARP = 0;
+
+    private static final int DUMP_ACTION_STATE = -6996;
 
     Vector3 touchPoint;
     // TouchStatus should be use Enum
@@ -276,12 +291,17 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private Texture imgKeyNum3;
     private Texture imgSpeedUp;
     private Texture imgSpeedDown;
+
     private Texture touch_pad;
     private Texture touch_pad_knob;
+
+    private Texture imgBtnLeft;
+    private Texture imgBtnRight;
+
     BitmapFont font;
     private Music music;
     private Music music_opening = Gdx.audio.newMusic(Gdx.files.internal("data/audio/night.wav"));
-    private Music music_donald_christmas = Gdx.audio.newMusic(Gdx.files.internal("data/audio/Donald_Christmas.mp3"));
+    // private Music music_donald_christmas = Gdx.audio.newMusic(Gdx.files.internal("data/audio/Donald_Christmas.mp3"));
     Viewport viewport;
 
     private int shitty = 0; // debug flag
@@ -304,6 +324,14 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         Gdx.input.setInputProcessor(this);
         Gdx.input.setCatchBackKey( true );
 
+        this.loadMusic();
+
+        create();
+
+        touchPoint = new Vector3();
+    }
+
+    private void loadMusic() {
         manager = new AssetManager();
         // TODO edit sound for louder; investigate sound vs music
         // Some player like notation player3, audacity... that contribute to make these mmf back to live.
@@ -318,11 +346,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         manager.load("data/audio/Donald_Christmas.mp3", Sound.class);
 
         manager.finishLoading();
-
-        // Calculate global var width/height, view port ...
-        create();
-
-        touchPoint = new Vector3();
     }
 
     // Android GDX
@@ -344,27 +367,29 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        this.key_code = 0;
+        this.key_code = DUMP_ACTION_STATE; // 0
         batch.begin();
 
         touchPoint.set(Gdx.input.getX(),Gdx.input.getY(), 0);
 
         // Gdx.app.log("DEBUG", "touch " + touchPoint.x + " y "+ (SCREEN_HEIGHT-touchPoint.y) + " key_code "+ this.key_code + " scrn "+ this.screen);
-        game_action = getGameAction2(); // pointer
+        game_action = getGameAction(pointer); // pointer
 
         if(isTouchedSpeedUp()) { // smaller value, shorter sleep
+            this.dbg(" touch up up ");
             if(game_speed >= 12) {
                 Gdx.input.vibrate(5);
                 game_speed -= 8;
             }
-            // setGameSpeed(game_speed);
+            setGameSpeed(game_speed);
         }
         if(isTouchedSpeedDown()) {
+            this.dbg(" touch up down ");
             if(game_speed <= 128) {
                 Gdx.input.vibrate(5);
                 game_speed += 8;
             }
-            // setGameSpeed(game_speed);
+            setGameSpeed(game_speed);
         }
 
         Gdx.input.vibrate(5);
@@ -372,6 +397,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         keyPressed();
         batch.end();
 
+        showDeviceInfos();
         return false;
     }
 
@@ -405,6 +431,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     @Override
     public void render(float delta) {
         Gdx.gl20.glClearColor(0, 0, 0, 1);
+        //Gdx.gl20.glClearColor(255/255f, 255/255f, 255/255f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         camera.position.x = SCREEN_WIDTH/2;
         camera.position.y = SCREEN_HEIGHT/2;
@@ -421,8 +448,22 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         drawUI();
         batch.end();
 
+        int lineWidth = 24;
+        Color debug = new Color();
         shapeRenderer.begin(ShapeType.Line);
+        shapeRenderer.setColor(Color.BLUE);
         shapeRenderer.rect(rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getHeight());
+        shapeRenderer.rectLine(new Vector2(rectangle.getX(), rectangle.getWidth()),new Vector2(rectangle.getY(), rectangle.getHeight()),lineWidth);
+
+        shapeRenderer.setColor(Color.BLACK);
+        shapeRenderer.rect(upBtnRect.getX(), upBtnRect.getY(), upBtnRect.getWidth(), upBtnRect.getHeight());
+        shapeRenderer.setColor(Color.GRAY);
+        shapeRenderer.rect(downBtnRect.getX(), downBtnRect.getY(), downBtnRect.getWidth(), downBtnRect.getHeight());
+        shapeRenderer.setColor(Color.RED);
+        shapeRenderer.rect(leftBtnRect.getX(), leftBtnRect.getY(), leftBtnRect.getWidth(), leftBtnRect.getHeight());
+        shapeRenderer.setColor(Color.ORANGE);
+        shapeRenderer.rect(rightBtnRect.getX(), rightBtnRect.getY(), rightBtnRect.getWidth(), rightBtnRect.getHeight());
+
         shapeRenderer.end();
     }
 
@@ -451,7 +492,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         int VP_WIDTH = 1080;
         int VP_HEIGHT = 1920;
         camera.setToOrtho(false, SCREEN_WIDTH, SCREEN_HEIGHT);
-        viewport = new FitViewport(VP_WIDTH, VP_HEIGHT, camera);
+        viewport = new FitViewport(VP_WIDTH, VP_HEIGHT, camera); // TODO investigate is this shit make effect ?
         viewport.apply();
 
         camera.position.x = SCREEN_WIDTH/2;
@@ -462,11 +503,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         Gdx.input.setInputProcessor(this); // TODO use an InputProcessor object
 
         loadTextures();
-        // this.sbfme.startApp();
 
         font = new BitmapFont();
         font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-        font.getData().setScale(6);
+        font.getData().setScale(5);
     }
 
     public void resize(int width, int height) {
@@ -474,6 +514,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         camera.position.set(camera.viewportWidth/2,camera.viewportHeight/2,0);
     }
 
+    // Oh damn notch, bottom space
     protected boolean isTouchedUp() {
         this.key_code = -1;
         return OverlapTester.pointInRectangle(upBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
@@ -508,17 +549,15 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         return OverlapTester.pointInRectangle(leftMenuBtn, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
     }
     protected boolean isTouchedMenuRight() {
-        //this.key_code = KEY_RIGHT_MENU;
+        this.key_code = KEY_RIGHT_MENU;
         return OverlapTester.pointInRectangle(rightMenuBtn, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
     }
 
     protected boolean isTouchedSpeedUp() {
-        // return OverlapTester.pointInRectangle(speedUpBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
-        return false;
+        return OverlapTester.pointInRectangle(speedUpBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
     }
     protected boolean isTouchedSpeedDown() {
-        // return OverlapTester.pointInRectangle(speedDownBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
-        return false;
+        return OverlapTester.pointInRectangle(speedDownBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
     }
 
     protected Preferences getPrefs() {
@@ -526,24 +565,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             prefs = Gdx.app.getPreferences("gamestate");
         }
         return prefs;
-    }
-
-    public boolean isSoundEffectsEnabled() {
-        return getPrefs().getBoolean(PREF_SOUND_ENABLED, true);
-    }
-
-    public void setSoundEffectsEnabled(boolean soundEffectsEnabled) {
-        getPrefs().putBoolean(PREF_SOUND_ENABLED, soundEffectsEnabled);
-        getPrefs().flush();
-    }
-
-    public boolean getVibraEnabled() {
-        return getPrefs().getBoolean(PREF_VIBRATION, true);
-    }
-
-    public void setVibraEnabled(boolean vibra) {
-        getPrefs().putBoolean(PREF_VIBRATION, vibra);
-        getPrefs().flush();
     }
 
     public void empty_func() {}
@@ -605,7 +626,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         // TODO add func to map int color to simpled version of color
         int pos_y = (int) ((OLD_MOBI_H - y)*MOBI_SCL - imgColor[color].getHeight()*scaleY + BOTTOM_SPACE);
 
-        batch.draw(imgColor[color], pos_x, pos_y, 0, 0, imgColor[color].getWidth(), imgColor[color].getHeight(), scaleX, scaleY, 0, 0, 0, (int)(imgColor[color].getWidth()*scaleX), (int)(imgColor[color].getHeight()*scaleY), false, false);
+//        batch.draw(imgColor[color], pos_x, pos_y, 0, 0, imgColor[color].getWidth(), imgColor[color].getHeight(), scaleX, scaleY, 0, 0, 0, (int)(imgColor[color].getWidth()*scaleX), (int)(imgColor[color].getHeight()*scaleY), false, false);
     }
 
     /**
@@ -630,34 +651,23 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
      */
 
     /**
-     * Orig images have been scaled by 20/3 ratio; TODO scale to 9/2 ratio as 1080 / 240 or try best fit for most devices.
-     * Use GDX scale on draw image.
      * Refine scaled image is pain in the ass.
      */
     public void drawImage2(SpriteBatch paramGraphics, Texture image, int pos_x, int pos_y, int anchor)
     {
-        // 53 as BOTTOM_SPACE (~ 240 = 480/2) 240/4.5 ~= 53 (tile cell)
         if (image == null) {
             this.dbg("Null image drawImage2");
             return;
         }
 
         int img_height = (int)(image.getHeight()*SCALE);
-        int position_y = (int) ((OLD_MOBI_H - pos_y-20)*MOBI_SCL - img_height + BOTTOM_SPACE); // anchor 20
+        int position_y = (int) ((OLD_MOBI_H - pos_y - anchor)*MOBI_SCL - img_height + BOTTOM_SPACE); // anchor 20 pos_y -20
 
-        if (shitty == 0) {
-            shitty++;
-             this.dbg("††† MOBI_SCL " + MOBI_SCL + " x " + pos_x*MOBI_SCL + " scr width " + SCREEN_WIDTH + " screen height " + SCREEN_HEIGHT);
-            // bot 356
-        }
+        // batch.draw(image, (int)(pos_x*MOBI_SCL), position_y, image.getWidth()*SCALE, image.getHeight()*SCALE); // draw no scale
 
-        // Fix me hard code position
-        // batch.draw(image, (int)(pos_x*MOBI_SCL), position_y - 200, image.getWidth()*SCALE, image.getHeight()*SCALE); // 20 anchor
-
-        // TODO draw Image with scale param, can anchor to 1080x1920 work without / with minimal change in geometry ?
-
-        float scaleX = (float) (MOBI_SCL / SCALED_IMG_RATIO);
-        float scaleY = (float) (MOBI_SCL / SCALED_IMG_RATIO); // (9/2)*(3/20) = 27 / 40
+        // Draw Image with scale param, can anchor to 1080x1920 work without / with minimal change in geometry ?
+        float scaleX = (float) (MOBI_SCL / SCALED_IMG_RATIO); // 1080 / 128 / 9
+        float scaleY = (float) (MOBI_SCL / SCALED_IMG_RATIO);
         paramGraphics.draw(image, (int)(pos_x*MOBI_SCL), position_y, 0, 0, image.getWidth(), image.getHeight(), scaleX, scaleY, 0, 0, 0, (int)(image.getWidth()), (int)(image.getHeight()), false, false);
     }
 
@@ -733,15 +743,15 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
      * Simulate J2ME keyCode
      * https://docs.oracle.com/javame/config/cldc/ref-impl/midp2.0/jsr118/constant-values.html#javax.microedition.lcdui.Canvas.UP
      * */
-    public int getGameAction(int keyCode) {
+    public int getGameAction2(int keyCode) {
         return game_action;
     }
 
-    public int getGameAction2() { // int pointer
+    public int getGameAction(int pointer) { // int pointer
         if(isTouchedUp()) {
             Gdx.input.vibrate(15);
             this.key_code = -1;
-            this.dbg("††† up ↑-↑-↑-" + "keycode= " + this.key_code + " game action= " + GAME_ACTION_UP + " " + touchPoint.x + " y " + touchPoint.y);
+            this.dbg("††† up ↑-↑-↑-" + upBtnRect.getX() + "," + upBtnRect.getWidth() + " " + upBtnRect.getY() + ","+(SCREEN_HEIGHT-upBtnRect.getHeight()) + " +" + upBtnRect.getHeight()  +  " key= " + this.key_code + " action= " + game_action + " after " + GAME_ACTION_UP + " " + touchPoint.x + " y " + touchPoint.y);
             return GAME_ACTION_UP;
         }
         if(isTouchedDown()) { // Careful with game state, ie. item_mode = 0
@@ -770,79 +780,55 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             return GAME_ACTION_OK;
         }
 
-        return 0;
+        return DUMP_ACTION_STATE; // 0
     }
 
+    // FIXME anchor with RECTANGLE
     protected void drawUI() {
+        //batch.draw(snowWhiteBg, 0, (int)(50*SCALE), snowWhiteBg.getWidth()*SCALE, snowWhiteBg.getHeight()*SCALE);
+
         // It seem single image can have it's own event Listener such as: touchDown/Up; See bellow
         // https://github.com/BrentAureli/ControllerDemo/blob/master/core/src/com/brentaureli/overlaydemo/Controller.java
         // TODO use custom IMAGE addEventListener for more UI refine. Can image used as Texture ?
+
         batch.draw(fireBtnTexture, SCREEN_WIDTH-(50+fireBtnTexture.getWidth())*SCALE, (int)(50*SCALE), fireBtnTexture.getWidth()*SCALE, fireBtnTexture.getHeight()*SCALE);
-        batch.draw(imgKeyNum3, SCREEN_WIDTH-(50+fireBtnTexture.getWidth()+fireBtnTexture.getWidth()/2 + imgKeyNum3.getWidth())*SCALE, (40 + imgSpeedUp.getHeight())*SCALE, imgKeyNum3.getWidth()*SCALE, imgKeyNum3.getHeight()*SCALE);
+        batch.draw(imgKeyNum3, SCREEN_WIDTH-(50+fireBtnTexture.getWidth()+fireBtnTexture.getWidth()/2 + imgKeyNum3.getWidth())*SCALE, (40 + imgSpeedUp.getHeight())*SCALE - 150, imgKeyNum3.getWidth()*SCALE, imgKeyNum3.getHeight()*SCALE);
         batch.draw(imgSpeedUp, SCREEN_WIDTH-(50+fireBtnTexture.getWidth()+fireBtnTexture.getWidth()/2 + imgSpeedUp.getWidth())*SCALE, 20*SCALE, imgSpeedUp.getWidth()*SCALE, imgSpeedUp.getHeight()*SCALE);
         batch.draw(imgSpeedDown, SCREEN_WIDTH-(50+fireBtnTexture.getWidth()+fireBtnTexture.getWidth()/2 + 2*imgSpeedDown.getWidth())*SCALE, 20*SCALE, imgSpeedDown.getWidth()*SCALE, imgSpeedDown.getHeight()*SCALE);
         batch.draw(touch_pad, 20*SCALE, 20*SCALE, touch_pad.getWidth()*SCALE, touch_pad.getHeight()*SCALE);
         batch.draw(touch_pad_knob, (20+touch_pad.getWidth()/2-touch_pad_knob.getWidth()/2)*SCALE, (20+touch_pad.getHeight()/2-touch_pad_knob.getHeight()/2)*SCALE, touch_pad_knob.getWidth()*SCALE, touch_pad_knob.getHeight()*SCALE);
+
+        batch.draw(imgBtnLeft, SCREEN_WIDTH-(50+fireBtnTexture.getWidth()+fireBtnTexture.getWidth()/2 + imgBtnLeft.getWidth())*SCALE, 20*SCALE + 100*SCALE +20, imgBtnLeft.getWidth()*SCALE, imgBtnLeft.getHeight()*SCALE);
+        batch.draw(imgBtnRight, SCREEN_WIDTH-(50+fireBtnTexture.getWidth()+fireBtnTexture.getWidth()/2 + imgBtnRight.getWidth())*SCALE, 20*SCALE + 100*SCALE +20, imgBtnRight.getWidth()*SCALE, imgBtnRight.getHeight()*SCALE);
     }
 
-    private void loadTexturesOld() {
-        fireBtnTexture = new Texture("data/gui/fire.png");
-
-        /**
-         * #0 for red
-         * #1 for light blue, #3 light blue 2 6DCFF6
-         * #2 for light yellow, #4 gray 93959A #5 for white
-         */
-        imgColor = new Texture[6];
-        for (int i = 0; i < 6; i++) {
-            imgColor[i] = new Texture("data/gui/color-" + i + ".png");
-        }
-
-        imgKeyNum3 = new Texture("data/gui/use_item_btn.png");
-        imgSpeedUp = new Texture("data/gui/right_btn.png");
-        imgSpeedDown = new Texture("data/gui/left_btn.png");
-        touch_pad = new Texture("data/gui/touchBackground.png");
-        touch_pad_knob = new Texture("data/gui/touchKnob.png");
-    }
-
+    // TODO use texture region
     private void loadTextures() {
         fireBtnTexture = new Texture("data/gui/fire.png");
+        snowWhiteBg = new Texture("data/sprites/snow.png"); // white_bg
 
-        if (school <= 0) {
-            school = 1;
+        this.imgBacks = new Texture[4];
+        for (int i = 0; i < 4; i++) {
+            this.imgBacks[i] = new Texture("data/sprites/back" + (i+1) + ".png");
         }
-        imgBack = new Texture("data/sprites/back" + school + ".png");
-        imgAl = new Texture("data/sprites/al.png");
-        imgShadow = new Texture("data/sprites/shadow0.png");
-        imgPok = new Texture("data/sprites/pok.png");
-        imgPPang = new Texture("data/sprites/bbang0.png");
-        imgPPang1 = new Texture("data/sprites/bbang1.png");
-        imgH_ppang = new Texture("data/sprites/h_bbang.png");
-        imgSnow_g = new Texture("data/sprites/snow_gauge.png");
-        imgPwd = new Texture("data/sprites/power.png");
 
-        // TODO init Item object item value, not just Texture
-        imgItem = new Texture[9];
-        for (int m = 0; m < 9; m++) {
-            imgItem[m] = new Texture("data/sprites/item" + m + ".png");
-        }
-        imgItem_hyo = new Texture[2];
-        imgItem_hyo[0] = new Texture("data/sprites/hyo0.png");
-        imgItem_hyo[1] = new Texture("data/sprites/hyo1.png");
+        // This one fix school = 0 -> back0.png not exist
+        school = (school <= 0) ? 1 : school;
+        imgBack = imgBacks[school-1];
 
         imgSpecial = new Texture[3];
         for (int i = 0; i < 3; i++) {
             imgSpecial[i] = new Texture("data/sprites/special" + i + ".png");
         }
-        // TODO use texture region
-        imgEffect = new Texture[2];
-        imgEffect[0] = new Texture("data/sprites/effect0.png");
-        imgEffect[1] = new Texture("data/sprites/effect1.png");
 
-        if (tmp_stage <= 8) {
-            tmp_stage = 1;
+        tmp_stage =  (tmp_stage <= 0) ? 1 : tmp_stage;
+        tmp_stage = (tmp_stage > 4) ? 4 : tmp_stage;
+        imgStage_num = new Texture("data/sprites/stage" + tmp_stage + ".png");
+        imgStage_nums = new Texture[4]; // nickfarrow
+        for (int i=0; i < 4; i++) {
+            imgStage_nums[i] = new Texture("data/sprites/stage" + (i+1) + ".png");
         }
-        imgStage_num = new Texture("data/sprites/stage" + tmp_stage + ".png"); // tmp_stage +
+
         ui = new Texture("data/sprites/ui.png");  // h:160p (1080p)
         imgStage = new Texture[5];
         for (int i = 0; i < 5; i++) {
@@ -865,6 +851,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         touch_pad = new Texture("data/gui/touchBackground.png");
         touch_pad_knob = new Texture("data/gui/touchKnob.png");
 
+        imgBtnLeft = new Texture("data/gui/left_btn.png");
+        imgBtnRight = new Texture("data/gui/right_btn.png");
+
         // Old load textures
         int i;
 
@@ -873,6 +862,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         this.imgSl = new Texture("data/sprites/sl.png");
         this.imgPl = new Texture("data/sprites/play.png");
         this.imgCh = new Texture("data/sprites/check.png");
+        this.imgHeroIcon = new Texture("data/sprites/hero_icon.png"); // nickfarrow
 
         // 6
         this.imgHero = new Texture[5];
@@ -914,10 +904,24 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         this.imgBack = new Texture("data/sprites/back" + this.school + ".png");
 
         // 7
-        this.imgBoss = new Texture[4];
-        for (i = 0; i < 4; i++) { // e_boss = 0 as init, but image start = 1;  fixme
-            this.imgBoss[i] = new Texture("data/sprites/boss" + (this.e_boss + 1) + i + ".png");
+        this.imgBoss1 = new Texture[4]; // nickfarrow
+        this.imgBoss2 = new Texture[4];
+        this.imgBoss3 = new Texture[4];
+        this.imgBoss4 = new Texture[4];
+        for (i = 0; i < 4; i++) {
+            this.imgBoss1[i] = new Texture("data/sprites/boss1" + i + ".png");
         }
+        for (i = 0; i < 4; i++) {
+            this.imgBoss2[i] = new Texture("data/sprites/boss2" + i + ".png");
+        }
+        for (i = 0; i < 4; i++) {
+            this.imgBoss3[i] = new Texture("data/sprites/boss3" + i + ".png");
+        }
+        for (i = 0; i < 4; i++) {
+            this.imgBoss4[i] = new Texture("data/sprites/boss4" + i + ".png");
+        }
+
+        this.imgBoss = this.imgBoss1;
 
         // -6
         this.imgStage = new Texture[5];
@@ -934,20 +938,21 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         this.gameOn = true;
 
         // 9
-        this.imgSp = new Texture("data/sprites/sp" + (this.special+1) + ".png"); // fixme 0+1
+        this.imgSp = new Texture("data/sprites/sp" + this.special + ".png");
+        this.imgSps = new Texture[3];
+        for (i=0; i < 3; i++) {
+            this.imgSps[i] = new Texture("data/sprites/sp" + i + ".png");
+        }
 
         // 3
         this.imgVill = new Texture("data/sprites/village.png");
-        this.imgCh = new Texture("data/sprites/hero_icon.png");
+        this.imgCh = new Texture("data/sprites/check.png");
         this.imgSchool = new Texture("data/sprites/school.png");
 
         // 31 fix me, this should be load all at start
-        if (this.m_mode == 1) {
-            this.imgShop = new Texture("data/sprites/shop0.png");
-        }
-        if (this.m_mode == 0) {
-            this.imgShop = new Texture("data/sprites/shop1.png");
-        }
+        this.imgShops = new Texture[2];
+        this.imgShops[0] = new Texture("data/sprites/shop0.png");
+        this.imgShops[1] = new Texture("data/sprites/shop1.png");
 
         // 200 VICTORY ?
         this.imgVictory = new Texture("data/sprites/victory.png");
@@ -1049,10 +1054,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             {
                 this.imgSp = new Texture("data/sprites/sp" + this.special + ".png");
             }
-            else if (paramInt == 3)
+            else if (paramInt == 3) // Screen 3 VILLAGE
             {
                 this.imgVill = new Texture("data/sprites/village.png");
-                this.imgCh = new Texture("data/sprites/hero_icon.png");
+                this.imgCh = new Texture("data/sprites/hero_icon.png"); // Yeah this one change img chk to hero
                 this.imgSchool = new Texture("data/sprites/school.png");
             }
             else if (paramInt == 31)
@@ -1086,11 +1091,149 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
     }
 
+    // Careful with new Texture => only reassign to loaded texture
+    private void adjustTextures(int paramInt) { // nickfarrow -> for update/reload textures based on game state
+        if (paramInt == -6) {
+
+        }
+        else if (paramInt == -2)
+        {
+
+        }
+        else if (paramInt == 1)
+        {}
+        else if (paramInt == 2)  // MENU_SCREEN / INSTRUCTION_SCREEN = 2
+        {}
+        else if (paramInt == 3)  // VILLAGE, imgCh -> hero_icon
+        {
+            this.imgCh = this.imgHeroIcon; // TODO double check restore chk icon on other screen.
+        }
+        else if (paramInt == 6)
+        {
+            this.imgStage_num = imgStage_nums[this.tmp_stage-1];
+        }
+        else if (paramInt == 7)
+        {
+            if (this.e_boss == 1) {
+                this.imgBoss = this.imgBoss1;
+            } else if (this.e_boss == 2) {
+                this.imgBoss = this.imgBoss2;
+            } else if (this.e_boss == 3) {
+                this.imgBoss = this.imgBoss3;
+            } else if (this.e_boss == 4) {
+                this.imgBoss = this.imgBoss4;
+            }
+        }
+        else if (paramInt == 8)
+        {
+        }
+        else if (paramInt == 9)
+        {
+            this.special = (this.special > 2) ? 2: this.special;
+            this.imgSp = this.imgSps[this.special];
+        }
+        else if (paramInt == 31)  // SHOP_SCREEN = 31
+        {
+            if (this.m_mode == 1) {
+                this.imgShop = imgShops[0];
+            }
+            if (this.m_mode == 0) {
+                this.imgShop = imgShops[1];
+            }
+        }
+        else if (paramInt == 100)
+        {
+            this.imgBack = imgBacks[school-1];
+        }
+        else if (paramInt == 200)
+        {}
+        else if (paramInt == 65336)
+        {}
+    }
+
     private void dbg(String log) {
-        Gdx.app.log("DEBUG", log);
+        Gdx.app.log("DEBUG", "††† " + log);
+    }
+
+    private void showDeviceInfos() {
+        if (shitty == 0) {
+            shitty++;
+            this.dbg("††† MOBI_SCL " + MOBI_SCL + " scr width " + SCREEN_WIDTH + " screen height " + SCREEN_HEIGHT);
+        }
+    }
+
+    public boolean isSoundEffectsEnabled() {
+        return getPrefs().getBoolean(PREF_SOUND_ENABLED, true);
+    }
+
+    public void setSoundEffectsEnabled(boolean soundEffectsEnabled) {
+        getPrefs().putBoolean(PREF_SOUND_ENABLED, soundEffectsEnabled);
+        getPrefs().flush();
+    }
+
+    public boolean getVibraEnabled() {
+        return getPrefs().getBoolean(PREF_VIBRATION, true);
+    }
+
+    public void setVibraEnabled(boolean vibra) {
+        getPrefs().putBoolean(PREF_VIBRATION, vibra);
+        getPrefs().flush();
+    }
+
+    public int getLevel() {
+        return getPrefs().getInteger(PREF_LEVEL, 11);
+    }
+
+    public void setLevel(int level) {
+        getPrefs().putInteger(PREF_LEVEL, level);
+        getPrefs().flush();
+
+    }
+    public int getSavedgold() {
+        return getPrefs().getInteger(PREF_SAVEDGOLD, 64);
+    }
+
+    public void setSavedGold(int saved_gold) {
+        getPrefs().putInteger(PREF_SAVEDGOLD, saved_gold);
+        getPrefs().flush();
+    }
+
+    public int getSavedMana() {
+        return getPrefs().getInteger(PREF_MANA, 64);
+    }
+
+    public void setSavedMana(int saved_gold) {
+        getPrefs().putInteger(PREF_MANA, saved_gold);
+        getPrefs().flush();
+    }
+
+    public int getGameSpeed() {
+        return getPrefs().getInteger(PREF_SPEED, 24);
+    }
+
+    public void setGameSpeed(int speed) {
+        getPrefs().putInteger(PREF_SPEED, speed);
+        getPrefs().flush();
+    }
+    public int getGameStage() {
+        return getPrefs().getInteger(PREF_GAME_STAGE, 11);
+    }
+
+    public void setGameStage(int game_stage) {
+        getPrefs().putInteger(PREF_GAME_STAGE, game_stage);
+        getPrefs().flush();
+    }
+    public int getLastGameStage() {
+        return getPrefs().getInteger(PREF_LAST_GAME_STAGE, 11);
+    }
+
+    public void setLastGameStage(int last_game_stage) {
+        getPrefs().putInteger(PREF_LAST_GAME_STAGE, last_game_stage);
+        getPrefs().flush();
     }
 
     // end Android GDX
+    /*--------------------------------------------------------------------------------------------*/
 
     public void addScore(String paramString, int paramInt)
     {
@@ -1220,209 +1363,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     public void loadImage(int paramInt)
     {
-//        this.loadTextures(paramInt);
-//        this.loadTextures();
-        return;
-
-        /*
-        try
-        {
-            if (paramInt == 2)
-            {
-                this.imgMM = new Texture("sprites/mm.png");
-                this.imgBk = new Texture("sprites/bk.png");
-                this.imgSl = new Texture("sprites/sl.png");
-                this.imgPl = new Texture("sprites/play.png");
-                this.imgCh = new Texture("sprites/check.png");
-            }
-            else
-            {
-                int i;
-                if (paramInt == 6)
-                {
-                    this.imgHero = new Texture[5];
-                    this.imgEnemy = new Texture[4];
-                    this.imgItem = new Texture[9];
-                    this.imgItem_hyo = new Texture[2];
-                    this.imgItem_hyo[0] = new Texture("sprites/hyo0.png");
-                    this.imgItem_hyo[1] = new Texture("sprites/hyo1.png");
-                    for (i = 0; i < 5; i++) {
-                        this.imgHero[i] = new Texture("sprites/hero" + i + ".png");
-                    }
-                    if (get_random(2) == 0) {
-                        for (int j = 0; j < 4; j++) {
-                            this.imgEnemy[j] = new Texture("sprites/enemy0" + j + ".png");
-                        }
-                    } else {
-                        for (int k = 0; k < 4; k++) {
-                            this.imgEnemy[k] = new Texture("sprites/enemy1" + k + ".png");
-                        }
-                    }
-                    for (int m = 0; m < 9; m++) {
-                        this.imgItem[m] = new Texture("sprites/item" + m + ".png");
-                    }
-                    System.gc();
-                    this.imgSnow_g = new Texture("sprites/snow_gauge.png");
-                    this.imgPwd = new Texture("sprites/power.png");
-                    this.imgShadow = new Texture("sprites/shadow0.png");
-                    this.imgPok = new Texture("sprites/pok.png");
-                    this.imgPPang = new Texture("sprites/bbang0.png");
-                    this.imgPPang1 = new Texture("sprites/bbang1.png");
-                    this.imgH_ppang = new Texture("sprites/h_bbang.png");
-                    this.imgCh = new Texture("sprites/check.png");
-                    this.imgAl = new Texture("sprites/al.png");
-                    this.imgEffect = new Texture[2];
-                    this.imgEffect[0] = new Texture("sprites/effect0.png");
-                    this.imgEffect[1] = new Texture("sprites/effect1.png");
-                }
-                else if (paramInt == 100)
-                {
-                    this.imgBack = new Texture("sprites/back" + this.school + ".png");
-                }
-                else if (paramInt == 7)
-                {
-                    this.imgBoss = new Texture[4];
-                    for (i = 0; i < 4; i++) {
-                        this.imgBoss[i] = new Texture("sprites/boss" + this.e_boss + i + ".png");
-                    }
-                }
-                else if (paramInt == -6)
-                {
-                    this.imgStage = new Texture[5];
-                    for (i = 0; i < 5; i++) {
-                        this.imgStage[i] = new Texture("sprites/word-" + i + ".png");
-                    }
-                    this.imgStage_num = new Texture("sprites/stage" + this.tmp_stage + ".png");
-                }
-                else if (paramInt == 8)
-                {
-                    this.imgSpecial = new Texture[3];
-                    for (i = 0; i < 3; i++) {
-                        this.imgSpecial[i] = new Texture("sprites/special" + i + ".png");
-                    }
-                    this.gameOn = true;
-                }
-                else if (paramInt == 9)
-                {
-                    this.imgSp = new Texture("sprites/sp" + this.special + ".png");
-                }
-                else if (paramInt == 3)
-                {
-                    this.imgVill = new Texture("sprites/village.png");
-                    this.imgCh = new Texture("sprites/hero_icon.png");
-                    this.imgSchool = new Texture("sprites/school.png");
-                }
-                else if (paramInt == 31)
-                {
-                    if (this.m_mode == 1) {
-                        this.imgShop = new Texture("sprites/shop0.png");
-                    }
-                    if (this.m_mode == 0) {
-                        this.imgShop = new Texture("sprites/shop1.png");
-                    }
-                }
-                else if (paramInt == 200)
-                {
-                    this.imgVictory = new Texture("sprites/victory.png");
-                    this.imgV = new Texture("sprites/v.png");
-                    this.imgHero_v = new Texture("sprites/hero-vic.png");
-                }
-                else if (paramInt == 65336)
-                {
-                    this.imgLose = new Texture("sprites/lose.png");
-                    this.imgHero_l = new Texture("sprites/hero-lose.png");
-                }
-                else if (paramInt == 1)
-                {
-                    this.imgNum = new Texture[10];
-                    for (i = 0; i < 10; i++) {
-                        this.imgNum[i] = new Texture("sprites/" + i + ".png");
-                    }
-                    this.imgLogo = new Texture("sprites/logo.png");
-                }
-            }
-        }
-        catch (Exception localException) {}
-
-        */
+        this.adjustTextures(paramInt);
     }
 
     public void destroyImage(int paramInt)
     {
-        /*
-        if (paramInt == 1)
-        {
-            this.imgLogo = null;
-        }
-        else if (paramInt == 2)
-        {
-            this.imgMM = null;
-            this.imgBk = null;
-            this.imgPl = null;
-            this.imgSl = null;
-            this.imgCh = null;
-        }
-        else if (paramInt == 3)
-        {
-            this.imgVill = null;
-            this.imgCh = null;
-            this.imgSchool = null;
-        }
-        else if (paramInt == 31)
-        {
-            this.imgShop = null;
-        }
-        else if (paramInt == 6)
-        {
-            this.imgHero = null;
-            this.imgEnemy = null;
-            this.imgItem = null;
-            this.imgSnow_g = null;
-            this.imgPwd = null;
-            this.imgShadow = null;
-            this.imgPok = null;
-            this.imgPPang = null;
-            this.imgPPang1 = null;
-            this.imgH_ppang = null;
-            this.imgItem_hyo = null;
-            this.imgCh = null;
-            this.imgAl = null;
-            this.imgEffect = null;
-        }
-        else if (paramInt == 100)
-        {
-            this.imgBack = null;
-        }
-        else if (paramInt == -6)
-        {
-            this.imgStage = null;
-            this.imgStage_num = null;
-        }
-        else if (paramInt == 7)
-        {
-            this.imgBoss = null;
-        }
-        else if (paramInt == 8)
-        {
-            this.imgSpecial = null;
-        }
-        else if (paramInt == 9)
-        {
-            this.imgSp = null;
-        }
-        else if (paramInt == 200)
-        {
-            this.imgVictory = null;
-            this.imgV = null;
-            this.imgHero_v = null;
-        }
-        else if (paramInt == 65336)
-        {
-            this.imgLose = null;
-            this.imgHero_l = null;
-        }
-        System.gc();
-        */
     }
 
     public void init_game(int paramInt)
@@ -1643,10 +1588,12 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         int j;
         if (this.screen == 6) // RUNNING
         {
-            j2me_port.drawImage(paramGraphics, this.imgBack, 0, 0, 20);
+            drawImage2(paramGraphics, this.snowWhiteBg, 0, 0, 20);
+            drawImage2(paramGraphics, this.ui, 0, 109, 20);
+            drawImage2(paramGraphics, this.imgBack, 0, 0, 20);
             // paramGraphics.setColor(16777215);
             fillRect(paramGraphics, 0, 25, 128, 84, 16777215);
-            drawImage2(paramGraphics, this.imgHero[this.h_idx], this.h_x * 5, 83, 0x10 | 0x1);
+            drawImage2(paramGraphics, this.imgHero[this.h_idx], this.h_x * 5, 83, 0x10 | 0x1); // = 17 tho.
             if (this.ppang_time > 0)
             {
                 if (this.ppang_item == 1) {
@@ -1907,6 +1854,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             }
             if ((this.ani_step == 0) && (this.last_stage > 20))
             {
+                this.dbg("Northern boy challenged you!");
                 if (this.last_stage == 31) {
                     draw_text_box(paramGraphics, "Western Boys");
                 } else if (this.last_stage == 41) {
@@ -2134,46 +2082,41 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             drawImage2(paramGraphics, this.imgMM, 0, 0, 20);
             drawImage2(paramGraphics, this.imgBk, 2, 115, 20);
             destroyImage(2);
-            // paramGraphics.setColor(16777164);
-            //try
-            //{
-                if (this.m_mode == 1) {
-                    drawImage2(paramGraphics, txt4, 5, 25, 20);
-                }
-                if (this.m_mode == 2)
-                {
-                    fillRect(paramGraphics, 6, 23, 10, 10, 16777164);
-                    fillRect(paramGraphics, 6, 45, 10, 10, 16777164);
-                    fillRect(paramGraphics, 6, 61, 10, 10, 16777164);
-                    fillRect(paramGraphics, 6, 84, 10, 10, 16777164);
-                    drawImage2(paramGraphics, imgItem[1], 7, 24, 20); // item1.png
-                    drawImage2(paramGraphics, imgItem[2], 7, 46, 20); // item2.png
-                    drawImage2(paramGraphics, imgItem[3], 7, 62, 20); // item3.png
-                    drawImage2(paramGraphics, imgItem[4], 7, 85, 20); // item4.png
-                    drawImage2(paramGraphics, txt2, 23, 25, 20); // txt2.png
-                }
-                if (this.m_mode == 3)
-                {
-                    fillRect(paramGraphics, 6, 23, 10, 10, 16777164);
-                    fillRect(paramGraphics, 6, 38, 10, 10, 16777164);
-                    fillRect(paramGraphics, 6, 53, 10, 10, 16777164);
-                    fillRect(paramGraphics, 6, 67, 10, 10, 16777164);
-                    drawImage2(paramGraphics, imgItem[5], 7, 24, 20); // item5.png
-                    drawImage2(paramGraphics, imgItem[6], 7, 39, 20); // item6.png
-                    drawImage2(paramGraphics, imgItem[7], 7, 54, 20); // item7.png
-                    drawImage2(paramGraphics, imgItem[8], 7, 68, 20); // item8.png
-                    drawImage2(paramGraphics, txt1, 23, 25, 20); // txt1.png
-                }
-            //}
-            //catch (Exception localException2) {}
-            //System.gc();
+
+            if (this.m_mode == 1) {
+                drawImage2(paramGraphics, txt4, 5, 25, 20);
+            }
+            if (this.m_mode == 2)
+            {
+                fillRect(paramGraphics, 6, 23, 10, 10, 16777164);
+                fillRect(paramGraphics, 6, 45, 10, 10, 16777164);
+                fillRect(paramGraphics, 6, 61, 10, 10, 16777164);
+                fillRect(paramGraphics, 6, 84, 10, 10, 16777164);
+                drawImage2(paramGraphics, imgItem[1], 7, 24, 20); // item1.png
+                drawImage2(paramGraphics, imgItem[2], 7, 46, 20); // item2.png
+                drawImage2(paramGraphics, imgItem[3], 7, 62, 20); // item3.png
+                drawImage2(paramGraphics, imgItem[4], 7, 85, 20); // item4.png
+                drawImage2(paramGraphics, txt2, 23, 25, 20); // txt2.png
+            }
+            if (this.m_mode == 3)
+            {
+                fillRect(paramGraphics, 6, 23, 10, 10, 16777164);
+                fillRect(paramGraphics, 6, 38, 10, 10, 16777164);
+                fillRect(paramGraphics, 6, 53, 10, 10, 16777164);
+                fillRect(paramGraphics, 6, 67, 10, 10, 16777164);
+                drawImage2(paramGraphics, imgItem[5], 7, 24, 20); // item5.png
+                drawImage2(paramGraphics, imgItem[6], 7, 39, 20); // item6.png
+                drawImage2(paramGraphics, imgItem[7], 7, 54, 20); // item7.png
+                drawImage2(paramGraphics, imgItem[8], 7, 68, 20); // item8.png
+                drawImage2(paramGraphics, txt1, 23, 25, 20); // txt1.png
+            }
         }
         else if (this.screen == 200)
         {
             if ((this.ani_step >= 13) && (this.ani_step < 27))
             {
                 // paramGraphics.setColor(16777215);
-                fillRect(paramGraphics, 0, 60, 128, 47, 16777215);
+                // fillRect(paramGraphics, 0, 60, 128, 47, 16777215);
                 drawImage2(paramGraphics, this.imgHero_v, this.h_x * 5, 83, 0x10 | 0x1);
             }
             else if ((this.ani_step >= 28) && (this.ani_step < 50))
@@ -2244,28 +2187,17 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             // paramGraphics.setColor(25054);
             fillRect(paramGraphics, 0, 0, 128, 22, 25054);
             fillRect(paramGraphics, 0, 71, 128, 84, 25054);
-//            try
-//            {
 
-            // TODO fix wrong param: idx, x, y -> y = 0x10 | 0x1 is wrong
-
-                drawImage2(batch, present, 64, 5, 0x10 | 0x1); // present.png
-                drawImage2(batch, sam_logo, 64, 28, 0x10 | 0x1); // sam_logo.png
-                drawImage2(batch, http1, 7, 77, 20); // http1.png
-                drawImage2(batch, http2, 7, 103, 20); // http2.png
-//            }
-//            catch (Exception localException3) {}
-            System.gc();
+            drawImage2(batch, present, 64, 5, 0x10 | 0x1); // present.png
+            drawImage2(batch, sam_logo, 64, 28, 0x10 | 0x1); // sam_logo.png
+            drawImage2(batch, http1, 7, 77, 20); // http1.png
+            drawImage2(batch, http2, 7, 103, 20); // http2.png
         }
         else if (this.screen == 1000)
         {
             // paramGraphics.setColor(16777215);
             fillRect(paramGraphics, 0, 25, 120, 85, 16777215);
-            //try
-            //{
-                drawImage2(paramGraphics, allClear, 64, 10, 0x10 | 0x1); // allClear.png
-            //}
-            //catch (Exception localException4) {}
+            drawImage2(paramGraphics, allClear, 64, 10, 0x10 | 0x1); // allClear.png
         }
         else if (this.screen == -5)
         {
@@ -2274,21 +2206,14 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             // paramGraphics.setColor(0);
             drawRect(paramGraphics, 0, 19, 127, 90, 0);
             drawRect(paramGraphics, 0, 21, 127, 86, 0);
-            //try
-            //{
-                drawImage2(paramGraphics, txt4b, 4, 30, 20); // txt4b
-            //}
-            //catch (Exception localException5) {}
-            //System.gc();
+
+            drawImage2(paramGraphics, txt4b, 4, 30, 20); // txt4b
         }
         else if (this.screen == 1)
         {
             drawImage2(paramGraphics, this.imgMM, 0, 0, 20);
-            //try
-            //{
-                drawImage2(paramGraphics, title, 64, 35, 0x10 | 0x1); // title.png
-            //}
-            //catch (Exception localException6) {}
+            drawImage2(paramGraphics, title, 64, 35, 0x10 | 0x1); // title.png
+
             drawImage2(paramGraphics, this.imgPl, 68, 115, 20);
             drawImage2(paramGraphics, this.imgBk, 2, 115, 20);
             //System.gc();
@@ -2561,279 +2486,270 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     public void run()
     {
-//        for (;;)
-//        {
-//            this.dbg("infinite loop run() ");
-        /**/
-            if (this.gameOn)
+        if (this.gameOn)
+        {
+            if (this.screen == 6) // RUNNING
             {
-
-                if (this.screen == 6) // RUNNING
+                if (this.state == 1)
                 {
-                    if (this.state == 1)
+                    try
                     {
-//                        try
-//                        {
-//                            Thread.sleep(this.game_speed);
-//                        }
-//                        catch (Exception localException1) {}
-                        if (this.pw_up == 1)
+                        Thread.sleep(this.game_speed);
+                    }
+                    catch (Exception localException1) {}
+
+                    if (this.pw_up == 1)
+                    {
+                        setPower();
+                        if (this.h_idx == 2) {
+                            this.h_idx = 3;
+                        } else if (this.h_idx == 3) {
+                            this.h_idx = 2;
+                        }
+                    }
+                    else if (this.pw_up == 2)
+                    {
+                        if (this.h_timer < 4)
                         {
-                            setPower();
-                            if (this.h_idx == 2) {
-                                this.h_idx = 3;
-                            } else if (this.h_idx == 3) {
-                                this.h_idx = 2;
+                            this.h_timer += 1;
+                            if (this.h_timer == 4) {
+                                this.h_idx = 0;
                             }
                         }
-                        else if (this.pw_up == 2)
+                        if (this.snow_y > this.snow_last_y)
                         {
-                            if (this.h_timer < 4)
-                            {
-                                this.h_timer += 1;
-                                if (this.h_timer == 4) {
-                                    this.h_idx = 0;
-                                }
-                            }
-                            if (this.snow_y > this.snow_last_y)
-                            {
-                                this.snow_y -= 1;
-                                if (this.snow_y > this.snow_top_y) {
-                                    this.snow_gap += 3;
-                                } else if (this.snow_y < this.snow_top_y) {
-                                    this.snow_gap -= 3;
-                                }
-                            }
-                            else
-                            {
-                                check_ppang();
+                            this.snow_y -= 1;
+                            if (this.snow_y > this.snow_top_y) {
+                                this.snow_gap += 3;
+                            } else if (this.snow_y < this.snow_top_y) {
+                                this.snow_gap -= 3;
                             }
                         }
-                        this.e_time += 1;
-                        for (int i = 0; i < this.e_num; i++)
+                        else
                         {
-                            if (this.e_hp[i] >= 0)
-                            {
-                                if ((this.e_time == this.e_fire_time[i]) && (get_random(3) != 1) && (this.e_ppang_item[i] != 2)) {
-                                    e_attack_ai(i);
-                                }
-                                if (this.e_ppang_item[i] != 2) {
-                                    if (this.e_idx[i] == 0) {
-                                        this.e_idx[i] = 1;
-                                    } else if (this.e_idx[i] == 1) {
-                                        this.e_idx[i] = 0;
-                                    }
-                                }
+                            check_ppang();
+                        }
+                    }
+                    this.e_time += 1;
+                    for (int i = 0; i < this.e_num; i++)
+                    {
+                        if (this.e_hp[i] >= 0)
+                        {
+                            if ((this.e_time == this.e_fire_time[i]) && (get_random(3) != 1) && (this.e_ppang_item[i] != 2)) {
+                                e_attack_ai(i);
                             }
-                            if (this.e_move_dir[i] >= 100)
-                            {
-                                this.e_move_dir[i] += 1;
-                                if (this.e_move_dir[i] == 120) {
-                                    this.e_move_dir[i] = 0;
+                            if (this.e_ppang_item[i] != 2) {
+                                if (this.e_idx[i] == 0) {
+                                    this.e_idx[i] = 1;
+                                } else if (this.e_idx[i] == 1) {
+                                    this.e_idx[i] = 0;
                                 }
-                            }
-                            else if ((this.e_move_dir[i] == 0) && (this.e_hp[i] > 0) && (this.e_ppang_item[i] != 2))
-                            {
-                                //System.out.println("E move dir = 0 AI: " + this.e_move_dir[0] + " " + this.e_move_dir[1]+ " --x-- " + this.e_x[0] + " "+ this.e_x[1]);
-                                e_move_ai(i);
-                            }
-                            else if ((this.e_move_dir[i] < 100) && (this.e_move_dir[i] != 0) && (this.e_hp[i] > 0))
-                            {
-                                //System.out.println("E move dir < 100: " + this.e_move_dir[0] + " " + this.e_move_dir[1]+ " --x-- " + this.e_x[0] + " "+ this.e_x[1]);
-                                e_move(i);
                             }
                         }
-                        if (this.e_boss > 0)
+                        if (this.e_move_dir[i] >= 100)
                         {
-                            if (this.e_boss_hp >= 0)
-                            {
-                                if ((this.e_time == this.e_boss_fire_time) && (get_random(3) != 1)) {
-                                    if ((this.e_boss == 1) || (this.e_boss == 2)) {
-                                        e_attack_ai(101);
-                                    } else {
-                                        e_attack_ai(102);
-                                    }
-                                }
-                                if (this.e_boss_idx == 0) {
-                                    this.e_boss_idx = 1;
-                                } else if (this.e_boss_idx == 1) {
-                                    this.e_boss_idx = 0;
-                                }
-                            }
-                            if (this.e_boss_move_dir >= 100)
-                            {
-                                this.e_boss_move_dir += 1;
-                                if (this.e_boss_move_dir == 115) {
-                                    this.e_boss_move_dir = 0;
-                                }
-                            }
-                            else if ((this.e_boss_move_dir == 0) && (this.e_boss_hp > 0))
-                            {
-                                boss_move_ai();
-                            }
-                            else if ((this.e_boss_move_dir != 0) && (this.e_boss_hp > 0))
-                            {
-                                boss_move();
+                            this.e_move_dir[i] += 1;
+                            if (this.e_move_dir[i] == 120) {
+                                this.e_move_dir[i] = 0;
                             }
                         }
-                        if ((this.e_num == 3) || (this.e_num == 4))
+                        else if ((this.e_move_dir[i] == 0) && (this.e_hp[i] > 0) && (this.e_ppang_item[i] != 2))
                         {
-                            if (this.e_time == 21) {
-                                this.e_time = 0;
+                            //System.out.println("E move dir = 0 AI: " + this.e_move_dir[0] + " " + this.e_move_dir[1]+ " --x-- " + this.e_x[0] + " "+ this.e_x[1]);
+                            e_move_ai(i);
+                        }
+                        else if ((this.e_move_dir[i] < 100) && (this.e_move_dir[i] != 0) && (this.e_hp[i] > 0))
+                        {
+                            //System.out.println("E move dir < 100: " + this.e_move_dir[0] + " " + this.e_move_dir[1]+ " --x-- " + this.e_x[0] + " "+ this.e_x[1]);
+                            e_move(i);
+                        }
+                    }
+                    if (this.e_boss > 0)
+                    {
+                        if (this.e_boss_hp >= 0)
+                        {
+                            if ((this.e_time == this.e_boss_fire_time) && (get_random(3) != 1)) {
+                                if ((this.e_boss == 1) || (this.e_boss == 2)) {
+                                    e_attack_ai(101);
+                                } else {
+                                    e_attack_ai(102);
+                                }
+                            }
+                            if (this.e_boss_idx == 0) {
+                                this.e_boss_idx = 1;
+                            } else if (this.e_boss_idx == 1) {
+                                this.e_boss_idx = 0;
                             }
                         }
-                        else if ((this.e_num == 2) && (this.e_time == 18)) {
+                        if (this.e_boss_move_dir >= 100)
+                        {
+                            this.e_boss_move_dir += 1;
+                            if (this.e_boss_move_dir == 115) {
+                                this.e_boss_move_dir = 0;
+                            }
+                        }
+                        else if ((this.e_boss_move_dir == 0) && (this.e_boss_hp > 0))
+                        {
+                            boss_move_ai();
+                        }
+                        else if ((this.e_boss_move_dir != 0) && (this.e_boss_hp > 0))
+                        {
+                            boss_move();
+                        }
+                    }
+                    if ((this.e_num == 3) || (this.e_num == 4))
+                    {
+                        if (this.e_time == 21) {
                             this.e_time = 0;
                         }
-                        e_snow();
-                        if (this.gameOn)
-                        {
-                             repaint();
-                            // serviceRepaints();
-                        }
                     }
-                    else if (this.state == 2)
-                    {
-                        if ((this.ani_step >= 1) && (this.ani_step <= 20)) {
-                            this.ani_step += 1;
-                        }
-                        if (this.ani_step == 0)
-                        {
-                            loadImage(-6);
-                            this.ani_step = 1;
-                        }
-                        else if ((this.ani_step >= 1) && (this.ani_step <= 19))
-                        {
-                            repaint();
-                            // serviceRepaints();
-                        }
-                        else if (this.ani_step == 20)
-                        {
-                            destroyImage(-6);
-                            this.state = 1;
-                        }
+                    else if ((this.e_num == 2) && (this.e_time == 18)) {
+                        this.e_time = 0;
                     }
-                    else if (this.state == 3)
+                    e_snow();
+                    if (this.gameOn)
                     {
-                        if (this.game_state == 2)
-                        {
-                            this.screen = 201;
-                            MPlay(7);
-                            this.gold = (this.school * 6 + get_random(7) + 5);
-                        }
-                        else if (this.game_state == 1)
-                        {
-                            this.screen = 65336;
-                            this.gold = 3;
-                        }
+                         repaint();
+                        // serviceRepaints();
                     }
                 }
-                else if (this.screen == 8) // SPECIAL_ANIMATION
+                else if (this.state == 2)
                 {
-                    if ((this.ani_step < 50) && (this.ani_step > 0)) {
+                    if ((this.ani_step >= 1) && (this.ani_step <= 20)) {
                         this.ani_step += 1;
                     }
-                    repaint();
-                    // serviceRepaints();
-                }
-                else if (this.screen == 9) // SPECIAL_SCREEN
-                {
-                    if ((this.ani_step < 46) && (this.ani_step >= 0)) {
-                        this.ani_step += 1;
-                    }
-                    repaint();
-                    // serviceRepaints();
-                }
-                else if (this.screen == 200) // VICTORY
-                {
-                    if ((this.ani_step < 51) && (this.ani_step >= 0))
+                    if (this.ani_step == 0)
                     {
-                        this.ani_step += 1;
+                        loadImage(-6);
+                        this.ani_step = 1;
+                    }
+                    else if ((this.ani_step >= 1) && (this.ani_step <= 19))
+                    {
                         repaint();
                         // serviceRepaints();
                     }
-                    else
+                    else if (this.ani_step == 20)
                     {
-                        this.gameOn = false; // Game ending here.
-                        destroyImage(200);
-                        //System.gc();
-                        if (this.state != 10)
-                        {
-                            loadImage(2);
-                            this.screen = 300;
-                        }
-                        else
-                        {
-                            this.screen = 1000;
-                        }
-                        repaint();
+                        destroyImage(-6);
+                        this.state = 1;
                     }
                 }
-                else if (this.screen == 201)
+                else if (this.state == 3)
                 {
-                    this.ani_step = 0;
-                    if (this.last_stage / 10 == this.school)
+                    if (this.game_state == 2)
                     {
-                        if (this.stage % 10 != 4)
-                        {
-                            this.stage += 1;
-                        }
-                        else if (this.stage != 44)
-                        {
-                            this.stage += 10;
-                            this.stage = (this.stage - this.stage % 10 + 1);
-                        }
-                        else
-                        {
-                            this.stage = 45;
-                            this.state = 10;
-                        }
-                        this.last_stage = this.stage;
+                        this.screen = 201;
+                        MPlay(7);
+                        this.gold = (this.school * 6 + get_random(7) + 5);
                     }
-                    destroyImage(6);
-                    destroyImage(7);
-                    destroyImage(100);
-                    loadImage(200);
-                    this.screen = 200;
-                }
-                else if (this.screen == 65336)
-                {
-                    this.item_mode = 0;
-                    this.ani_step = 0;
-                    destroyImage(6);
-                    destroyImage(7);
-                    destroyImage(100);
-                    loadImage(65336);
-                    MPlay(6);
-                    this.screen = 65335;
-                }
-                else if (this.screen == 65335) // LOSE_SCREEN
-                {
-                    if (this.ani_step <= 100)
+                    else if (this.game_state == 1)
                     {
-                        this.ani_step += 1;
-                        repaint();
-                        // serviceRepaints();
-                    }
-                    else
-                    {
-                        this.gameOn = false;
-                        destroyImage(65336);
-                        loadImage(2);
-                        System.gc();
-                        this.screen = 300;
-                        repaint();
+                        this.screen = 65336;
+                        this.gold = 3;
                     }
                 }
             }
-            else {
-//                try
-//                {
-//                    Thread.sleep(100L);
-//                }
-//                catch (Exception localException2) {}
-            } /**/
-//        }
+            else if (this.screen == 8) // SPECIAL_ANIMATION
+            {
+                if ((this.ani_step < 50) && (this.ani_step > 0)) {
+                    this.ani_step += 1;
+                }
+                repaint();
+                // serviceRepaints();
+            }
+            else if (this.screen == 9) // SPECIAL_SCREEN
+            {
+                if ((this.ani_step < 46) && (this.ani_step >= 0)) {
+                    this.ani_step += 1;
+                }
+                repaint();
+                // serviceRepaints();
+            }
+            else if (this.screen == 200) // VICTORY
+            {
+                if ((this.ani_step < 51) && (this.ani_step >= 0))
+                {
+                    this.ani_step += 1;
+                    repaint();
+                    // serviceRepaints();
+                }
+                else
+                {
+                    this.gameOn = false; // Game ending here.
+                    destroyImage(200);
+                    //System.gc();
+                    if (this.state != 10)
+                    {
+                        loadImage(2);
+                        this.screen = 300;
+                    }
+                    else
+                    {
+                        this.screen = 1000;
+                    }
+                    repaint();
+                }
+            }
+            else if (this.screen == 201)
+            {
+                this.ani_step = 0;
+                if (this.last_stage / 10 == this.school)
+                {
+                    if (this.stage % 10 != 4)
+                    {
+                        this.stage += 1;
+                    }
+                    else if (this.stage != 44)
+                    {
+                        this.stage += 10;
+                        this.stage = (this.stage - this.stage % 10 + 1);
+                    }
+                    else
+                    {
+                        this.stage = 45;
+                        this.state = 10;
+                    }
+                    this.last_stage = this.stage;
+                }
+                destroyImage(6);
+                destroyImage(7);
+                destroyImage(100);
+                loadImage(200);
+                this.screen = 200;
+            }
+            else if (this.screen == 65336)
+            {
+                this.item_mode = 0;
+                this.ani_step = 0;
+                destroyImage(6);
+                destroyImage(7);
+                destroyImage(100);
+                loadImage(65336);
+                MPlay(6);
+                this.screen = 65335;
+            }
+            else if (this.screen == 65335) // LOSE_SCREEN
+            {
+                if (this.ani_step <= 100)
+                {
+                    this.ani_step += 1;
+                    repaint();
+                    // serviceRepaints();
+                }
+                else
+                {
+                    this.gameOn = false;
+                    destroyImage(65336);
+                    loadImage(2);
+                    System.gc();
+                    this.screen = 300;
+                    repaint();
+                }
+            }
+        }
+        else {
+            this.dbg("ßßß ---- Game not running!");
+        }
 
         paint(batch);
     }
@@ -3543,7 +3459,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         destroyImage(6);
         destroyImage(7);
         destroyImage(100);
-        loadImage(2);
+        loadImage(2); // MENU_SCREEN / INSTRUCTION_SCREEN = 2
         this.m_mode = 1;
         this.screen = 2;
     }
@@ -3749,7 +3665,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
      */
     public void keyPressed() // int paramInt J2ME simulate from virtual Droid/iOS keyboard
     {
-        getGameAction2(); //
+        getGameAction(0); //
         int paramInt = this.key_code;
 
         int i;
@@ -3980,7 +3896,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
         else if (this.screen == 3) // VILLAGE_SCREEN
         {
-            Gdx.app.log("DEBUG", " game action " + getGameAction(paramInt));
+            Gdx.app.log("DEBUG", "††† in the ville game action " + getGameAction(paramInt) + " code " + this.key_code);
             if (getGameAction(paramInt) == 1)
             {
                 j = this.h_y - 8;
@@ -4010,14 +3926,14 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 }
             }
             // GAME_ACTION_UP = 8
-            else if ((paramInt == 35) || (getGameAction2() == 8) || (paramInt == -7))   // GAME_ACTION_UP = 8 ; getGameAction(paramInt)
+            else if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == -7))   // GAME_ACTION_UP = 8 ;
             {
-                Gdx.app.log("DEBUG", "mmode " + this.m_mode);
+                Gdx.app.log("DEBUG", "††† mmode " + this.m_mode);
 
                 if ((this.m_mode == 0) || (this.m_mode == 1))
                 {
-                    loadImage(31);
-                    this.screen = 31;
+                    loadImage(31);  // SHOP_SCREEN = 31
+                    this.screen = 31;  // SHOP_SCREEN = 31
                     repaint();
                 }
                 else if ((this.m_mode >= 2) && (this.m_mode <= 5))
@@ -4028,19 +3944,18 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     }
                     destroyImage(3);
                     this.message = "Loading";
-                    Gdx.app.log("DEBUG", "init game ...");
                     init_game(k);
                 }
-            } // END cond VILLAGE_SCREEN
+            }
             else if ((paramInt == 42) || (paramInt == -6))
             {
                 destroyImage(3);
                 loadImage(2);
-                this.screen = 2;
+                this.screen = 2;  // MAIN_MENU_SCREEN / INSTRUCTION
                 this.m_mode = 1;
             }
             repaint();
-        }
+        } // END cond VILLAGE_SCREEN
         else if (this.screen == 31)
         {
             if (getGameAction(paramInt) == 1) {
@@ -4063,7 +3978,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 {
                     this.m_mode = -1;
                     destroyImage(31);
-                    this.screen = 3;
+                    this.screen = 3; // VILLAGE
                 }
                 else if (this.s_item == 0)
                 {
@@ -4116,6 +4031,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 if (this.speed == 1) {
                     this.game_speed = 38;
                 }
+
+                setGameSpeed(speed);
                 addScore("config", 1);
                 this.m_mode = 3;
             }
@@ -4206,7 +4123,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             // this.screen = 100;
             repaint();
         }
-        else if (this.screen == -88)
+        else if (this.screen == -88)  // NEW_GAME_MENU_SCREEN
         {
             if (getGameAction(paramInt) == 1) {
                 if (this.m_mode <= 1) {
@@ -4237,7 +4154,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     // addScore("hero", 0);
                 }
                 destroyImage(2);
-                loadImage(3);
+                loadImage(3); // VILLAGE, imgCh -> hero_icon
+                this.imgCh = this.imgHeroIcon; // nickfarrow temp fix
                 this.h_x = 57;
                 this.h_y = 46;
                 this.m_mode = -1;
@@ -4248,9 +4166,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 this.screen = 2;
                 this.m_mode = 1;
             }
+
             repaint();
         }
-        else if (this.screen == -33)
+        else if (this.screen == -33) // LIST SCREEN
         {
             if ((paramInt == 42) || (paramInt == -6))
             {
@@ -4273,6 +4192,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             // addScore("hero", 0);
             this.ani_step = 0;
             this.screen = 3;
+            // TODO may be reset imgCh to imgHeroIcon
             repaint();
             System.gc();
         }
@@ -4287,7 +4207,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             loadImage(2);
             this.screen = 1;
             repaint();
-            this.dbg("exit SAMSUNG_FUNCLUB_SCREEN");
         }
         else if (this.screen == 1)
         {
@@ -4359,8 +4278,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
         if (this.music != null)
         {
-            // this.music.stop();
-            // this.music = null;
         }
         try
         {
@@ -4368,7 +4285,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 // this.music.dispose();
                 this.music = null;
             }
-            this.music_donald_christmas = null;
             this.music_opening = null;
 
             if(!isMP3) {
@@ -4376,15 +4292,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             } else {
                 this.manager.get("data/audio/"+ paramString + ".mp3", Sound.class).play();
             }
-
-            /// this.music.setVolume(0.5f);
-            /**
-             if(this.music != null) {
-             if (! this.music.isPlaying()) {
-             this.music.play();
-             this.music.setLooping(false);
-             }
-             }*/
         }
         catch (Exception localException)
         {
@@ -4426,7 +4333,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         public static final int NEW_GAME_MENU_SCREEN = -88;
 
         public static final int TITLE_MENU_SCREEN = 1;
-        public static final int INSTRUCTION_SCREEN = 2;
+        public static final int INSTRUCTION_SCREEN = 2;  // MAIN_MENU_SCREEN
         public static final int VILLAGE_SCREEN = 3;
         public static final int SOUND_SPEED_SETTING_SCREEN = 4;
         public static final int GUIDE_MENU_SCREEN = 5;
