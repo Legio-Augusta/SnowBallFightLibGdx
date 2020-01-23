@@ -55,7 +55,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private static final int DEFAULT_DEM = 12;
     // RecordStore recordStore = null;
     private int game_state = 0;
-    private int saved_gold = 1000; // orig.10
+    private int saved_gold = 400; // orig.10
     private int speed = 1; // orig.4
     private int game_speed = 5; // orig.17
     private Random rnd = new Random();
@@ -64,7 +64,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private int screen = -1;
     private boolean gameOn = true;
     private String message;
-    private int m_mode = 1;  // For shop
+    private int m_mode = 1;  // For shop, game...; appeared 128 times. It game_mode / game state ...
     private int s_play = 1;
     private int v_mode = 1;
     //  AudioClip audioClip = null;
@@ -238,8 +238,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private static int BOTTOM_SPACE = (int)(SCREEN_HEIGHT/8 + 20*MOBI_SCL); // May be change for fit touch button
 
     // Use rectangle until figure out how to work with BoundingBox multi input.
-    Rectangle upBtnRect = new Rectangle((20+(200/3))*SCALE, (20+(400/3))*SCALE, 72*SCALE, 70*SCALE+ 150); // + 150 Jan-21
-
+    Rectangle upBtnRect = new Rectangle((20+(200/3))*SCALE, (20+(400/3))*SCALE, 132*SCALE, 70*SCALE+ 150); // + 150 Jan-2
     Rectangle downBtnRect = new Rectangle((20+(200/3))*SCALE, 20*SCALE, 72*SCALE, 70*SCALE);
 
     Rectangle leftBtnRect = new Rectangle(20*SCALE, (20+(200/6))*SCALE, 70*SCALE, 140*SCALE);
@@ -268,7 +267,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private static final int KEY_STAR = 0;
     private static final int KEY_NUM_3 = 0; // for item mode
     private static final int KEY_SHARP = 0;
-
     private static final int DUMP_ACTION_STATE = -6996;
 
     Vector3 touchPoint;
@@ -295,8 +293,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private Texture touch_pad;
     private Texture touch_pad_knob;
 
-    private Texture imgBtnLeft;
-    private Texture imgBtnRight;
+    private Texture imgMenuLeft;
+    private Texture imgMenuRight;
 
     BitmapFont font;
     private Music music;
@@ -626,7 +624,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         // TODO add func to map int color to simpled version of color
         int pos_y = (int) ((OLD_MOBI_H - y)*MOBI_SCL - imgColor[color].getHeight()*scaleY + BOTTOM_SPACE);
 
-//        batch.draw(imgColor[color], pos_x, pos_y, 0, 0, imgColor[color].getWidth(), imgColor[color].getHeight(), scaleX, scaleY, 0, 0, 0, (int)(imgColor[color].getWidth()*scaleX), (int)(imgColor[color].getHeight()*scaleY), false, false);
+        batch.draw(imgColor[color], pos_x, pos_y, 0, 0, imgColor[color].getWidth(), imgColor[color].getHeight(), scaleX, scaleY, 0, 0, 0, (int)(imgColor[color].getWidth()*scaleX), (int)(imgColor[color].getHeight()*scaleY), false, false);
     }
 
     /**
@@ -679,11 +677,13 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     }
 
     public void drawRect(int x, int y, int width, int height, int color) {
-
+        this.fillRect(this.batch, x, y, width, height, color);
     }
 
+    // Temporary draw single line
     public void drawRect(SpriteBatch paramGraphics, int x, int y, int width, int height, int color)
     {
+        this.fillRect(paramGraphics, x, y, width, height, color);
     }
 
     public void drawString(SpriteBatch paramGraphics,  String paramString, int paramInt1, int paramInt2, int paramInt3, int color)
@@ -790,16 +790,29 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         // It seem single image can have it's own event Listener such as: touchDown/Up; See bellow
         // https://github.com/BrentAureli/ControllerDemo/blob/master/core/src/com/brentaureli/overlaydemo/Controller.java
         // TODO use custom IMAGE addEventListener for more UI refine. Can image used as Texture ?
+        int fire_w = fireBtnTexture.getWidth();
+        int fire_h = fireBtnTexture.getHeight();
+        int menu_left_w = imgMenuLeft.getWidth();
+        int menu_left_h = imgMenuLeft.getHeight();
+        int menu_right_w = imgMenuRight.getWidth();
+        int menu_right_h = imgMenuRight.getHeight();
+
+        int speed_up_w = imgSpeedUp.getWidth();
+        int speed_up_h = imgSpeedUp.getHeight();
+        int speed_down_w = imgSpeedDown.getWidth();
 
         batch.draw(fireBtnTexture, SCREEN_WIDTH-(50+fireBtnTexture.getWidth())*SCALE, (int)(50*SCALE), fireBtnTexture.getWidth()*SCALE, fireBtnTexture.getHeight()*SCALE);
-        batch.draw(imgKeyNum3, SCREEN_WIDTH-(50+fireBtnTexture.getWidth()+fireBtnTexture.getWidth()/2 + imgKeyNum3.getWidth())*SCALE, (40 + imgSpeedUp.getHeight())*SCALE - 150, imgKeyNum3.getWidth()*SCALE, imgKeyNum3.getHeight()*SCALE);
-        batch.draw(imgSpeedUp, SCREEN_WIDTH-(50+fireBtnTexture.getWidth()+fireBtnTexture.getWidth()/2 + imgSpeedUp.getWidth())*SCALE, 20*SCALE, imgSpeedUp.getWidth()*SCALE, imgSpeedUp.getHeight()*SCALE);
-        batch.draw(imgSpeedDown, SCREEN_WIDTH-(50+fireBtnTexture.getWidth()+fireBtnTexture.getWidth()/2 + 2*imgSpeedDown.getWidth())*SCALE, 20*SCALE, imgSpeedDown.getWidth()*SCALE, imgSpeedDown.getHeight()*SCALE);
+        batch.draw(imgKeyNum3, SCREEN_WIDTH-(50+ fire_w + fire_w/2 + imgKeyNum3.getWidth())*SCALE, (40 + speed_up_h)*SCALE, imgKeyNum3.getWidth()*SCALE, imgKeyNum3.getHeight()*SCALE);
         batch.draw(touch_pad, 20*SCALE, 20*SCALE, touch_pad.getWidth()*SCALE, touch_pad.getHeight()*SCALE);
         batch.draw(touch_pad_knob, (20+touch_pad.getWidth()/2-touch_pad_knob.getWidth()/2)*SCALE, (20+touch_pad.getHeight()/2-touch_pad_knob.getHeight()/2)*SCALE, touch_pad_knob.getWidth()*SCALE, touch_pad_knob.getHeight()*SCALE);
 
-        batch.draw(imgBtnLeft, SCREEN_WIDTH-(50+fireBtnTexture.getWidth()+fireBtnTexture.getWidth()/2 + imgBtnLeft.getWidth())*SCALE, 20*SCALE + 100*SCALE +20, imgBtnLeft.getWidth()*SCALE, imgBtnLeft.getHeight()*SCALE);
-        batch.draw(imgBtnRight, SCREEN_WIDTH-(50+fireBtnTexture.getWidth()+fireBtnTexture.getWidth()/2 + imgBtnRight.getWidth())*SCALE, 20*SCALE + 100*SCALE +20, imgBtnRight.getWidth()*SCALE, imgBtnRight.getHeight()*SCALE);
+        batch.draw(imgSpeedUp, SCREEN_WIDTH-(50+fire_w  + fire_w/2 + speed_up_w)*SCALE, 20*SCALE, speed_up_w*SCALE, imgSpeedUp.getHeight()*SCALE);
+        batch.draw(imgSpeedDown, SCREEN_WIDTH-(50+fire_w + fire_w/2 + 2*speed_down_w)*SCALE, 20*SCALE, speed_down_w*SCALE, imgSpeedDown.getHeight()*SCALE);
+
+//        batch.draw(imgMenuLeft, SCREEN_WIDTH-(50+fire_w + fire_w/2)*SCALE, 20*SCALE + 100*SCALE +20, menu_left_w*SCALE, menu_left_h*SCALE);
+        batch.draw(imgMenuLeft, 20, (140 + menu_right_h)*SCALE +20, menu_left_w*SCALE, menu_left_h*SCALE);
+//        batch.draw(imgMenuRight, SCREEN_WIDTH-(50+fire_w + fire_w/2 + menu_left_w)*SCALE, 20*SCALE + 100*SCALE +20, menu_right_w*SCALE, menu_right_h*SCALE);
+        batch.draw(imgMenuRight, SCREEN_WIDTH-(50+fire_w + fire_w/2 + menu_left_w)*SCALE, (140 +menu_right_h)*SCALE +20, menu_right_w*SCALE, menu_right_h*SCALE);
     }
 
     // TODO use texture region
@@ -851,8 +864,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         touch_pad = new Texture("data/gui/touchBackground.png");
         touch_pad_knob = new Texture("data/gui/touchKnob.png");
 
-        imgBtnLeft = new Texture("data/gui/left_btn.png");
-        imgBtnRight = new Texture("data/gui/right_btn.png");
+        imgMenuLeft = new Texture("data/gui/left_btn.png");
+        imgMenuRight = new Texture("data/gui/right_btn.png");
 
         // Old load textures
         int i;
@@ -970,6 +983,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
         this.imgLogo = new Texture("data/sprites/logo.png");
 
+        // Inline image /texture created on the fly
+        this.present = new Texture("data/sprites/present.png");
+        this.sam_logo = new Texture("data/sprites/sam_logo.png");
+        this.http1 = new Texture("data/sprites/http1.png");
+        this.http2 = new Texture("data/sprites/http2.png");
     }
 
     private void loadTextures(int paramInt) { // paramInt custom for
@@ -2188,8 +2206,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             fillRect(paramGraphics, 0, 0, 128, 22, 25054);
             fillRect(paramGraphics, 0, 71, 128, 84, 25054);
 
-            drawImage2(batch, present, 64, 5, 0x10 | 0x1); // present.png
-            drawImage2(batch, sam_logo, 64, 28, 0x10 | 0x1); // sam_logo.png
+            // TODO make drawCenter() or draw(Position = TL, BR, Center, allign ...)
+            drawImage2(batch, present, 22, 5, 0x10 | 0x1); // present.png // 83 x 11;
+            drawImage2(batch, sam_logo, 16, 28, 0x10 | 0x1); // sam_logo.png // 96 x 33; 128 WIDTH
             drawImage2(batch, http1, 7, 77, 20); // http1.png
             drawImage2(batch, http2, 7, 103, 20); // http2.png
         }
@@ -2451,6 +2470,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     public void draw_int(SpriteBatch paramGraphics, int paramInt1, int paramInt2, int paramInt3)
     {
+        this.dbg("draw int " + paramInt1);
         int i = 0;
         if (paramInt1 / 100 > 0) {
             i = 3;
@@ -2460,7 +2480,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             i = 1;
         }
         int[] arrayOfInt = new int[i];
-        if (i == 3)
+        if (i == 3) // saved game mechanism ?
         {
             arrayOfInt[2] = (paramInt1 / 100);
             arrayOfInt[1] = (paramInt1 / 10 % 10);
@@ -2482,6 +2502,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 drawImage2(paramGraphics, this.imgNum[arrayOfInt[(j - 1)]], (i - j) * 4 + paramInt2 - 2, paramInt3, 20);
             }
         }
+
+        // arrayOfInt[(j - 1) out of range exception is COOL! it prevent saved gold > 1000 ? so not easy hack kk :)
     }
 
     public void run()
@@ -3930,6 +3952,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             {
                 Gdx.app.log("DEBUG", "††† mmode " + this.m_mode);
 
+                // m_mode = 0;
                 if ((this.m_mode == 0) || (this.m_mode == 1))
                 {
                     loadImage(31);  // SHOP_SCREEN = 31
@@ -4145,11 +4168,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 if (paramInt > 48) {
                     this.m_mode = (paramInt - 48);
                 }
-                if (this.m_mode == 1) // this one seem on INIT()
+                if (this.m_mode == 1) // this one seem on INIT() or new game (vs load saved game)
                 {
                     this.last_stage = 11;
                     this.stage = 11;
-                    this.saved_gold = 0;
+                    this.saved_gold = 400; // nickfarrow
                     this.mana = 0;
                     // addScore("hero", 0);
                 }
