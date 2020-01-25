@@ -3,6 +3,7 @@ package com.littlewing.sbf.game.screens;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.InputProcessor;
 
+import java.util.Arrays;
 import java.util.Random;
 
 
@@ -658,7 +659,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             return;
         }
 
-        int img_height = (int)(image.getHeight()*SCALE);
+        int img_height = (int)(image.getHeight()*SCALE); // SCALE per 1080
         int position_y = (int) ((OLD_MOBI_H - pos_y - anchor)*MOBI_SCL - img_height + BOTTOM_SPACE); // anchor 20 pos_y -20
 
         // batch.draw(image, (int)(pos_x*MOBI_SCL), position_y, image.getWidth()*SCALE, image.getHeight()*SCALE); // draw no scale
@@ -666,7 +667,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         // Draw Image with scale param, can anchor to 1080x1920 work without / with minimal change in geometry ?
         float scaleX = (float) (MOBI_SCL / SCALED_IMG_RATIO); // 1080 / 128 / 9
         float scaleY = (float) (MOBI_SCL / SCALED_IMG_RATIO);
-        paramGraphics.draw(image, (int)(pos_x*MOBI_SCL), position_y, 0, 0, image.getWidth(), image.getHeight(), scaleX, scaleY, 0, 0, 0, (int)(image.getWidth()), (int)(image.getHeight()), false, false);
+        paramGraphics.draw(image, (int)(pos_x*MOBI_SCL), position_y*SCALE, 0, 0, image.getWidth(), image.getHeight(), scaleX, scaleY, 0, 0, 0, (int)(image.getWidth()), (int)(image.getHeight()), false, false);
     }
 
     public void drawImage(SpriteBatch paramGraphics)
@@ -813,6 +814,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         batch.draw(imgMenuLeft, 20, (140 + menu_right_h)*SCALE +20, menu_left_w*SCALE, menu_left_h*SCALE);
 //        batch.draw(imgMenuRight, SCREEN_WIDTH-(50+fire_w + fire_w/2 + menu_left_w)*SCALE, 20*SCALE + 100*SCALE +20, menu_right_w*SCALE, menu_right_h*SCALE);
         batch.draw(imgMenuRight, SCREEN_WIDTH-(50+fire_w + fire_w/2 + menu_left_w)*SCALE, (140 +menu_right_h)*SCALE +20, menu_right_w*SCALE, menu_right_h*SCALE);
+
+
+        drawImage2(batch, this.imgItem[this.item_slot[0]], 12 * 0 + 37, 111*0, 20*0);
+        drawImage2(batch, this.imgItem[this.item_slot[1]], 12 * 1 + 37, 111*0, 20*0);
+        drawImage2(batch, this.imgItem[this.item_slot[2]], 12 * 2 + 37, 111*0, 20*0);
     }
 
     // TODO use texture region
@@ -1625,6 +1631,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 }
             }
             draw_enemy(paramGraphics);
+            draw_item(this.batch); // nf
             if (this.item_mode != 0)
             {
                 // paramGraphics.setColor(12698049);
@@ -2244,7 +2251,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         // this.dbg("††† in repaint " + rnd.nextInt() + " screen =" + this.screen);
         // this.paint(this.batch);
 //        if (this.screen == -2) {
-//            this.screen = Const.RUNNING_SCREEN; // 3 - VILLAGE_SCREEN; 6 - running
+//            this.screen = GameScreens.RUNNING_SCREEN; // 3 - VILLAGE_SCREEN; 6 - running
 //        }
     }
 
@@ -2278,6 +2285,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     public void draw_item(SpriteBatch paramGraphics)
     {
+        this.dbg(" del " + this.del + " item slot " + (Arrays.toString(this.item_slot)));
         if (this.del == -1)
         {
             for (int i = 0; i < 5; i++) {
@@ -2289,7 +2297,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         else
         {
             // paramGraphics.setColor(6974058);
-            fillRect(paramGraphics, this.del * 12 + 37, 111, 8, 8, 6974058);
+            this.dbg(" del != -1 " + this.del );
+            fillRect(paramGraphics, this.del * 12 + 37, 111*0, 8, 8, 6974058);
             this.del = -1;
         }
     }
@@ -3488,6 +3497,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     public void check_building(int paramInt1, int paramInt2)
     {
+        this.dbg("Check building " + paramInt1 + " " + paramInt2);
         if ((paramInt1 == 43) && (paramInt2 == 22))
         {
             this.m_mode = 0;
@@ -3538,8 +3548,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
     }
 
+    // int1 int2 seem to be hero_x, hero_y (h_x, h_y)
+    // Init h_x/y 57, 46
     public int hero_move(int paramInt1, int paramInt2, int paramInt3)
     {
+        this.dbg("Int 1 2 " + paramInt1 + " " + paramInt2 + " " + paramInt3);
         if (paramInt3 == 0)
         {
             if ((paramInt2 == 46) && (paramInt1 >= 22) && (paramInt1 <= 92))
@@ -3551,6 +3564,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
         if (paramInt3 == 1)
         {
+            // Go up/down -> Shop/ Southern boy, Western Boy
             if (((paramInt1 == 43) || (paramInt1 == 71)) && (paramInt2 >= 15) && (paramInt2 <= 71))
             {
                 check_building(paramInt1, paramInt2);
@@ -3919,7 +3933,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         else if (this.screen == 3) // VILLAGE_SCREEN
         {
             Gdx.app.log("DEBUG", "††† in the ville game action " + getGameAction(paramInt) + " code " + this.key_code);
-            if (getGameAction(paramInt) == 1)
+            if (getGameAction(paramInt) == 1 && (getGameAction(paramInt) == GAME_ACTION_UP)) // debug
             {
                 j = this.h_y - 8;
                 if (hero_move(this.h_x, j, 1) > 0) {
@@ -3950,6 +3964,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             // GAME_ACTION_UP = 8
             else if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == -7))   // GAME_ACTION_UP = 8 ;
             {
+                j = this.h_y - 8;
+                if (hero_move(this.h_x, j, 1) > 0) {
+                    this.h_y = j;
+                }
                 Gdx.app.log("DEBUG", "††† mmode " + this.m_mode);
 
                 // m_mode = 0;
@@ -4347,7 +4365,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         this.d_gauge = 2;
     }
 
-    private static class Const {
+    private static class GameScreens {
         public static final String BAR_VALUE = "BAR";
         public static final int LOGO_SCREEN = -1;
         public static final int SAMSUNG_FUNCLUB_SCREEN = -2;
@@ -4375,6 +4393,18 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         public static final int ALL_CLEAR_SCREEN = 1000;
         public static final int LOSE_SCREEN = 65335;
         public static final int LOSE_SCREEN2 = 65336;
+    }
 
+    // Game mode and menu mode ...
+    private static class GameMode {
+        public static final int DRUG_STORE = 0;
+        public static final int ITEM_SHOP = 1;
+        public static final int EASTERN_BOY = 2;
+        public static final int SOUTHERN_BOY = 3;
+        public static final int WESTERN_BOY = 4;
+        public static final int NORTHERN_BOY = 5;
+        public static final int NO_ADMITTANCE = 100;
+
+        //this.m_mode = (paramInt - 48);
     }
 }
