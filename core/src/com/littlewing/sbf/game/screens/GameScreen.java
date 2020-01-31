@@ -668,6 +668,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     /**
      * Refine scaled image is pain in the ass.
      */
+    // anchor 20 may be TOP|LEFT = 16+4 ? = 0x11 | 0x4
+    // HCENTER: 1 VCENTER: 2; LEFT: 4; RIGHT: 8; TOP: 16; BOTTOM: 32; BASELINE: 64; SOLID: 0; DOTTED: 1 dupli ?
+    // http://www.it.uc3m.es/florina/docencia/j2me/midp/docs/api/javax/microedition/lcdui/Graphics.html#VCENTER
+    // https://docs.oracle.com/javame/config/cldc/ref-impl/midp2.0/jsr118/javax/microedition/lcdui/Graphics.html#BASELINE
     public void drawImage2(SpriteBatch paramGraphics, Texture image, int pos_x, int pos_y, int anchor)
     {
         if (image == null) {
