@@ -58,7 +58,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private int game_state = 0;
     private int saved_gold = 400; // orig.10
     private int speed = 1; // orig.4
-    private int game_speed = 5; // orig.17
+    private int game_speed = 1; // orig.17 -> 5
     private Random rnd = new Random();
     // private SnowBallFightME SJ;
     private Thread thread = null;
@@ -260,7 +260,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private static final int GAME_ACTION_OK = 8; // simulate KEY, gameAction in J2ME
     private static final int GAME_ACTION_LEFT = 2;
     private static final int GAME_ACTION_RIGHT = 5;
-    private static final int GAME_ACTION_UP = 8;
+    private static final int GAME_ACTION_UP = 1; // It dupplicate w ACTION_OK; prev: 8
     private static final int GAME_ACTION_DOWN = 6;
     private static final int KEY_RIGHT_MENU = 35; // action = 0 // KEY_RIGHT_MENU = 35 ? -7 (from AA)
     private static final int KEY_LEFT_MENU = -6;  // action = 0
@@ -463,6 +463,21 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         shapeRenderer.setColor(Color.ORANGE);
         shapeRenderer.rect(rightBtnRect.getX(), rightBtnRect.getY(), rightBtnRect.getWidth(), rightBtnRect.getHeight());
 
+
+//        Rectangle okBound2    = new Rectangle(SCREEN_WIDTH-(50+fireBtnTexture.getWidth())*SCALE,                                     (int)(50*SCALE), fireBtnTexture.getWidth()*SCALE, fireBtnTexture.getHeight()*SCALE);
+//        shapeRenderer.setColor(Color.VIOLET);
+//        shapeRenderer.rect(okBound2.getX(), okBound2.getY(), okBound2.getWidth(), okBound2.getHeight());
+
+        // DKGRAY, LTGRAY, MAGENTA, GREEN, YELLOW
+        int fire_w = fireBtnTexture.getWidth();
+        int speed_up_h = imgSpeedUp.getHeight();
+
+        Rectangle testNum32 = new Rectangle(SCREEN_WIDTH-(50+ fire_w + fire_w/2 + imgKeyNum3.getWidth())*SCALE, (40 + speed_up_h)*SCALE, imgKeyNum3.getWidth()*SCALE, imgKeyNum3.getHeight()*SCALE);
+        shapeRenderer.setColor(Color.YELLOW);
+        shapeRenderer.rect(testNum32.getX(), testNum32.getY(), testNum32.getWidth(), testNum32.getHeight());
+        shapeRenderer.rect(testNum32.getX()-1, testNum32.getY()-1, testNum32.getWidth()+2, testNum32.getHeight()+2);
+
+
         shapeRenderer.end();
     }
 
@@ -538,6 +553,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         Rectangle textureBounds = new Rectangle(SCREEN_WIDTH-(fireBtnTexture.getWidth()+50)*SCALE, SCREEN_HEIGHT-(50+fireBtnTexture.getHeight())*SCALE, fireBtnTexture.getWidth()*SCALE,fireBtnTexture.getHeight()*SCALE);
         return textureBounds.contains(touchPoint.x, touchPoint.y);
     }
+
     protected boolean isTouchedNum3() {
         Rectangle textureBounds=new Rectangle(SCREEN_WIDTH-(fireBtnTexture.getWidth()+50+imgKeyNum3.getWidth()+(int)fireBtnTexture.getWidth()/2)*SCALE, SCREEN_HEIGHT-(40+imgSpeedUp.getHeight()+imgKeyNum3.getHeight())*SCALE, imgKeyNum3.getWidth()*SCALE,imgKeyNum3.getHeight()*SCALE);
         return textureBounds.contains(touchPoint.x, touchPoint.y);
@@ -660,7 +676,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
 
         int img_height = (int)(image.getHeight()*SCALE); // SCALE per 1080
-        int position_y = (int) ((OLD_MOBI_H - pos_y - anchor)*MOBI_SCL - img_height + BOTTOM_SPACE); // anchor 20 pos_y -20
+        int position_y = (int) ((OLD_MOBI_H - pos_y - anchor*0)*MOBI_SCL - img_height + BOTTOM_SPACE); // anchor 20 pos_y -20
 
         // batch.draw(image, (int)(pos_x*MOBI_SCL), position_y, image.getWidth()*SCALE, image.getHeight()*SCALE); // draw no scale
 
@@ -748,29 +764,34 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         return game_action;
     }
 
+    // TODO messed with key press stack ? or cache/release mechanism.
     public int getGameAction(int pointer) { // int pointer
         if(isTouchedUp()) {
             Gdx.input.vibrate(15);
             this.key_code = -1;
             this.dbg("††† up ↑-↑-↑-" + upBtnRect.getX() + "," + upBtnRect.getWidth() + " " + upBtnRect.getY() + ","+(SCREEN_HEIGHT-upBtnRect.getHeight()) + " +" + upBtnRect.getHeight()  +  " key= " + this.key_code + " action= " + game_action + " after " + GAME_ACTION_UP + " " + touchPoint.x + " y " + touchPoint.y);
+            this.game_action = GAME_ACTION_UP;
             return GAME_ACTION_UP;
         }
         if(isTouchedDown()) { // Careful with game state, ie. item_mode = 0
             Gdx.input.vibrate(15);
             this.key_code = -2;
             this.dbg("††† down ↓-↓-↓-↓" + touchPoint.x + " y " + touchPoint.y);
+            this.game_action = GAME_ACTION_DOWN;
             return GAME_ACTION_DOWN;
         }
         if(isTouchedLeft() && Gdx.input.isTouched()) {
             Gdx.input.vibrate(15);
             this.key_code = -3;
             this.dbg("††† << ---"  + touchPoint.x + " y " + touchPoint.y);
+            this.game_action = GAME_ACTION_LEFT;
             return GAME_ACTION_LEFT;
         }
         if(isTouchedRight()) {
             this.key_code = -4;
             Gdx.input.vibrate(15);
             this.dbg("††† >> ---" + touchPoint.x + " y " + touchPoint.y);
+            this.game_action = GAME_ACTION_RIGHT;
             return GAME_ACTION_RIGHT;
         }
 
@@ -778,9 +799,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             this.key_code = KEY_OK; // -5
             Gdx.input.vibrate(15);
             this.dbg("††† OK ---" + touchPoint.x + " y " + touchPoint.y);
+            this.game_action = GAME_ACTION_OK;
             return GAME_ACTION_OK;
         }
 
+        this.game_action = DUMP_ACTION_STATE;
         return DUMP_ACTION_STATE; // 0
     }
 
@@ -804,6 +827,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
         batch.draw(fireBtnTexture, SCREEN_WIDTH-(50+fireBtnTexture.getWidth())*SCALE, (int)(50*SCALE), fireBtnTexture.getWidth()*SCALE, fireBtnTexture.getHeight()*SCALE);
         batch.draw(imgKeyNum3, SCREEN_WIDTH-(50+ fire_w + fire_w/2 + imgKeyNum3.getWidth())*SCALE, (40 + speed_up_h)*SCALE, imgKeyNum3.getWidth()*SCALE, imgKeyNum3.getHeight()*SCALE);
+
         batch.draw(touch_pad, 20*SCALE, 20*SCALE, touch_pad.getWidth()*SCALE, touch_pad.getHeight()*SCALE);
         batch.draw(touch_pad_knob, (20+touch_pad.getWidth()/2-touch_pad_knob.getWidth()/2)*SCALE, (20+touch_pad.getHeight()/2-touch_pad_knob.getHeight()/2)*SCALE, touch_pad_knob.getWidth()*SCALE, touch_pad_knob.getHeight()*SCALE);
 
@@ -815,10 +839,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 //        batch.draw(imgMenuRight, SCREEN_WIDTH-(50+fire_w + fire_w/2 + menu_left_w)*SCALE, 20*SCALE + 100*SCALE +20, menu_right_w*SCALE, menu_right_h*SCALE);
         batch.draw(imgMenuRight, SCREEN_WIDTH-(50+fire_w + fire_w/2 + menu_left_w)*SCALE, (140 +menu_right_h)*SCALE +20, menu_right_w*SCALE, menu_right_h*SCALE);
 
-
-        drawImage2(batch, this.imgItem[this.item_slot[0]], 12 * 0 + 37, 111*0, 20*0);
-        drawImage2(batch, this.imgItem[this.item_slot[1]], 12 * 1 + 37, 111*0, 20*0);
-        drawImage2(batch, this.imgItem[this.item_slot[2]], 12 * 2 + 37, 111*0, 20*0);
     }
 
     // TODO use texture region
@@ -841,7 +861,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
 
         tmp_stage =  (tmp_stage <= 0) ? 1 : tmp_stage;
-        tmp_stage = (tmp_stage > 4) ? 4 : tmp_stage;
+        tmp_stage = (tmp_stage >= 4) ? 4 : tmp_stage;
         imgStage_num = new Texture("data/sprites/stage" + tmp_stage + ".png");
         imgStage_nums = new Texture[4]; // nickfarrow
         for (int i=0; i < 4; i++) {
@@ -1134,7 +1154,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
         else if (paramInt == 6)
         {
-            this.imgStage_num = imgStage_nums[this.tmp_stage-1];
+            this.imgStage_num = imgStage_nums[this.tmp_stage-1]; // Fixme outofbound
         }
         else if (paramInt == 7)
         {
@@ -3701,14 +3721,15 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
      */
     public void keyPressed() // int paramInt J2ME simulate from virtual Droid/iOS keyboard
     {
-        getGameAction(0); //
+        // getGameAction(0); //
         int paramInt = this.key_code;
 
         int i;
         int j;
         if ((this.screen == 6) && (this.state == 1)) // RUNNING
         {
-            if ((getGameAction(paramInt) == 2) || (paramInt == 52))
+            // this.dbg(" isTouchedNum3 " + isTouchedNum3() + " getGameAction(paramInt) " + getGameAction(paramInt));
+            if ((getGameAction(paramInt) == 2) || (paramInt == 52))  // NUM_4 or left key
             {
                 if ((this.item_mode == 0) && (this.ppang_item != 2))
                 {
@@ -3731,7 +3752,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     repaint();
                 }
             }
-            else if ((getGameAction(paramInt) == 5) || (paramInt == 54))
+            else if ((getGameAction(paramInt) == 5) || (paramInt == 54))  // NUM_6 or RIGHT_KEY (may be LEFT_KEY by keyboard view)
             {
                 if ((this.item_mode == 0) && (this.ppang_item != 2))
                 {
@@ -3754,7 +3775,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     repaint();
                 }
             }
-            else if ((getGameAction(paramInt) == 6) || (paramInt == 56)) // GAME_ACTION_DOWN = 6
+            else if ((getGameAction(paramInt) == 6) || (paramInt == 56)) // GAME_ACTION_DOWN = 6  // NUM_8 or DOWN KEY
             {
                 if (this.mana >= 12) {
                     use_special();
@@ -3762,7 +3783,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     this.message = "Insufficient Mana";
                 }
             }
-            else if ((paramInt == -5) || (getGameAction(paramInt) == 1) || (paramInt == 50) || (paramInt == 53))
+            // KEY_UP = 50 (fire can be use up key), -5 = OK keycode
+            // else if ((paramInt == -5) || (getGameAction(paramInt) == 1) || (paramInt == 50) || (paramInt == 53) || isTouchedOK())
+            else if ( ( (paramInt == -5) || (getGameAction(paramInt) == 1) || (paramInt == 50) || (paramInt == 53) ) && !isTouchedNum3()) // OK, NUM_5 etc isTouchedUp()
             {
                 if (this.item_mode == 0)
                 {
@@ -3785,7 +3808,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     this.gameOn = true;
                 }
             }
-            else if (((paramInt == 35) || (paramInt == -7)) && (this.game_state == 0))
+            else if (((paramInt == 35) || (paramInt == -7)) && (this.game_state == 0)) // RIGHT_MENU, # (pound_key) => options|# action
             {
                 this.m_mode = 1;
                 this.gameOn = false;
@@ -3793,8 +3816,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 repaint();
                 this.dbg("††† m_mode " + this.m_mode + " screen " + this.screen + " on " + this.gameOn);
             }
-            else if ((paramInt == 51) && (this.game_state == 0))
+            else if ((paramInt == 51) && (this.game_state == 0) || isTouchedNum3()) // ITEM_MODE (NUM_3)
             {
+
                 i = 0;
                 j = 0;
                 while (i < 5)
@@ -3849,8 +3873,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     this.s_play = 2;
                 }
             }
-            // GAME_ACTION_UP = 8
-            else if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == -7)) {  // GAME_ACTION_UP = 8
+            // GAME_ACTION_UP = 1; prev: 8
+            else if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == -7)) {  // GAME_ACTION_UP = 1; prev:8
                 if (this.m_mode == 2)
                 {
                     goto_menu();
@@ -3902,7 +3926,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     this.m_mode += 1;
                 }
             }
-            // GAME_ACTION_UP = 8
+            // GAME_ACTION_UP = 1; prev: 8
             else if ((paramInt == 35) || (getGameAction(paramInt) == 8) || ((paramInt >= 49) && (paramInt <= 52)) || (paramInt == -7))
             {
                 if (paramInt > 48) {
@@ -3961,13 +3985,13 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     this.h_x = i;
                 }
             }
-            // GAME_ACTION_UP = 8
-            else if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == -7))   // GAME_ACTION_UP = 8 ;
+            // GAME_ACTION_UP = 1; prev:8; messing Action vs Action2
+            else if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == -7))   // GAME_ACTION_UP = 1; prev:8 ;
             {
-                j = this.h_y - 8;
-                if (hero_move(this.h_x, j, 1) > 0) {
-                    this.h_y = j;
-                }
+//                j = this.h_y - 8;
+//                if (hero_move(this.h_x, j, 1) > 0) {
+//                    this.h_y = j;
+//                }
                 Gdx.app.log("DEBUG", "††† mmode " + this.m_mode);
 
                 // m_mode = 0;
@@ -4014,7 +4038,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             else if ((getGameAction(paramInt) == 5) && (this.b_item != 3)) {
                 this.b_item += 1;
             }
-            if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == -7)) {   // GAME_ACTION_UP = 8
+            // TODO investigate all getGameAction vs getGameAction2
+            if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == -7)) {   // GAME_ACTION_UP = 1; pre8
                 if (this.s_item == 1)
                 {
                     this.m_mode = -1;
@@ -4136,7 +4161,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     this.m_mode += 1;
                 }
             }
-            // GAME_ACTION_UP = 8
+            // GAME_ACTION_UP = 1; pre8
             if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == 49) || (paramInt == 50) || (paramInt == 51) || (paramInt == -7))
             {
                 if (paramInt > 48) {
@@ -4180,7 +4205,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     this.m_mode += 1;
                 }
             }
-            // GAME_ACTION_UP = 8
+            // GAME_ACTION_UP = 1; pre8
             if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == 49) || (paramInt == 50) || (paramInt == -7))
             {
                 if (paramInt > 48) {
