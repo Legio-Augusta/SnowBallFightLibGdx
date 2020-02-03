@@ -58,7 +58,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private int game_state = 0;
     private int saved_gold = 400; // orig.10
     private int speed = 1; // orig.4
-    private int game_speed = 1; // orig.17 -> 5
+    private int game_speed = 17; // orig.17
     private Random rnd = new Random();
     // private SnowBallFightME SJ;
     private Thread thread = null;
@@ -239,7 +239,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private static int BOTTOM_SPACE = (int)(SCREEN_HEIGHT/8 + 20*MOBI_SCL); // May be change for fit touch button
 
     // Use rectangle until figure out how to work with BoundingBox multi input.
-    Rectangle upBtnRect = new Rectangle((20+(200/3))*SCALE, (20+(400/3))*SCALE, 132*SCALE, 70*SCALE+ 150); // + 150 Jan-2
+    Rectangle upBtnRect = new Rectangle((20+(200/3))*SCALE, (20+(400/3))*SCALE, 132*SCALE, 70*SCALE+ 50); // + 150 Jan-2
     Rectangle downBtnRect = new Rectangle((20+(200/3))*SCALE, 20*SCALE, 72*SCALE, 70*SCALE);
 
     Rectangle leftBtnRect = new Rectangle(20*SCALE, (20+(200/6))*SCALE, 70*SCALE, 140*SCALE);
@@ -247,11 +247,12 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     Rectangle optionBtnRect = new Rectangle(SCREEN_WIDTH/2+150*SCALE, SCREEN_HEIGHT/8, SCREEN_WIDTH/2-180*SCALE, 70*SCALE);
 
-    Rectangle speedUpBtnRect = new Rectangle(SCREEN_WIDTH-(275+400)*SCALE, 20*SCALE + 100*SCALE + 20, 200*SCALE, 100*SCALE);
-    Rectangle speedDownBtnRect = new Rectangle(SCREEN_WIDTH-(275+200)*SCALE, 20*SCALE + 100*SCALE + 20, 200*SCALE, 100*SCALE);
+    Rectangle speedUpBtnRect = new Rectangle(SCREEN_WIDTH-(275+200)*SCALE, 20*SCALE + 0*100*SCALE + 20, 200*SCALE, 100*SCALE);
+    Rectangle speedDownBtnRect = new Rectangle(SCREEN_WIDTH-(275+400)*SCALE, 20*SCALE + 100*SCALE + 20, 200*SCALE, 100*SCALE);
 
-    Rectangle leftMenuBtn = new Rectangle(SCREEN_WIDTH-(275+400)*SCALE, 20*SCALE, 200*SCALE, 100*SCALE);
-    Rectangle rightMenuBtn = new Rectangle(SCREEN_WIDTH-(275+200)*SCALE, 20*SCALE, 200*SCALE, 100*SCALE);
+    Rectangle leftMenuBtn = new Rectangle(10*SCALE, 250*SCALE, 200*SCALE, 100*SCALE);
+    // SCREEN_HEIGHT - (140 +menu_right_h)
+    Rectangle rightMenuBtn = new Rectangle(SCREEN_WIDTH-(275+200)*SCALE, 250*SCALE, 200*SCALE, 100*SCALE);
 
     private int game_action = DUMP_ACTION_STATE;
 
@@ -262,8 +263,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private static final int GAME_ACTION_RIGHT = 5;
     private static final int GAME_ACTION_UP = 1; // It dupplicate w ACTION_OK; prev: 8
     private static final int GAME_ACTION_DOWN = 6;
-    private static final int KEY_RIGHT_MENU = 35; // action = 0 // KEY_RIGHT_MENU = 35 ? -7 (from AA)
-    private static final int KEY_LEFT_MENU = -6;  // action = 0
+    private static final int KEY_RIGHT_MENU = 35; // action = 0 // KEY_RIGHT_MENU = 35 ? -7 (from AA) # key
+    private static final int KEY_LEFT_MENU = -6;  // action = 0; * key
     private static final int KEY_OK = -5;
     private static final int KEY_STAR = 0;
     private static final int KEY_NUM_3 = 0; // for item mode
@@ -296,6 +297,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     private Texture imgMenuLeft;
     private Texture imgMenuRight;
+    // Match with Rectangle:
+    // downBtnRect, leftBtnRect, optionBtnRect, speedUpBtnRect, leftMenuBtn
 
     BitmapFont font;
     private Music music;
@@ -318,6 +321,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         this.item_price[7] = 12;
         this.item_slot[0] = 3;
         this.item_slot[1] = 5;
+        // this.stage = this.last_stage;
+        this.last_stage = getGameStage();
+        this.last_stage = (this.last_stage <= 0) ? 32 : this.last_stage;
         this.stage = this.last_stage;
 
         Gdx.input.setInputProcessor(this);
@@ -375,18 +381,18 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         game_action = getGameAction(pointer); // pointer
 
         if(isTouchedSpeedUp()) { // smaller value, shorter sleep
-            this.dbg(" touch up up ");
+            this.dbg(" touch up ↓↑ ↓ " + this.game_speed);
             if(game_speed >= 12) {
                 Gdx.input.vibrate(5);
-                game_speed -= 8;
+                game_speed -= 3; // Base on shitty redmi note 7
             }
             setGameSpeed(game_speed);
         }
         if(isTouchedSpeedDown()) {
-            this.dbg(" touch up down ");
+            this.dbg(" touch up down ↓↑ ↓ " + this.game_speed);
             if(game_speed <= 128) {
                 Gdx.input.vibrate(5);
-                game_speed += 8;
+                game_speed += 3;
             }
             setGameSpeed(game_speed);
         }
@@ -477,6 +483,14 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         shapeRenderer.rect(testNum32.getX(), testNum32.getY(), testNum32.getWidth(), testNum32.getHeight());
         shapeRenderer.rect(testNum32.getX()-1, testNum32.getY()-1, testNum32.getWidth()+2, testNum32.getHeight()+2);
 
+        shapeRenderer.setColor(Color.MAGENTA);
+        shapeRenderer.rect(speedUpBtnRect.getX(), speedUpBtnRect.getY(), speedUpBtnRect.getWidth(), speedUpBtnRect.getHeight());
+        shapeRenderer.rect(speedDownBtnRect.getX(), speedDownBtnRect.getY(), speedDownBtnRect.getWidth(), speedDownBtnRect.getHeight());
+
+
+        shapeRenderer.setColor(Color.GREEN);
+        shapeRenderer.rect(leftMenuBtn.getX(), leftMenuBtn.getY(), leftMenuBtn.getWidth(), leftMenuBtn.getHeight());
+        shapeRenderer.rect(rightMenuBtn.getX(), rightMenuBtn.getY(), rightMenuBtn.getWidth(), rightMenuBtn.getHeight());
 
         shapeRenderer.end();
     }
@@ -559,11 +573,12 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         return textureBounds.contains(touchPoint.x, touchPoint.y);
     }
     protected boolean isTouchedMenuLeft() {
-        // Gdx.app.log("DEBUG Clip", "x: " + leftMenuBtn.x + " y " + leftMenuBtn.y + " w " + leftMenuBtn.getWidth() + " h " + leftMenuBtn.getHeight());
+        Gdx.app.log("DEBUG Clip", "x: " + leftMenuBtn.x + " y " + leftMenuBtn.y + " w " + leftMenuBtn.getWidth() + " h " + leftMenuBtn.getHeight());
         this.key_code = KEY_LEFT_MENU;
         return OverlapTester.pointInRectangle(leftMenuBtn, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
     }
     protected boolean isTouchedMenuRight() {
+        Gdx.app.log("DEBUG Clip", "x: " + rightMenuBtn.x + " y " + rightMenuBtn.y + " w " + rightMenuBtn.getWidth() + " h " + rightMenuBtn.getHeight());
         this.key_code = KEY_RIGHT_MENU;
         return OverlapTester.pointInRectangle(rightMenuBtn, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
     }
@@ -797,6 +812,21 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             this.dbg("††† >> ---" + touchPoint.x + " y " + touchPoint.y);
             this.game_action = GAME_ACTION_RIGHT;
             return GAME_ACTION_RIGHT;
+        }
+        if (isTouchedMenuLeft()) {
+            this.key_code = KEY_LEFT_MENU;
+            Gdx.input.vibrate(15);
+            this.dbg("††† Menu L ---" + touchPoint.x + " y " + touchPoint.y);
+            this.game_action = 0;
+            return 0;
+        }
+        // TODO show or represent SELECT #; OPTIONS # for user
+        if (isTouchedMenuRight()) {
+            this.key_code = KEY_RIGHT_MENU;
+            Gdx.input.vibrate(15);
+            this.dbg("††† Menu R ---" + touchPoint.x + " y " + touchPoint.y);
+            this.game_action = 0;
+            return 0;
         }
 
         if(isTouchedOK()) {
@@ -2309,7 +2339,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     public void draw_item(SpriteBatch paramGraphics)
     {
-        this.dbg(" del " + this.del + " item slot " + (Arrays.toString(this.item_slot)));
+        // this.dbg(" del " + this.del + " item slot " + (Arrays.toString(this.item_slot)));
         if (this.del == -1)
         {
             for (int i = 0; i < 5; i++) {
@@ -2699,9 +2729,13 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     }
                     else if (this.game_state == 1)
                     {
-                        this.screen = 65336;
+                        this.screen = 65336; // lose
                         this.gold = 3;
                     }
+
+                    setSavedMana(this.mana);
+                    setSavedGold(getSavedgold()+ this.gold);
+                    setGameStage(this.stage);
                 }
             }
             else if (this.screen == 8) // SPECIAL_ANIMATION
@@ -2765,6 +2799,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                         this.state = 10;
                     }
                     this.last_stage = this.stage;
+
+                    setGameStage(this.stage);
+                    setLastGameStage(this.last_stage);
                 }
                 destroyImage(6);
                 destroyImage(7);
@@ -2803,7 +2840,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             }
         }
         else {
-            this.dbg("ßßß ---- Game not running!");
+            // this.dbg("ßßß ---- Game not running!");
         }
 
         paint(batch);
@@ -3889,6 +3926,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     {
                         // this.SJ.destroyApp(true);
                         // this.SJ.notifyDestroyed();
+                        Gdx.app.exit();
                         return;
                     }
                     if (this.m_mode == 1)
@@ -3953,6 +3991,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 {
                     // this.SJ.destroyApp(true);
                     // this.SJ.notifyDestroyed();
+                    Gdx.app.exit();
                     return;
                 }
             }
@@ -3960,7 +3999,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
         else if (this.screen == 3) // VILLAGE_SCREEN
         {
-            Gdx.app.log("DEBUG", "††† in the ville game action " + getGameAction(paramInt) + " code " + this.key_code);
             if (getGameAction(paramInt) == 1 && (getGameAction(paramInt) == GAME_ACTION_UP)) // debug
             {
                 j = this.h_y - 8;
