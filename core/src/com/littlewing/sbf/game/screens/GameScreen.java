@@ -633,9 +633,63 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 return 3; // light blue
             default:
                 return 0;
-
         }
     }
+
+    // TODO fix redeclear array of float
+    public float[] getFloatColor(int color) {
+        float colorFloat[] = {1.0f, 1.0f, 1.0f};
+
+        switch(color) {
+            case 16777215:
+                return colorFloat; // white
+            case 7196662: // 6DCFF6
+                colorFloat = new float[]{0.427f, 0.812f, 0.965f};
+                return colorFloat; // light blue
+            case 9342606: // 8E8E8E
+                colorFloat = new float[]{0.557f, 0.557f, 0.557f}; // gray
+                return colorFloat;
+            case 15132390: // E6E6E6
+                colorFloat = new float[]{0.902f, 0.902f, 0.902f}; // light gray ~
+                return colorFloat;
+            case 14994350: // E4CBAE
+                colorFloat = new float[]{0.894f, 0.796f, 0.682f}; // light yellow ~ light orange
+                return colorFloat;
+            case 10173: // 0027BD
+                colorFloat = new float[]{0.0f, 0.153f, 0.741f}; // med blue ~ blue
+                return colorFloat;
+            case 16777164: // FFFFCC
+                colorFloat = new float[]{1.0f, 1.0f, 0.8f}; // light yellow
+                return colorFloat;
+            case 0:
+                colorFloat = new float[]{0.0f, 0.0f, 0.0f}; // gray (should be black)
+                return colorFloat;
+            case 25054: // 0061DE
+                colorFloat = new float[]{0.0f, 0.38f, 0.871f}; // med blue
+                return colorFloat;
+            case 44783: // 00AEEF
+                colorFloat = new float[]{0.0f, 0.682f, 0.937f}; // light blue
+                return colorFloat;
+            case 6974058: // 6A6A6A
+                colorFloat = new float[]{0.416f, 0.416f, 0.416f}; // gray ~ light gray
+                return colorFloat;
+            case 9672090: // 93959A
+                colorFloat = new float[]{0.576f, 0.584f, 0.604f}; // light gray ~ gray
+                return colorFloat;
+            case 16775065: // FFF799
+                colorFloat = new float[]{1.0f, 0.969f, 0.6f}; // light yellow
+                return colorFloat;
+            case 16711680: // FF0000
+                colorFloat = new float[]{1.0f, 0.0f, 0.0f}; // red
+                return colorFloat;
+            case 4960985: // 4BB2D9
+                colorFloat = new float[]{0.294f, 0.698f, 0.851f}; // light blue
+                return colorFloat;
+            default:
+                return colorFloat;
+        }
+    }
+
     /**
      *
      * @param paramGraphics
@@ -656,35 +710,23 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         // TODO add func to map int color to simpled version of color
         int pos_y = (int) ((OLD_MOBI_H - y)*MOBI_SCL - imgColor[color].getHeight()*scaleY + BOTTOM_SPACE);
 
-        batch.draw(imgColor[color], pos_x, pos_y, 0, 0, imgColor[color].getWidth(), imgColor[color].getHeight(), scaleX, scaleY, 0, 0, 0, (int)(imgColor[color].getWidth()*scaleX), (int)(imgColor[color].getHeight()*scaleY), false, false);
+        //batch.draw(imgColor[color], pos_x, pos_y, 0, 0, imgColor[color].getWidth(), imgColor[color].getHeight(), scaleX, scaleY, 0, 0, 0, (int)(imgColor[color].getWidth()*scaleX), (int)(imgColor[color].getHeight()*scaleY), false, false);
+        batch.draw(imgColor[color], pos_x, pos_y, 0, 0, imgColor[5].getWidth(), imgColor[5].getHeight(), scaleX, scaleY, 0, 0, 0, (int)(imgColor[5].getWidth()*scaleX), (int)(imgColor[5].getHeight()*scaleY), false, false);
     }
 
     /**
-     * Fix me: scale J2ME?
-     *
-     * drawImage2(paramGraphics, this.img_arr_a[paramInt1], paramInt2, paramInt3, 20);
      *
      * @param paramGraphics
      * @param pos_x positon x (240x320 J2ME geometry)
      * @param pos_y positon y
      * @param anchor
-     * @param spriteIdx image sprite index [not used, from AA]
-     * 20 => anchor point; It seem this gap is reserved for phone top bar: signal strength, datetime ...
      */
 
-    /**
-     * J2ME MIDP 2.0
-     * public void drawImage(Image img,
-     *                       int x,
-     *                       int y,
-     *                       int anchor) // anchor - the anchor point for positioning the image
-     */
-
-    /**
-     * Refine scaled image is pain in the ass.
-     */
+    // If there are any chance to debug J2ME (Eclipse) try debug anchor value mean.
+    // AA use quite many anchor call; It seem ok but not always.
     // anchor 20 may be TOP|LEFT = 16+4 ? = 0x11 | 0x4
-    // HCENTER: 1 VCENTER: 2; LEFT: 4; RIGHT: 8; TOP: 16; BOTTOM: 32; BASELINE: 64; SOLID: 0; DOTTED: 1 dupli ?
+    // Graphics.HCENTER: 1 Graphics.VCENTER: 2; LEFT: 4; RIGHT: 8; TOP: 16; BOTTOM: 32; BASELINE: 64; SOLID: 0; DOTTED: 1 dupli ?
+
     // http://www.it.uc3m.es/florina/docencia/j2me/midp/docs/api/javax/microedition/lcdui/Graphics.html#VCENTER
     // https://docs.oracle.com/javame/config/cldc/ref-impl/midp2.0/jsr118/javax/microedition/lcdui/Graphics.html#BASELINE
     public void drawImage2(SpriteBatch paramGraphics, Texture image, int pos_x, int pos_y, int anchor)
@@ -695,14 +737,35 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
 
         int img_height = (int)(image.getHeight()*SCALE); // SCALE per 1080
-        int position_y = (int) ((OLD_MOBI_H - pos_y - anchor*0)*MOBI_SCL - img_height + BOTTOM_SPACE); // anchor 20 pos_y -20
+        int img_width = (int)(image.getWidth()*SCALE); // SCALE per 1080
+
+        int position_x = (int) (pos_x*MOBI_SCL);
+        int position_y = (int) ((OLD_MOBI_H - pos_y)*MOBI_SCL - img_height + BOTTOM_SPACE); // Default TOP | LEFT
+
+        switch(anchor) {
+            case 20: // TOP | LEFT ; 0x10 | 0x4
+                break;
+            case 17:  // TOP | HCENTER ; 0x10 | 0x1; Remember horizontal center mean X/2 anchor;
+                // use OLD_MOBI_W /2 or pos_x for anchor x; (MIDP pos_x already calculated);
+                // can not use (pos_x - img_width)/2 since img already scaled to Droid;
+                position_x = (int) ( position_x - img_width/2); // MIDP: w/2 - img_width/2; ~ OLD_MOBI_W*MOBI_SCL/2
+                break;
+            case 3:  // VCENTER | HCENTER
+                // It's complex if centered by image (0,0) by image center not screen Geometry;
+                // MIDP: h/2 + height/2 => Droid: h -(h/2 +height/2) = h/2 - height/2;
+                position_x = (int) (position_x - img_width/2); // MIDP: w/2 - x/2 (width/2), h/2 + y/2 (height/2);
+                position_y = (int) ( (OLD_MOBI_H - pos_y)*MOBI_SCL - img_height/2 + BOTTOM_SPACE);
+                break;
+            default:
+                break;
+        }
 
         // batch.draw(image, (int)(pos_x*MOBI_SCL), position_y, image.getWidth()*SCALE, image.getHeight()*SCALE); // draw no scale
 
         // Draw Image with scale param, can anchor to 1080x1920 work without / with minimal change in geometry ?
         float scaleX = (float) (MOBI_SCL / SCALED_IMG_RATIO); // 1080 / 128 / 9
         float scaleY = (float) (MOBI_SCL / SCALED_IMG_RATIO);
-        paramGraphics.draw(image, (int)(pos_x*MOBI_SCL), position_y*SCALE, 0, 0, image.getWidth(), image.getHeight(), scaleX, scaleY, 0, 0, 0, (int)(image.getWidth()), (int)(image.getHeight()), false, false);
+        paramGraphics.draw(image, (int)(position_x*SCALE), position_y*SCALE, 0, 0, image.getWidth(), image.getHeight(), scaleX, scaleY, 0, 0, 0, (int)(image.getWidth()), (int)(image.getHeight()), false, false);
     }
 
     public void drawImage(SpriteBatch paramGraphics)
@@ -712,6 +775,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         // Can not use for now since now Array Of Images has been build.
     }
 
+    // Not used
     public void drawRect(int x, int y, int width, int height, int color) {
         this.fillRect(this.batch, x, y, width, height, color);
     }
@@ -719,60 +783,72 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     // Temporary draw single line
     public void drawRect(SpriteBatch paramGraphics, int x, int y, int width, int height, int color)
     {
-        this.fillRect(paramGraphics, x, y, width, height, color);
+        this.fillRect(paramGraphics, x, y, width, 1, color);
+        this.fillRect(paramGraphics, x+width-1, y, 1, height, color);
+        this.fillRect(paramGraphics, x, y+height-1, width, 1, color);
+        this.fillRect(paramGraphics, x, y, 1, height, color);
     }
 
-    public void drawString(SpriteBatch paramGraphics,  String paramString, int paramInt1, int paramInt2, int paramInt3, int color)
+    public void drawString(SpriteBatch paramGraphics, String paramString, int x, int y, int anchor, int color)
     {
         if(paramString == null) { // FIXME
             return;
         }
 
-        int position_y = (int) ((OLD_MOBI_H -paramInt2-20)*MOBI_SCL + BOTTOM_SPACE); // anchor 20
-        switch(paramInt3) {
-            case 1:
-                font.setColor(1, 0, 0, 1); // red
+        int stringLength = paramString.length() * 10; // fixme char width = 15px
+        int position_x = (int) ( (x*MOBI_SCL) - stringLength/2);
+        int position_y = (int) ((OLD_MOBI_H -y)*MOBI_SCL + BOTTOM_SPACE);
+
+        switch(anchor) {
+            case 20: // TOP | LEFT ; 0x10 | 0x4
+                break;
+            case 17:  // TOP | HCENTER ; 0x10 | 0x1; Remember horizontal center mean X/2 anchor;
+                // use OLD_MOBI_W /2 or pos_x for anchor x; (MIDP pos_x already calculated);
+                position_x = (int) (position_x - stringLength/2); // MIDP: w/2 - img_width/2; ~ OLD_MOBI_W*MOBI_SCL/2
+                break;
+            case 3:  // VCENTER | HCENTER
+                // stringWidth() alternative; oh may be this is why AA use image stack for custom text;
+                position_x = (int) (position_x - stringLength/2); // MIDP: w/2 - x/2 (width/2), h/2 + y/2 (height/2);
+                position_y = (int) ( (OLD_MOBI_H - y)*MOBI_SCL - 8 + BOTTOM_SPACE); // 8 as 1/2 line height
                 break;
             default:
-                font.setColor(1, 1, 1, 1);
                 break;
         }
-        font.draw(paramGraphics, paramString, (int)(paramInt1 * MOBI_SCL), position_y);
 
-        for (int k = 0; k < paramString.length(); k++) // NAME: \n AZ 1 \n DAMAGE: 30MP
-        {
-            int j = paramString.charAt(k);
-            if ((j >= 48) && (j <= 90))
-            {
-                int i = j - 48;
-                // Clever way to draw ASCII from integer position and sprite-pack crop area
-                // mySetClip(paramGraphics, paramInt1 + 6 * k, paramInt2, 5, 5); // font_00.png 215 x 5 ?
-                // Gdx.app.log("DEBUG Clip", "int1: " + paramInt1 + " k " + k + " int 2 = "+paramInt2 + " index " + i + " Msg " + paramString);
-                // TODO use GDX Title or text.
-                // drawImageAnchor20(paramGraphics, 0, paramInt1 + 6 * k - i * 5, paramInt2);
-                // ENERMY:null
-                // myDrawClip(paramGraphics, i, paramInt2, 5, 5, 0, paramInt1 + 6 * k - i * 5, paramInt2, 20);
-            }
-        }
-        // mySetClip(paramGraphics, 0, 0, 240, 320);
+        float[] colorFloat = this.getFloatColor(color);
+        font.setColor(1, colorFloat[0], colorFloat[1], colorFloat[2]); // red
+
+        font.draw(paramGraphics, paramString, (int)(x * MOBI_SCL), position_y);
     }
 
-    public void drawString(SpriteBatch paramGraphics, String paramString, int paramInt1, int paramInt2, int paramInt3)
+    // paramInt3 seem anchor not color
+    public void drawString(SpriteBatch paramGraphics, String paramString, int x, int y, int anchor)
     {
         if(paramString == null) { // FIXME
             return;
         }
 
-        int position_y = (int) ((OLD_MOBI_H -paramInt2-20)*MOBI_SCL + BOTTOM_SPACE); // anchor 20
-        switch(paramInt3) {
-            case 1:
-                font.setColor(1, 0, 0, 1); // red
+        int stringLength = paramString.length() * 10; // fixme char width = 15px
+        int position_x = (int) ( (x * MOBI_SCL) - stringLength/2 );
+        int position_y = (int) ( (OLD_MOBI_H - y)*MOBI_SCL + BOTTOM_SPACE );
+
+        switch(anchor) {
+            case 20: // TOP | LEFT ; 0x10 | 0x4
+                break;
+            case 17:  // TOP | HCENTER ; 0x10 | 0x1; Remember horizontal center mean X/2 anchor;
+                position_x = (int) ( position_x - stringLength/2); // MIDP: w/2 - img_width/2; ~ OLD_MOBI_W*MOBI_SCL/2
+                break;
+            case 3:  // VCENTER | HCENTER
+                position_x = (int) (position_x - stringLength/2); // MIDP: w/2 - x/2 (width/2), h/2 + y/2 (height/2);
+                position_y = (int) ( (OLD_MOBI_H - y)*MOBI_SCL - 8 + BOTTOM_SPACE);
                 break;
             default:
-                font.setColor(1, 1, 1, 1);
                 break;
         }
-        font.draw(paramGraphics, paramString, (int)(paramInt1 * MOBI_SCL), position_y);
+
+        font.setColor(1, 1.0f, 1.0f, 1.0f);
+
+        font.draw(paramGraphics, paramString, position_x, position_y); // SCALE ?
     }
 
     /*
@@ -1458,7 +1534,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         this.h_x = 5;
         this.h_y = 8;
         this.h_idx = 0;
-        this.max_hp = 10600; // fixme
+        this.max_hp = 106*5; // fixme
         this.hp = this.max_hp;
         this.wp = 0;
         this.pw_up = 0;
@@ -1671,7 +1747,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             drawImage2(paramGraphics, this.imgBack, 0, 0, 20);
             // paramGraphics.setColor(16777215);
             fillRect(paramGraphics, 0, 25, 128, 84, 16777215);
-            drawImage2(paramGraphics, this.imgHero[this.h_idx], this.h_x * 5, 83, 0x10 | 0x1); // = 17 tho.
+            drawImage2(paramGraphics, this.imgHero[this.h_idx], this.h_x * 5, 83, 0x10 | 0x1); // = 17 tho. Graphics.TOP | HCENTER
             if (this.ppang_time > 0)
             {
                 if (this.ppang_item == 1) {
@@ -2268,8 +2344,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             fillRect(paramGraphics, 0, 71, 128, 84, 25054);
 
             // TODO make drawCenter() or draw(Position = TL, BR, Center, allign ...)
-            drawImage2(batch, present, 22, 5, 0x10 | 0x1); // present.png // 83 x 11;
-            drawImage2(batch, sam_logo, 16, 28, 0x10 | 0x1); // sam_logo.png // 96 x 33; 128 WIDTH
+            drawImage2(batch, present, 64, 5, 0x10 | 0x1); // present.png // 83 x 11;
+            // orig sam_logo x:y 64:28 => seem 64 is center anchor x (128/2); HCENTER (horizontal);
+            drawImage2(batch, sam_logo, 64, 28, 0x10 | 0x1); // sam_logo.png // 96 x 33; 128 WIDTH
             drawImage2(batch, http1, 7, 77, 20); // http1.png
             drawImage2(batch, http2, 7, 103, 20); // http2.png
         }
