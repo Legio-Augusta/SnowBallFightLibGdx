@@ -147,7 +147,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private int h_timer;
     private int h_timer_p;
     private int pw_up;
-    private int mana = 0;
+    private int mana = 100;
     private int hp;
     private int max_hp;
     private int dem; // Damage by special effect
@@ -464,10 +464,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         shapeRenderer.rect(upBtnRect.getX(), upBtnRect.getY(), upBtnRect.getWidth(), upBtnRect.getHeight());
         shapeRenderer.setColor(Color.GRAY);
         shapeRenderer.rect(downBtnRect.getX(), downBtnRect.getY(), downBtnRect.getWidth(), downBtnRect.getHeight());
-        shapeRenderer.setColor(Color.RED);
-        shapeRenderer.rect(leftBtnRect.getX(), leftBtnRect.getY(), leftBtnRect.getWidth(), leftBtnRect.getHeight());
-        shapeRenderer.setColor(Color.ORANGE);
-        shapeRenderer.rect(rightBtnRect.getX(), rightBtnRect.getY(), rightBtnRect.getWidth(), rightBtnRect.getHeight());
+
+//        shapeRenderer.setColor(Color.RED);
+//        shapeRenderer.rect(leftBtnRect.getX(), leftBtnRect.getY(), leftBtnRect.getWidth(), leftBtnRect.getHeight());
+//        shapeRenderer.setColor(Color.ORANGE);
+//        shapeRenderer.rect(rightBtnRect.getX(), rightBtnRect.getY(), rightBtnRect.getWidth(), rightBtnRect.getHeight());
 
 
 //        Rectangle okBound2    = new Rectangle(SCREEN_WIDTH-(50+fireBtnTexture.getWidth())*SCALE,                                     (int)(50*SCALE), fireBtnTexture.getWidth()*SCALE, fireBtnTexture.getHeight()*SCALE);
@@ -478,19 +479,19 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         int fire_w = fireBtnTexture.getWidth();
         int speed_up_h = imgSpeedUp.getHeight();
 
-        Rectangle testNum32 = new Rectangle(SCREEN_WIDTH-(50+ fire_w + fire_w/2 + imgKeyNum3.getWidth())*SCALE, (40 + speed_up_h)*SCALE, imgKeyNum3.getWidth()*SCALE, imgKeyNum3.getHeight()*SCALE);
-        shapeRenderer.setColor(Color.YELLOW);
-        shapeRenderer.rect(testNum32.getX(), testNum32.getY(), testNum32.getWidth(), testNum32.getHeight());
-        shapeRenderer.rect(testNum32.getX()-1, testNum32.getY()-1, testNum32.getWidth()+2, testNum32.getHeight()+2);
+//        Rectangle testNum32 = new Rectangle(SCREEN_WIDTH-(50+ fire_w + fire_w/2 + imgKeyNum3.getWidth())*SCALE, (40 + speed_up_h)*SCALE, imgKeyNum3.getWidth()*SCALE, imgKeyNum3.getHeight()*SCALE);
+//        shapeRenderer.setColor(Color.YELLOW);
+//        shapeRenderer.rect(testNum32.getX(), testNum32.getY(), testNum32.getWidth(), testNum32.getHeight());
+//        shapeRenderer.rect(testNum32.getX()-1, testNum32.getY()-1, testNum32.getWidth()+2, testNum32.getHeight()+2);
 
         shapeRenderer.setColor(Color.MAGENTA);
         shapeRenderer.rect(speedUpBtnRect.getX(), speedUpBtnRect.getY(), speedUpBtnRect.getWidth(), speedUpBtnRect.getHeight());
         shapeRenderer.rect(speedDownBtnRect.getX(), speedDownBtnRect.getY(), speedDownBtnRect.getWidth(), speedDownBtnRect.getHeight());
 
 
-        shapeRenderer.setColor(Color.GREEN);
-        shapeRenderer.rect(leftMenuBtn.getX(), leftMenuBtn.getY(), leftMenuBtn.getWidth(), leftMenuBtn.getHeight());
-        shapeRenderer.rect(rightMenuBtn.getX(), rightMenuBtn.getY(), rightMenuBtn.getWidth(), rightMenuBtn.getHeight());
+//        shapeRenderer.setColor(Color.GREEN);
+//        shapeRenderer.rect(leftMenuBtn.getX(), leftMenuBtn.getY(), leftMenuBtn.getWidth(), leftMenuBtn.getHeight());
+//        shapeRenderer.rect(rightMenuBtn.getX(), rightMenuBtn.getY(), rightMenuBtn.getWidth(), rightMenuBtn.getHeight());
 
         shapeRenderer.end();
     }
@@ -573,12 +574,12 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         return textureBounds.contains(touchPoint.x, touchPoint.y);
     }
     protected boolean isTouchedMenuLeft() {
-        Gdx.app.log("DEBUG Clip", "x: " + leftMenuBtn.x + " y " + leftMenuBtn.y + " w " + leftMenuBtn.getWidth() + " h " + leftMenuBtn.getHeight());
+        // Gdx.app.log("DEBUG Clip", "x: " + leftMenuBtn.x + " y " + leftMenuBtn.y + " w " + leftMenuBtn.getWidth() + " h " + leftMenuBtn.getHeight());
         this.key_code = KEY_LEFT_MENU;
         return OverlapTester.pointInRectangle(leftMenuBtn, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
     }
     protected boolean isTouchedMenuRight() {
-        Gdx.app.log("DEBUG Clip", "x: " + rightMenuBtn.x + " y " + rightMenuBtn.y + " w " + rightMenuBtn.getWidth() + " h " + rightMenuBtn.getHeight());
+        // Gdx.app.log("DEBUG Clip", "x: " + rightMenuBtn.x + " y " + rightMenuBtn.y + " w " + rightMenuBtn.getWidth() + " h " + rightMenuBtn.getHeight());
         this.key_code = KEY_RIGHT_MENU;
         return OverlapTester.pointInRectangle(rightMenuBtn, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
     }
@@ -636,57 +637,64 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
     }
 
-    // TODO fix redeclear array of float
-    public float[] getFloatColor(int color) {
-        float colorFloat[] = {1.0f, 1.0f, 1.0f};
+    // Fixme due to GDX bug (?), color set not take effect, so try approximate by Color.RED/MAGENTA ...
+    // https://libgdx.badlogicgames.com/ci/nightlies/docs/api/com/badlogic/gdx/graphics/Color.html
+    // public float[] getFloatColor(int color) {
+    public Color getGDXtColor(int color) {
+        // float colorFloat[] = {1.0f, 1.0f, 1.0f};
+        // CYAN #00ffff; Maroon  #800000; Coral #FF7F50; Chartreuse #7FFF00; BROWN #964B00;
+        // FIREBRICK #B22222; FOREST #228B22; Gold FFD700; 	GOLDENROD DAA520; LT Gray d3d3d3; Lime Bfff00;
+        // OLIVE 808000; navy 000080; orange ff7f00; ping ffc0cb; Purple 800080; ROYAL 4169E1; SCARLET ff2400; Salmon FA8072;
+        // SLATE 708090; sky 80daeb; TAN D2B48C; TEAL 008080; VIOLET  7f00ff;
+        // These color above based on GG search, not official GDX; And Droid color is much more limitted.
 
         switch(color) {
             case 16777215:
-                return colorFloat; // white
+                return Color.WHITE; // white
             case 7196662: // 6DCFF6
-                colorFloat = new float[]{0.427f, 0.812f, 0.965f};
-                return colorFloat; // light blue
+                // colorFloat = new float[]{0.427f, 0.812f, 0.965f}; // 109f/255f, 207f/255f, 246f/255f
+                return Color.SKY;  // light blue
             case 9342606: // 8E8E8E
-                colorFloat = new float[]{0.557f, 0.557f, 0.557f}; // gray
-                return colorFloat;
+                // colorFloat = new float[]{0.557f, 0.557f, 0.557f}; // gray // 142f/255f, 142f/255f, 142f/255f
+                return Color.GRAY;
             case 15132390: // E6E6E6
-                colorFloat = new float[]{0.902f, 0.902f, 0.902f}; // light gray ~
-                return colorFloat;
+                // colorFloat = new float[]{0.902f, 0.902f, 0.902f}; // light gray ~ // 230f/255f, 230f/255f, 230f/255f
+                return Color.LIGHT_GRAY;
             case 14994350: // E4CBAE
-                colorFloat = new float[]{0.894f, 0.796f, 0.682f}; // light yellow ~ light orange
-                return colorFloat;
+                // colorFloat = new float[]{0.894f, 0.796f, 0.682f}; // light yellow ~ light orange
+                return Color.ORANGE;
             case 10173: // 0027BD
-                colorFloat = new float[]{0.0f, 0.153f, 0.741f}; // med blue ~ blue
-                return colorFloat;
+                // colorFloat = new float[]{0.0f, 0.153f, 0.741f}; // med blue ~ blue
+                return Color.BLUE;
             case 16777164: // FFFFCC
-                colorFloat = new float[]{1.0f, 1.0f, 0.8f}; // light yellow
-                return colorFloat;
+                // colorFloat = new float[]{1.0f, 1.0f, 0.8f}; // light yellow
+                return Color.YELLOW;
             case 0:
-                colorFloat = new float[]{0.0f, 0.0f, 0.0f}; // gray (should be black)
-                return colorFloat;
+                // colorFloat = new float[]{0.0f, 0.0f, 0.0f}; // gray (should be black)
+                return Color.DARK_GRAY; // fixme due to white snow bg bug
             case 25054: // 0061DE
-                colorFloat = new float[]{0.0f, 0.38f, 0.871f}; // med blue
-                return colorFloat;
+                // colorFloat = new float[]{0.0f, 0.38f, 0.871f}; // med blue
+                return Color.NAVY;
             case 44783: // 00AEEF
-                colorFloat = new float[]{0.0f, 0.682f, 0.937f}; // light blue
-                return colorFloat;
+                // colorFloat = new float[]{0.0f, 0.682f, 0.937f}; // light blue
+                return Color.SKY;
             case 6974058: // 6A6A6A
-                colorFloat = new float[]{0.416f, 0.416f, 0.416f}; // gray ~ light gray
-                return colorFloat;
+                // colorFloat = new float[]{0.416f, 0.416f, 0.416f}; // gray ~ light gray
+                return Color.LIGHT_GRAY;
             case 9672090: // 93959A
-                colorFloat = new float[]{0.576f, 0.584f, 0.604f}; // light gray ~ gray
-                return colorFloat;
+                // colorFloat = new float[]{0.576f, 0.584f, 0.604f}; // light gray ~ gray
+                return Color.LIGHT_GRAY;
             case 16775065: // FFF799
-                colorFloat = new float[]{1.0f, 0.969f, 0.6f}; // light yellow
-                return colorFloat;
+                // colorFloat = new float[]{1.0f, 0.969f, 0.6f}; // light yellow
+                return Color.YELLOW;
             case 16711680: // FF0000
-                colorFloat = new float[]{1.0f, 0.0f, 0.0f}; // red
-                return colorFloat;
+                // colorFloat = new float[]{1.0f, 0.0f, 0.0f}; // red
+                return Color.RED;
             case 4960985: // 4BB2D9
-                colorFloat = new float[]{0.294f, 0.698f, 0.851f}; // light blue
-                return colorFloat;
+                // colorFloat = new float[]{0.294f, 0.698f, 0.851f}; // light blue
+                return Color.SKY;
             default:
-                return colorFloat;
+                return Color.WHITE;
         }
     }
 
@@ -815,8 +823,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 break;
         }
 
-        float[] colorFloat = this.getFloatColor(color);
-        font.setColor(1, colorFloat[0], colorFloat[1], colorFloat[2]); // red
+        Color colorGDX = this.getGDXtColor(color);
+        font.setColor(colorGDX);
 
         font.draw(paramGraphics, paramString, (int)(x * MOBI_SCL), position_y);
     }
@@ -846,7 +854,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 break;
         }
 
-        font.setColor(1, 1.0f, 1.0f, 1.0f);
+        font.setColor(Color.WHITE);
 
         font.draw(paramGraphics, paramString, position_x, position_y); // SCALE ?
     }
@@ -908,7 +916,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         if(isTouchedOK()) {
             this.key_code = KEY_OK; // -5
             Gdx.input.vibrate(15);
-            this.dbg("††† OK ---" + touchPoint.x + " y " + touchPoint.y);
+            // this.dbg("††† OK ---" + touchPoint.x + " y " + touchPoint.y);
             this.game_action = GAME_ACTION_OK;
             return GAME_ACTION_OK;
         }
@@ -951,7 +959,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     }
 
-    // TODO use texture region
+    // TODO use texture region; Optimize reuse stuff, object;
     private void loadTextures() {
         fireBtnTexture = new Texture("data/gui/fire.png");
         snowWhiteBg = new Texture("data/sprites/snow.png"); // white_bg
@@ -1090,7 +1098,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         this.imgSp = new Texture("data/sprites/sp" + this.special + ".png");
         this.imgSps = new Texture[3];
         for (i=0; i < 3; i++) {
-            this.imgSps[i] = new Texture("data/sprites/sp" + i + ".png");
+            this.imgSps[i] = new Texture("data/sprites/sp" + (i+1) + ".png");
         }
 
         // 3
@@ -1283,7 +1291,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
         else if (paramInt == 9)
         {
-            this.special = (this.special > 2) ? 2: this.special;
+            this.special = (this.special > 2) ? 2: this.special; // sp 1 2 3 but array index = 0 1 2
             this.imgSp = this.imgSps[this.special];
         }
         else if (paramInt == 31)  // SHOP_SCREEN = 31
@@ -1306,7 +1314,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     }
 
     private void dbg(String log) {
-        Gdx.app.log("DEBUG", "††† " + log);
+//        Gdx.app.log("DEBUG", "††† " + log);
     }
 
     private void showDeviceInfos() {
@@ -1534,7 +1542,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         this.h_x = 5;
         this.h_y = 8;
         this.h_idx = 0;
-        this.max_hp = 106*5; // fixme
+        this.max_hp = 106*5*2; // fixme
         this.hp = this.max_hp;
         this.wp = 0;
         this.pw_up = 0;
@@ -1746,7 +1754,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             drawImage2(paramGraphics, this.ui, 0, 109, 20);
             drawImage2(paramGraphics, this.imgBack, 0, 0, 20);
             // paramGraphics.setColor(16777215);
-            fillRect(paramGraphics, 0, 25, 128, 84, 16777215);
+            //fillRect(paramGraphics, 0, 25, 128, 84, 16777215);
             drawImage2(paramGraphics, this.imgHero[this.h_idx], this.h_x * 5, 83, 0x10 | 0x1); // = 17 tho. Graphics.TOP | HCENTER
             if (this.ppang_time > 0)
             {
@@ -1949,10 +1957,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         {
             drawImage2(paramGraphics, this.imgMM, 0, 0, 20);
             // paramGraphics.setColor(16777164);
-            drawString(paramGraphics, "1.Play", 13, 23, 20);
-            drawString(paramGraphics, "2.Instructions", 13, 38, 20);
-            drawString(paramGraphics, "3.Configuration", 13, 53, 20);
-            drawString(paramGraphics, "4.Quit", 13, 68, 20);
+            drawString(paramGraphics, "1.Play", 13, 23, 20, 16777164);
+            drawString(paramGraphics, "2.Instructions", 13, 38, 20, 16777164);
+            drawString(paramGraphics, "3.Configuration", 13, 53, 20, 16777164);
+            drawString(paramGraphics, "4.Quit", 13, 68, 20, 16777164);
             drawImage2(paramGraphics, this.imgSl, 68, 115, 20);
             drawImage2(paramGraphics, this.imgCh, 3, this.m_mode * 15 + 11, 20);
         }
@@ -2047,9 +2055,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             drawRect(paramGraphics, 0, 19, 127, 90, 0);
             drawRect(paramGraphics, 0, 21, 127, 86, 0);
             drawImage2(paramGraphics, this.imgCh, 3, this.m_mode * 14 + 18, 20);
-            drawString(paramGraphics, "Resume", 15, 28, 20);
-            drawString(paramGraphics, "MainMenu", 15, 42, 20);
-            drawString(paramGraphics, "Sound", 15, 56, 20);
+            drawString(paramGraphics, "Resume", 15, 28, 20, 0);
+            drawString(paramGraphics, "MainMenu", 15, 42, 20, 0);
+            drawString(paramGraphics, "Sound", 15, 56, 20, 0);
             if (this.s_play == 1)
             {
                 // paramGraphics.setColor(255);
@@ -2064,7 +2072,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 // paramGraphics.setColor(255);
                 drawString(paramGraphics, "OFF", 93, 56, 20, 255);
             }
-            // paramGraphics.setColor(0);
+            // paramGraphics.setColor(0); // 0 = black ? It's ok if on white bg;
+            // But there r something wrong if both menu selected sametime (highlighted)?
             drawString(paramGraphics, "Instructions", 15, 70, 20, 0);
             drawString(paramGraphics, "Quit", 15, 84, 20, 0);
         }
@@ -2185,7 +2194,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             drawString(paramGraphics, "Sound", 12, 23, 20, 16777164);
             if (this.s_play == 1)
             {
-                drawString(paramGraphics, "ON /", 62, 23, 20); // TODO color required ?
+                drawString(paramGraphics, "ON /", 62, 23, 20, 16777164); // color required ? WHITE as default may be use default/no param;
                 // paramGraphics.setColor(10790052);
                 drawString(paramGraphics, "off", 95, 23, 20, 10790052);
                 // paramGraphics.setColor(16777164);
@@ -2197,10 +2206,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 // paramGraphics.setColor(16777164);
                 drawString(paramGraphics, "OFF", 94, 23, 20, 16777164);
             }
-            drawString(paramGraphics, "Vibration ", 12, 41, 20);
+            drawString(paramGraphics, "Vibration ", 12, 41, 20, 16777164);
             if (this.v_mode == 1)
             {
-                drawString(paramGraphics, "ON /", 62, 59, 20);
+                drawString(paramGraphics, "ON /", 62, 59, 20, 16777164);
                 // paramGraphics.setColor(10790052);
                 drawString(paramGraphics, "off", 95, 59, 20, 10790052);
                 // paramGraphics.setColor(16777164);
@@ -2212,8 +2221,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 // paramGraphics.setColor(16777164);
                 drawString(paramGraphics, "OFF", 94, 59, 20, 16777164);
             }
-            drawString(paramGraphics, "Speed ", 14, 77, 20);
-            drawString(paramGraphics, "[ " + String.valueOf(this.speed) + " ]", 68, 77, 20);
+            drawString(paramGraphics, "Speed ", 14, 77, 20, 16777164);
+            drawString(paramGraphics, "[ " + String.valueOf(this.speed) + " ]", 68, 77, 20, 16777164);
             drawImage2(paramGraphics, this.imgBk, 2, 115, 20);
             if (this.m_mode < 3) {
                 drawImage2(paramGraphics, this.imgCh, 4, this.m_mode * 18 + 9, 20);
