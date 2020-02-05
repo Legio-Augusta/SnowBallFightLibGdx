@@ -25,24 +25,23 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 
 import com.littlewing.sbf.game.OverlapTester;
 import com.littlewing.sbf.game.J2ME_API_Port;
 
-// Original J2ME with new API function porting
-
 /** TODO
- * Biggest issues: game gesture, user input;
+ * - issues: game gesture, user input;
  * - migrate old physical keyboard meme to new touch screen
  * - new screen size
- * - long time issue with button area, hint/hight light for easy of use
+ * - issue with button area, hint/hight light for easy of use
  * - iOS
  * - Ads and/or payment
  */
 
 /**
- * Responsive design pain in the ass. fixxed position of button.
- * The original version is for fixxed size screen.
+ * Fixed position of button.
+ * The original version is for fixed size screen.
  * only way for handle million device is if/else ?
  * https://qph.fs.quoracdn.net/main-qimg-4f8b79be77bb76e9103a8ee0e6c35f2b
  * viewport vs pixel
@@ -216,7 +215,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private int al;
     private int d_gauge;
 
-    private static int OLD_MOBI_H = 160;  // JavaME height = 320px
+    private static int OLD_MOBI_H = 160;  // JavaME height = 160px; In Emulator it's a square 128x128 and have blue blank bottom.
     private static int OLD_MOBI_W = 128; // Original Java Phone resolution. Damn many orig png have 128x => it should be 128 width tho.
     private static float MOBI_SCL = (float)Gdx.graphics.getWidth()/ OLD_MOBI_W; // FIXME 4.5 is not integer
     // SGH T199 128x160 ; E250 128x160
@@ -234,9 +233,17 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     // Ratio 3:4 ~ 9:12 So with ratio 9:16 we lost (not use) 4/16 = 1/4 of height.
     // Ie. 1920 we will cut 1/4 = 480px to keep ratio 3:4 1080:1440.
     // Bottom space used for fireBtn, so top should space only 240px
+    // TODO calculate scaled 128x160 to 1080x1350 ? Other space leave blank for ads or button.
+    // For future work, support screen horizontal mode.
     private static int SCREEN_WIDTH = Gdx.graphics.getWidth();
-    private static int SCREEN_HEIGHT = Gdx.graphics.getHeight();
-    private static int BOTTOM_SPACE = (int)(SCREEN_HEIGHT/8 + 20*MOBI_SCL); // May be change for fit touch button
+    // private static int SCREEN_HEIGHT = Gdx.graphics.getHeight();
+    private static int SCREEN_HEIGHT = 1920;
+
+    // Debug
+    int MIDP_H_SCALED = (int) (SCREEN_WIDTH / OLD_MOBI_W * 160);
+    int EXCEEDED_H = Gdx.graphics.getHeight() - MIDP_H_SCALED;
+
+    private static int BOTTOM_SPACE = (int)(SCREEN_HEIGHT/8); // May be change for fit touch button
 
     // Use rectangle until figure out how to work with BoundingBox multi input.
     Rectangle upBtnRect = new Rectangle((20+(200/3))*SCALE, (20+(400/3))*SCALE, 132*SCALE, 70*SCALE+ 50); // + 150 Jan-2
@@ -301,6 +308,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     // downBtnRect, leftBtnRect, optionBtnRect, speedUpBtnRect, leftMenuBtn
 
     BitmapFont font;
+    GlyphLayout layout;
     private Music music;
     private Music music_opening = Gdx.audio.newMusic(Gdx.files.internal("data/audio/night.wav"));
     // private Music music_donald_christmas = Gdx.audio.newMusic(Gdx.files.internal("data/audio/Donald_Christmas.mp3"));
@@ -435,8 +443,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     @Override
     public void render(float delta) {
-        Gdx.gl20.glClearColor(0, 0, 0, 1);
-        //Gdx.gl20.glClearColor(255/255f, 255/255f, 255/255f, 1);
+        // Gdx.gl20.glClearColor(0, 0, 0, 1);
+        // Gdx.gl20.glClearColor(255f/255f, 255f/255f, 255f/255f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         camera.position.x = SCREEN_WIDTH/2;
         camera.position.y = SCREEN_HEIGHT/2;
@@ -493,6 +501,25 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 //        shapeRenderer.rect(leftMenuBtn.getX(), leftMenuBtn.getY(), leftMenuBtn.getWidth(), leftMenuBtn.getHeight());
 //        shapeRenderer.rect(rightMenuBtn.getX(), rightMenuBtn.getY(), rightMenuBtn.getWidth(), rightMenuBtn.getHeight());
 
+        // TODO draw some debug bound rect: 128x160 scale rect, center point... for debug
+        // some cordination of ie. select hight light Rect vs shop position which is right.
+
+        Rectangle bound = new Rectangle(0, BOTTOM_SPACE*SCALE, SCREEN_WIDTH*SCALE, SCREEN_HEIGHT*SCALE);
+//        Rectangle center = new Rectangle(SCREEN_WIDTH/2*SCALE-5, (SCREEN_HEIGHT-BOTTOM_SPACE)/2*SCALE-5, 10, 10);
+        Rectangle vcenter_line = new Rectangle(SCREEN_WIDTH/2*SCALE-5, BOTTOM_SPACE*SCALE, 10, SCREEN_HEIGHT*SCALE);
+        Rectangle hcenter_line = new Rectangle(0, (SCREEN_HEIGHT+BOTTOM_SPACE)/2*SCALE-5, SCREEN_WIDTH*SCALE, 10);
+
+        shapeRenderer.setColor(Color.CORAL);
+        shapeRenderer.rect(bound.getX(), bound.getY(), bound.getWidth(), bound.getHeight());
+        shapeRenderer.rect(bound.getX()+1, bound.getY()+1, bound.getWidth()-2, bound.getHeight()-2);
+        shapeRenderer.setColor(Color.FOREST);
+        shapeRenderer.rect(vcenter_line.getX(), vcenter_line.getY(), vcenter_line.getWidth(), vcenter_line.getHeight());
+        shapeRenderer.rect(vcenter_line.getX()+1, vcenter_line.getY()+1, vcenter_line.getWidth()-2, vcenter_line.getHeight()-2);
+
+        shapeRenderer.setColor(Color.SALMON);
+        shapeRenderer.rect(hcenter_line.getX(), hcenter_line.getY(), hcenter_line.getWidth(), hcenter_line.getHeight());
+        shapeRenderer.rect(hcenter_line.getX()+1, hcenter_line.getY()+1, hcenter_line.getWidth()-2, hcenter_line.getHeight()-2);
+
         shapeRenderer.end();
     }
 
@@ -536,11 +563,18 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         font = new BitmapFont();
         font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         font.getData().setScale(5);
+
+        this.layout = new GlyphLayout(); //dont do this every frame! Store it as member
     }
 
     public void resize(int width, int height) {
         viewport.update(width,height);
         camera.position.set(camera.viewportWidth/2,camera.viewportHeight/2,0);
+
+        // Gdx.gl20.glClearColor(0, 180f/255f, 221f/255f, 1); // Samsung blue orig.
+        // Gdx.gl20.glClearColor(109f/255f, 207f/255f, 246f/255f, 1); // SKY
+        Gdx.gl20.glClearColor(255f/255f, 255f/255f, 255f/255f, 1); // WHITE
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     }
 
     // Oh damn notch, bottom space
@@ -600,6 +634,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     public void empty_func() {}
 
+    // TODO reorder, convert (IMagick) by RGB order ie. 0 1 2 prefix respectively
     public int getEnumColor(int color) {
         switch(color) {
             case 16777215:
@@ -626,6 +661,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 return 4; // gray ~ light gray
             case 9672090:
                 return 4; // light gray ~ gray
+            case 13434777: // light green (grass)
+                return 15; // light green grass
+            case 16777062: // FFFF66
+                return 2;
             case 16775065:
                 return 2; // light yellow
             case 16711680:
@@ -643,8 +682,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     public Color getGDXtColor(int color) {
         // float colorFloat[] = {1.0f, 1.0f, 1.0f};
         // CYAN #00ffff; Maroon  #800000; Coral #FF7F50; Chartreuse #7FFF00; BROWN #964B00;
-        // FIREBRICK #B22222; FOREST #228B22; Gold FFD700; 	GOLDENROD DAA520; LT Gray d3d3d3; Lime Bfff00;
-        // OLIVE 808000; navy 000080; orange ff7f00; ping ffc0cb; Purple 800080; ROYAL 4169E1; SCARLET ff2400; Salmon FA8072;
+        // FIREBRICK #B22222; FOREST #228B22; Gold FFD700; 	GOLDENROD DAA520; LT Gray d3d3d3; Lime 32cd32, it should be Bfff00;
+        // OLIVE 808000; navy 000080; orange ff7f00; pink ffc0cb; Purple 800080; ROYAL 4169E1; SCARLET ff2400; Salmon FA8072;
         // SLATE 708090; sky 80daeb; TAN D2B48C; TEAL 008080; VIOLET  7f00ff;
         // These color above based on GG search, not official GDX; And Droid color is much more limitted.
 
@@ -662,13 +701,13 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 return Color.LIGHT_GRAY;
             case 14994350: // E4CBAE
                 // colorFloat = new float[]{0.894f, 0.796f, 0.682f}; // light yellow ~ light orange
-                return Color.ORANGE;
+                return Color.ORANGE; // ? it's wheat color;
             case 10173: // 0027BD
                 // colorFloat = new float[]{0.0f, 0.153f, 0.741f}; // med blue ~ blue
                 return Color.BLUE;
             case 16777164: // FFFFCC
                 // colorFloat = new float[]{1.0f, 1.0f, 0.8f}; // light yellow
-                return Color.YELLOW;
+                return Color.WHITE; // YELLOW; // LIME
             case 0:
                 // colorFloat = new float[]{0.0f, 0.0f, 0.0f}; // gray (should be black)
                 return Color.DARK_GRAY; // fixme due to white snow bg bug
@@ -678,21 +717,27 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             case 44783: // 00AEEF
                 // colorFloat = new float[]{0.0f, 0.682f, 0.937f}; // light blue
                 return Color.SKY;
+            case 4960985: // 4BB2D9
+                // colorFloat = new float[]{0.294f, 0.698f, 0.851f}; // light blue
+                return Color.SKY;
             case 6974058: // 6A6A6A
                 // colorFloat = new float[]{0.416f, 0.416f, 0.416f}; // gray ~ light gray
                 return Color.LIGHT_GRAY;
+            case 8421504: // 808080
+                return Color.GRAY;
             case 9672090: // 93959A
                 // colorFloat = new float[]{0.576f, 0.584f, 0.604f}; // light gray ~ gray
                 return Color.LIGHT_GRAY;
+            case 10790052: // A4A4A4
+                return Color.LIGHT_GRAY;
+            case 13434726: // CCFF66
+                return Color.GREEN; // LIME is most closely match but GDX.LIME too dark.
             case 16775065: // FFF799
                 // colorFloat = new float[]{1.0f, 0.969f, 0.6f}; // light yellow
                 return Color.YELLOW;
             case 16711680: // FF0000
                 // colorFloat = new float[]{1.0f, 0.0f, 0.0f}; // red
                 return Color.RED;
-            case 4960985: // 4BB2D9
-                // colorFloat = new float[]{0.294f, 0.698f, 0.851f}; // light blue
-                return Color.SKY;
             default:
                 return Color.WHITE;
         }
@@ -719,7 +764,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         int pos_y = (int) ((OLD_MOBI_H - y)*MOBI_SCL - imgColor[color].getHeight()*scaleY + BOTTOM_SPACE);
 
         //batch.draw(imgColor[color], pos_x, pos_y, 0, 0, imgColor[color].getWidth(), imgColor[color].getHeight(), scaleX, scaleY, 0, 0, 0, (int)(imgColor[color].getWidth()*scaleX), (int)(imgColor[color].getHeight()*scaleY), false, false);
-        batch.draw(imgColor[color], pos_x, pos_y, 0, 0, imgColor[5].getWidth(), imgColor[5].getHeight(), scaleX, scaleY, 0, 0, 0, (int)(imgColor[5].getWidth()*scaleX), (int)(imgColor[5].getHeight()*scaleY), false, false);
+        paramGraphics.draw(imgColor[color], pos_x, pos_y, 0, 0, imgColor[5].getWidth(), imgColor[5].getHeight(), scaleX, scaleY, 0, 0, 0, (int)(imgColor[5].getWidth()*scaleX), (int)(imgColor[5].getHeight()*scaleY), false, false);
     }
 
     /**
@@ -753,10 +798,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         switch(anchor) {
             case 20: // TOP | LEFT ; 0x10 | 0x4
                 break;
-            case 17:  // TOP | HCENTER ; 0x10 | 0x1; Remember horizontal center mean X/2 anchor;
+            case 17:  // TOP | HCENTER ; 0x10 | 0x1; Remember horizontal center mean Y/2 anchor;
                 // use OLD_MOBI_W /2 or pos_x for anchor x; (MIDP pos_x already calculated);
-                // can not use (pos_x - img_width)/2 since img already scaled to Droid;
+                // img_width already scaled to Droid;
                 position_x = (int) ( position_x - img_width/2); // MIDP: w/2 - img_width/2; ~ OLD_MOBI_W*MOBI_SCL/2
+                //position_y = (int) ( (OLD_MOBI_H - pos_y)*MOBI_SCL - img_height/2 + BOTTOM_SPACE);
                 break;
             case 3:  // VCENTER | HCENTER
                 // It's complex if centered by image (0,0) by image center not screen Geometry;
@@ -803,21 +849,27 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             return;
         }
 
-        int stringLength = paramString.length() * 10; // fixme char width = 15px
-        int position_x = (int) ( (x*MOBI_SCL) - stringLength/2);
+        // int stringWidth = font.getBounds(paramString).width; // new API getBounds are gone
+        layout.setText(font, paramString);
+        int stringWidth = (int) layout.width; // contains the width of the current set text
+        int stringHeight = (int) layout.height;
+        // this.dbg("String width " + stringWidth);
+
+        // int position_x = (int) ( (x*MOBI_SCL) - stringWidth/2);
+        int position_x = (int) (x * MOBI_SCL); // It seem x have already calculated.
         int position_y = (int) ((OLD_MOBI_H -y)*MOBI_SCL + BOTTOM_SPACE);
 
         switch(anchor) {
             case 20: // TOP | LEFT ; 0x10 | 0x4
                 break;
             case 17:  // TOP | HCENTER ; 0x10 | 0x1; Remember horizontal center mean X/2 anchor;
-                // use OLD_MOBI_W /2 or pos_x for anchor x; (MIDP pos_x already calculated);
-                position_x = (int) (position_x - stringLength/2); // MIDP: w/2 - img_width/2; ~ OLD_MOBI_W*MOBI_SCL/2
+                position_x = (int) ( (x * MOBI_SCL) - stringWidth/2); // nickfarrow custom
+                position_y = (int) ( (OLD_MOBI_H - y)*MOBI_SCL - stringHeight/2 + BOTTOM_SPACE); // 8 as 1/2 line height
                 break;
             case 3:  // VCENTER | HCENTER
                 // stringWidth() alternative; oh may be this is why AA use image stack for custom text;
-                position_x = (int) (position_x - stringLength/2); // MIDP: w/2 - x/2 (width/2), h/2 + y/2 (height/2);
-                position_y = (int) ( (OLD_MOBI_H - y)*MOBI_SCL - 8 + BOTTOM_SPACE); // 8 as 1/2 line height
+                position_x = (int) (position_x - stringWidth/2); // MIDP: w/2 - x/2 (width/2), h/2 + y/2 (height/2);
+                position_y = (int) ( (OLD_MOBI_H - y)*MOBI_SCL - stringHeight/2 + BOTTOM_SPACE); // 8 as 1/2 line height
                 break;
             default:
                 break;
@@ -826,7 +878,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         Color colorGDX = this.getGDXtColor(color);
         font.setColor(colorGDX);
 
-        font.draw(paramGraphics, paramString, (int)(x * MOBI_SCL), position_y);
+        font.draw(paramGraphics, paramString, (int)position_x, position_y);
     }
 
     // paramInt3 seem anchor not color
@@ -997,8 +1049,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
          * #1 for light blue, #3 light blue 2 6DCFF6
          * #2 for light yellow, #4 gray 93959A #5 for white
          */
-        imgColor = new Texture[6];
-        for (int i = 0; i < 6; i++) {
+        imgColor = new Texture[16];
+        for (int i = 0; i < 16; i++) {
             imgColor[i] = new Texture("data/gui/color-" + i + ".png");
         }
 
@@ -1134,125 +1186,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         this.http2 = new Texture("data/sprites/http2.png");
     }
 
-    private void loadTextures(int paramInt) { // paramInt custom for
-        // old loadImage(int paramInt)
-        this.dbg("load texture param = " + paramInt);
-
-        if (paramInt == 2) {
-            this.imgMM = new Texture("data/sprites/mm.png");
-            this.imgBk = new Texture("data/sprites/bk.png");
-            this.imgSl = new Texture("data/sprites/sl.png");
-            this.imgPl = new Texture("data/sprites/play.png");
-            this.imgCh = new Texture("data/sprites/check.png");
-        }
-        else
-        {
-            int i;
-            if (paramInt == 6) // GAME_ACTION_DOWN
-            {
-                this.imgHero = new Texture[5];
-                this.imgEnemy = new Texture[4];
-                this.imgItem = new Texture[9];
-                this.imgItem_hyo = new Texture[2];
-                this.imgItem_hyo[0] = new Texture("data/sprites/hyo0.png");
-                this.imgItem_hyo[1] = new Texture("data/sprites/hyo1.png");
-                for (i = 0; i < 5; i++) {
-                    this.imgHero[i] = new Texture("data/sprites/hero" + i + ".png");
-                }
-                if (get_random(2) == 0) {
-                    for (int j = 0; j < 4; j++) {
-                        this.imgEnemy[j] = new Texture("data/sprites/enemy0" + j + ".png");
-                    }
-                } else {
-                    for (int k = 0; k < 4; k++) {
-                        this.imgEnemy[k] = new Texture("data/sprites/enemy1" + k + ".png");
-                    }
-                }
-                for (int m = 0; m < 9; m++) {
-                    this.imgItem[m] = new Texture("data/sprites/item" + m + ".png");
-                }
-                //System.gc();
-                this.imgSnow_g = new Texture("data/sprites/snow_gauge.png");
-                this.imgPwd = new Texture("data/sprites/power.png");
-                this.imgShadow = new Texture("data/sprites/shadow0.png");
-                this.imgPok = new Texture("data/sprites/pok.png");
-                this.imgPPang = new Texture("data/sprites/bbang0.png");
-                this.imgPPang1 = new Texture("data/sprites/bbang1.png");
-                this.imgH_ppang = new Texture("data/sprites/h_bbang.png");
-                this.imgCh = new Texture("data/sprites/check.png");
-                this.imgAl = new Texture("data/sprites/al.png");
-                this.imgEffect = new Texture[2];
-                this.imgEffect[0] = new Texture("data/sprites/effect0.png");
-                this.imgEffect[1] = new Texture("data/sprites/effect1.png");
-            }
-            else if (paramInt == 100)
-            {
-                this.imgBack = new Texture("data/sprites/back" + this.school + ".png");
-            }
-            else if (paramInt == 7)
-            {
-                this.imgBoss = new Texture[4];
-                for (i = 0; i < 4; i++) {
-                    this.imgBoss[i] = new Texture("data/sprites/boss" + this.e_boss + i + ".png");
-                }
-            }
-            else if (paramInt == -6)
-            {
-                this.imgStage = new Texture[5];
-                for (i = 0; i < 5; i++) {
-                    this.imgStage[i] = new Texture("data/sprites/word-" + i + ".png");
-                }
-                this.imgStage_num = new Texture("data/sprites/stage" + this.tmp_stage + ".png");
-            }
-            else if (paramInt == 8) // EFFECT ?
-            {
-                this.imgSpecial = new Texture[3];
-                for (i = 0; i < 3; i++) {
-                    this.imgSpecial[i] = new Texture("data/sprites/special" + i + ".png");
-                }
-                this.gameOn = true;
-            }
-            else if (paramInt == 9)
-            {
-                this.imgSp = new Texture("data/sprites/sp" + this.special + ".png");
-            }
-            else if (paramInt == 3) // Screen 3 VILLAGE
-            {
-                this.imgVill = new Texture("data/sprites/village.png");
-                this.imgCh = new Texture("data/sprites/hero_icon.png"); // Yeah this one change img chk to hero
-                this.imgSchool = new Texture("data/sprites/school.png");
-            }
-            else if (paramInt == 31)
-            {
-                if (this.m_mode == 1) {
-                    this.imgShop = new Texture("data/sprites/shop0.png");
-                }
-                if (this.m_mode == 0) {
-                    this.imgShop = new Texture("data/sprites/shop1.png");
-                }
-            }
-            else if (paramInt == 200) // VICTORY ?
-            {
-                this.imgVictory = new Texture("data/sprites/victory.png");
-                this.imgV = new Texture("data/sprites/v.png");
-                this.imgHero_v = new Texture("data/sprites/hero-vic.png");
-            }
-            else if (paramInt == 65336)
-            {
-                this.imgLose = new Texture("data/sprites/lose.png");
-                this.imgHero_l = new Texture("data/sprites/hero-lose.png");
-            }
-            else if (paramInt == 1)
-            {
-                this.imgNum = new Texture[10];
-                for (i = 0; i < 10; i++) {
-                    this.imgNum[i] = new Texture("data/sprites/" + i + ".png");
-                }
-                this.imgLogo = new Texture("data/sprites/logo.png");
-            }
-        }
-    }
-
     // Careful with new Texture => only reassign to loaded texture
     private void adjustTextures(int paramInt) { // nickfarrow -> for update/reload textures based on game state
         if (paramInt == -6) {
@@ -1314,7 +1247,12 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     }
 
     private void dbg(String log) {
-//        Gdx.app.log("DEBUG", "††† " + log);
+        int i = this.rnd.nextInt();
+        // Reduce log flood
+        if (i%3 == 0) {
+            Gdx.app.log("DEBUG", "††† " + log);
+        }
+        i++;
     }
 
     private void showDeviceInfos() {
@@ -1392,6 +1330,14 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     public void setLastGameStage(int last_game_stage) {
         getPrefs().putInteger(PREF_LAST_GAME_STAGE, last_game_stage);
         getPrefs().flush();
+    }
+
+    private void sleepAbit(int time) {
+        try
+        {
+            Thread.sleep(time);
+        }
+        catch (Exception localException1) {}
     }
 
     // end Android GDX
@@ -1750,11 +1696,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         int j;
         if (this.screen == 6) // RUNNING
         {
-            drawImage2(paramGraphics, this.snowWhiteBg, 0, 0, 20);
+            //drawImage2(paramGraphics, this.snowWhiteBg, 0, 0, 20);
             drawImage2(paramGraphics, this.ui, 0, 109, 20);
             drawImage2(paramGraphics, this.imgBack, 0, 0, 20);
             // paramGraphics.setColor(16777215);
-            //fillRect(paramGraphics, 0, 25, 128, 84, 16777215);
+            // fillRect(paramGraphics, 0, 25, 128, 84, 16777215);
             drawImage2(paramGraphics, this.imgHero[this.h_idx], this.h_x * 5, 83, 0x10 | 0x1); // = 17 tho. Graphics.TOP | HCENTER
             if (this.ppang_time > 0)
             {
@@ -2032,10 +1978,12 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         {
             drawImage2(paramGraphics, this.imgShop, 24, 20, 20);
             // paramGraphics.setColor(16777062);
+            // This double draw seem for bold; buy / exit select.
             drawRect(paramGraphics, 27, this.s_item * 13 + 30, 29, 10, 16777062);
             drawRect(paramGraphics, 28, this.s_item * 13 + 31, 27, 8, 16777062);
             // paramGraphics.setColor(13434777);
             drawRect(paramGraphics, this.b_item * 16 + 32, 70, 15, 15, 13434777);
+            // redraw for bold; it have a gap bug, may be caused by rounding integer.
             drawRect(paramGraphics, this.b_item * 16 + 33, 71, 13, 13, 13434777);
             draw_int(paramGraphics, this.saved_gold, 84, 96);
             if (this.m_mode == 1) {
@@ -2286,6 +2234,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             else if ((this.ani_step >= 28) && (this.ani_step < 50))
             {
                 drawImage2(paramGraphics, this.imgV, this.h_x * 5 + 8, 87, 0x10 | 0x1);
+                this.sleepAbit(100);
+
                 if (this.ani_step > 41) {
                     drawImage2(paramGraphics, this.imgVictory, 60, 60, 0x10 | 0x1);
                 }
@@ -2384,7 +2334,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             drawImage2(paramGraphics, this.imgBk, 2, 115, 20);
             //System.gc();
         }
-
     }
 
     public void repaint() { // Override orig J2ME
@@ -2617,13 +2566,12 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         this.d_gauge = 0;
     }
 
-    public void draw_int(SpriteBatch paramGraphics, int paramInt1, int paramInt2, int paramInt3)
+    public void draw_int(SpriteBatch paramGraphics, int number, int paramInt2, int paramInt3)
     {
-        this.dbg("draw int " + paramInt1);
         int i = 0;
-        if (paramInt1 / 100 > 0) {
+        if (number / 100 > 0) {
             i = 3;
-        } else if (paramInt1 / 10 > 0) {
+        } else if (number / 10 > 0) {
             i = 2;
         } else {
             i = 1;
@@ -2631,21 +2579,21 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         int[] arrayOfInt = new int[i];
         if (i == 3) // saved game mechanism ?
         {
-            arrayOfInt[2] = (paramInt1 / 100);
-            arrayOfInt[1] = (paramInt1 / 10 % 10);
-            arrayOfInt[0] = (paramInt1 % 10);
+            arrayOfInt[2] = (number / 100);
+            arrayOfInt[1] = (number / 10 % 10);
+            arrayOfInt[0] = (number % 10);
         }
         else if (i == 2)
         {
-            arrayOfInt[1] = (paramInt1 / 10);
-            arrayOfInt[0] = (paramInt1 % 10);
+            arrayOfInt[1] = (number / 10);
+            arrayOfInt[0] = (number % 10);
         }
         else if (i == 1)
         {
-            arrayOfInt[0] = paramInt1;
+            arrayOfInt[0] = number;
         }
         for (int j = i; j > 0; j--) {
-            if (paramInt1 < 10) {
+            if (number < 10) {
                 drawImage2(paramGraphics, this.imgNum[arrayOfInt[(j - 1)]], (i - j) * 4 + paramInt2, paramInt3, 20);
             } else {
                 drawImage2(paramGraphics, this.imgNum[arrayOfInt[(j - 1)]], (i - j) * 4 + paramInt2 - 2, paramInt3, 20);
@@ -2856,7 +2804,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     if (this.state != 10)
                     {
                         loadImage(2);
+                        this.sleepAbit(400);
                         this.screen = 300;
+                        this.sleepAbit(400);
                     }
                     else
                     {
@@ -4560,4 +4510,127 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
         //this.m_mode = (paramInt - 48);
     }
+
+
+    // Dump area
+    /**
+     private void loadTextures(int paramInt) { // Not used (old API)
+        this.dbg("load texture param = " + paramInt);
+
+        if (paramInt == 2) {
+            this.imgMM = new Texture("data/sprites/mm.png");
+            this.imgBk = new Texture("data/sprites/bk.png");
+            this.imgSl = new Texture("data/sprites/sl.png");
+            this.imgPl = new Texture("data/sprites/play.png");
+            this.imgCh = new Texture("data/sprites/check.png");
+        }
+        else
+        {
+            int i;
+            if (paramInt == 6) // GAME_ACTION_DOWN
+            {
+                this.imgHero = new Texture[5];
+                this.imgEnemy = new Texture[4];
+                this.imgItem = new Texture[9];
+                this.imgItem_hyo = new Texture[2];
+                this.imgItem_hyo[0] = new Texture("data/sprites/hyo0.png");
+                this.imgItem_hyo[1] = new Texture("data/sprites/hyo1.png");
+                for (i = 0; i < 5; i++) {
+                    this.imgHero[i] = new Texture("data/sprites/hero" + i + ".png");
+                }
+                if (get_random(2) == 0) {
+                    for (int j = 0; j < 4; j++) {
+                        this.imgEnemy[j] = new Texture("data/sprites/enemy0" + j + ".png");
+                    }
+                } else {
+                    for (int k = 0; k < 4; k++) {
+                        this.imgEnemy[k] = new Texture("data/sprites/enemy1" + k + ".png");
+                    }
+                }
+                for (int m = 0; m < 9; m++) {
+                    this.imgItem[m] = new Texture("data/sprites/item" + m + ".png");
+                }
+                //System.gc();
+                this.imgSnow_g = new Texture("data/sprites/snow_gauge.png");
+                this.imgPwd = new Texture("data/sprites/power.png");
+                this.imgShadow = new Texture("data/sprites/shadow0.png");
+                this.imgPok = new Texture("data/sprites/pok.png");
+                this.imgPPang = new Texture("data/sprites/bbang0.png");
+                this.imgPPang1 = new Texture("data/sprites/bbang1.png");
+                this.imgH_ppang = new Texture("data/sprites/h_bbang.png");
+                this.imgCh = new Texture("data/sprites/check.png");
+                this.imgAl = new Texture("data/sprites/al.png");
+                this.imgEffect = new Texture[2];
+                this.imgEffect[0] = new Texture("data/sprites/effect0.png");
+                this.imgEffect[1] = new Texture("data/sprites/effect1.png");
+            }
+            else if (paramInt == 100)
+            {
+                this.imgBack = new Texture("data/sprites/back" + this.school + ".png");
+            }
+            else if (paramInt == 7)
+            {
+                this.imgBoss = new Texture[4];
+                for (i = 0; i < 4; i++) {
+                    this.imgBoss[i] = new Texture("data/sprites/boss" + this.e_boss + i + ".png");
+                }
+            }
+            else if (paramInt == -6)
+            {
+                this.imgStage = new Texture[5];
+                for (i = 0; i < 5; i++) {
+                    this.imgStage[i] = new Texture("data/sprites/word-" + i + ".png");
+                }
+                this.imgStage_num = new Texture("data/sprites/stage" + this.tmp_stage + ".png");
+            }
+            else if (paramInt == 8) // EFFECT ?
+            {
+                this.imgSpecial = new Texture[3];
+                for (i = 0; i < 3; i++) {
+                    this.imgSpecial[i] = new Texture("data/sprites/special" + i + ".png");
+                }
+                this.gameOn = true;
+            }
+            else if (paramInt == 9)
+            {
+                this.imgSp = new Texture("data/sprites/sp" + this.special + ".png");
+            }
+            else if (paramInt == 3) // Screen 3 VILLAGE
+            {
+                this.imgVill = new Texture("data/sprites/village.png");
+                this.imgCh = new Texture("data/sprites/hero_icon.png"); // Yeah this one change img chk to hero
+                this.imgSchool = new Texture("data/sprites/school.png");
+            }
+            else if (paramInt == 31)
+            {
+                if (this.m_mode == 1) {
+                    this.imgShop = new Texture("data/sprites/shop0.png");
+                }
+                if (this.m_mode == 0) {
+                    this.imgShop = new Texture("data/sprites/shop1.png");
+                }
+            }
+            else if (paramInt == 200) // VICTORY ?
+            {
+                this.imgVictory = new Texture("data/sprites/victory.png");
+                this.imgV = new Texture("data/sprites/v.png");
+                this.imgHero_v = new Texture("data/sprites/hero-vic.png");
+            }
+            else if (paramInt == 65336)
+            {
+                this.imgLose = new Texture("data/sprites/lose.png");
+                this.imgHero_l = new Texture("data/sprites/hero-lose.png");
+            }
+            else if (paramInt == 1)
+            {
+                this.imgNum = new Texture[10];
+                for (i = 0; i < 10; i++) {
+                    this.imgNum[i] = new Texture("data/sprites/" + i + ".png");
+                }
+                this.imgLogo = new Texture("data/sprites/logo.png");
+            }
+        }
+    }
+
+     */
 }
