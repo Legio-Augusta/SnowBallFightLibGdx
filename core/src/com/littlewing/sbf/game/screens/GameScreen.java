@@ -236,8 +236,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     // TODO calculate scaled 128x160 to 1080x1350 ? Other space leave blank for ads or button.
     // For future work, support screen horizontal mode.
     private static int SCREEN_WIDTH = Gdx.graphics.getWidth();
-    // private static int SCREEN_HEIGHT = Gdx.graphics.getHeight();
-    private static int SCREEN_HEIGHT = 1920;
+    private static int SCREEN_HEIGHT = Gdx.graphics.getHeight();
+    // private static int SCREEN_HEIGHT = 1920;
 
     // Debug
     int MIDP_H_SCALED = (int) (SCREEN_WIDTH / OLD_MOBI_W * 160);
@@ -572,8 +572,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         camera.position.set(camera.viewportWidth/2,camera.viewportHeight/2,0);
 
         // Gdx.gl20.glClearColor(0, 180f/255f, 221f/255f, 1); // Samsung blue orig.
-        // Gdx.gl20.glClearColor(109f/255f, 207f/255f, 246f/255f, 1); // SKY
-        Gdx.gl20.glClearColor(255f/255f, 255f/255f, 255f/255f, 1); // WHITE
+        Gdx.gl20.glClearColor(109f/255f, 207f/255f, 246f/255f, 1); // SKY
+        // Gdx.gl20.glClearColor(255f/255f, 255f/255f, 255f/255f, 1); // WHITE
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     }
 
@@ -637,40 +637,40 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     // TODO reorder, convert (IMagick) by RGB order ie. 0 1 2 prefix respectively
     public int getEnumColor(int color) {
         switch(color) {
-            case 16777215:
-                return 5; // white
-            case 7196662:
-                return 3; // light blue
-            case 9342606:
-                return 4; // gray
-            case 15132390:
-                return 4; // light gray ~
-            case 14994350:
-                return 2; // light yellow ~ light orange
-            case 10173:
-                return 1; // med blue ~ blue
-            case 16777164:
-                return 2; // light yellow
             case 0:
                 return 4; // gray (should be black)
+            case 10173:
+                return 1; // med blue ~ blue
             case 25054:
                 return 1; // med blue
             case 44783:
                 return 3; // light blue
+            case 4960985:
+                return 3; // light blue
+            case 7196662:
+                return 3; // light blue
             case 6974058:
                 return 4; // gray ~ light gray
+            case 9342606:
+                return 4; // gray
             case 9672090:
                 return 4; // light gray ~ gray
             case 13434777: // light green (grass)
                 return 15; // light green grass
-            case 16777062: // FFFF66
-                return 2;
-            case 16775065:
-                return 2; // light yellow
+            case 14994350:
+                return 2; // light yellow ~ light orange
+            case 15132390:
+                return 4; // light gray ~
             case 16711680:
                 return 0; // red
-            case 4960985:
-                return 3; // light blue
+            case 16775065:
+                return 2; // light yellow
+            case 16777062: // FFFF66
+                return 2;
+            case 16777164:
+                return 2; // light yellow
+            case 16777215:
+                return 5; // white
             default:
                 return 0;
         }
@@ -1014,7 +1014,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     // TODO use texture region; Optimize reuse stuff, object;
     private void loadTextures() {
         fireBtnTexture = new Texture("data/gui/fire.png");
-        snowWhiteBg = new Texture("data/sprites/snow.png"); // white_bg
+        // Yeah convert Imagick suck, 1kb 1080x1920 may be alpha shit make it black.
+        snowWhiteBg = new Texture("data/sprites/white_background.png");
 
         this.imgBacks = new Texture[4];
         for (int i = 0; i < 4; i++) {
@@ -1157,6 +1158,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         this.imgVill = new Texture("data/sprites/village.png");
         this.imgCh = new Texture("data/sprites/check.png");
         this.imgSchool = new Texture("data/sprites/school.png");
+        this.title = new Texture("data/sprites/title.png");
+        this.txt1 = new Texture("data/sprites/txt1.png"); // TODO make original clean white text as orig. Scalled too blur.
+        this.txt2 = new Texture("data/sprites/txt2.png");
+        this.txt4 = new Texture("data/sprites/txt4.png");
+        this.txt4b = new Texture("data/sprites/txt4b.png");
 
         // 31 fix me, this should be load all at start
         this.imgShops = new Texture[2];
@@ -1247,12 +1253,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     }
 
     private void dbg(String log) {
-        int i = this.rnd.nextInt();
-        // Reduce log flood
-        if (i%3 == 0) {
-            Gdx.app.log("DEBUG", "††† " + log);
-        }
-        i++;
+        Gdx.app.log("DEBUG", "††† " + log);
     }
 
     private void showDeviceInfos() {
@@ -1696,7 +1697,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         int j;
         if (this.screen == 6) // RUNNING
         {
-            //drawImage2(paramGraphics, this.snowWhiteBg, 0, 0, 20);
+            // drawImage2(paramGraphics, this.snowWhiteBg, 0, 0, 20);
+            batch.draw(this.snowWhiteBg, 0, 0+BOTTOM_SPACE);
             drawImage2(paramGraphics, this.ui, 0, 109, 20);
             drawImage2(paramGraphics, this.imgBack, 0, 0, 20);
             // paramGraphics.setColor(16777215);
@@ -2804,9 +2806,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     if (this.state != 10)
                     {
                         loadImage(2);
-                        this.sleepAbit(400);
+                        this.sleepAbit(200);
                         this.screen = 300;
-                        this.sleepAbit(400);
+                        this.sleepAbit(200);
                     }
                     else
                     {
