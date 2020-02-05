@@ -641,6 +641,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 return 4; // gray (should be black)
             case 10173:
                 return 1; // med blue ~ blue
+            case 20361: // 004F89 dark blue
+                return 1; // It look very similar with some Gdx.Color.* ie. TEAL
             case 25054:
                 return 1; // med blue
             case 44783:
