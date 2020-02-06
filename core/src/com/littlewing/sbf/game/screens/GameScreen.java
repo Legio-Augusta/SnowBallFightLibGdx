@@ -146,7 +146,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private int h_timer;
     private int h_timer_p;
     private int pw_up;
-    private int mana = 100;
+    private int mana = 0;
     private int hp;
     private int max_hp;
     private int dem; // Damage by special effect
@@ -670,6 +670,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             case 14994350:
                 return 2; // light yellow ~ light orange
             case 15132390:
+                return 4;
+            case 12698049: // C1C1C1 light gray
                 return 4; // light gray ~
             case 16711680:
                 return 0; // red
@@ -1797,6 +1799,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     drawImage2(paramGraphics, this.imgStage_num, 95, 60, 20);
                 }
             }
+
+            // Permanent draw mana + hp
+            fillRect(paramGraphics, 5, 113, 9, 12 - 12 * this.hp / this.max_hp, 9342606);
+            draw_gauge(paramGraphics);
         } // END RUNNING State check (screen = 6)
         else if (this.screen == 2)
         {
@@ -2234,6 +2240,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             drawImage2(paramGraphics, this.imgBk, 2, 115, 20);
             //System.gc();
         }
+        // draw_gauge(paramGraphics);
     }
 
     public void repaint() { // Override orig J2ME
@@ -3594,11 +3601,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         return 0;
     }
 
-    public void use_item(int paramInt)
+    public void use_item(int itemMode)
     {
-        if ((this.item_slot[paramInt] > 0) && (this.item_slot[paramInt] <= 4))
+        if ((this.item_slot[itemMode] > 0) && (this.item_slot[itemMode] <= 4))
         {
-            this.wp = this.item_slot[paramInt];
+            this.wp = this.item_slot[itemMode];
             if (this.wp == 1)
             {
                 this.item_a_num -= 1;
@@ -3629,7 +3636,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             }
             this.d_gauge = 2;
         }
-        else if (this.item_slot[paramInt] == 5)
+        else if (this.item_slot[itemMode] == 5)
         {
             delete_item(5);
             this.hp += this.max_hp / 3;
@@ -3638,7 +3645,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             }
             this.h_timer_p = -4;
         }
-        else if (this.item_slot[paramInt] == 6)
+        else if (this.item_slot[itemMode] == 6)
         {
             delete_item(6);
             this.mana += 10;
@@ -3647,13 +3654,13 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             }
             this.d_gauge = 1;
         }
-        else if (this.item_slot[paramInt] == 7)
+        else if (this.item_slot[itemMode] == 7)
         {
             delete_item(7);
             this.hp = this.max_hp;
             this.h_timer_p = -4;
         }
-        else if (this.item_slot[paramInt] == 8)
+        else if (this.item_slot[itemMode] == 8)
         {
             delete_item(8);
             this.hp += this.max_hp / 3;
