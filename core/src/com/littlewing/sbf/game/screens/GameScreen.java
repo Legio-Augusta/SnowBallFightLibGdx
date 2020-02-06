@@ -33,7 +33,7 @@ import com.littlewing.sbf.game.J2ME_API_Port;
 /** TODO
  * - issues: game gesture, user input;
  * - migrate old physical keyboard meme to new touch screen
- * - new screen size
+ * - support full notch screen, orientation landscape, split screen.
  * - issue with button area, hint/hight light for easy of use
  * - iOS
  * - Ads and/or payment
@@ -55,8 +55,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private static final int DEFAULT_DEM = 12;
     // RecordStore recordStore = null;
     private int game_state = 0;
-    private int saved_gold = 400; // orig.10
-    private int speed = 1; // orig.4
+    private int saved_gold = 200; // orig.10
+    private int speed = 4;
     private int game_speed = 17; // orig.17
     private Random rnd = new Random();
     // private SnowBallFightME SJ;
@@ -139,7 +139,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private int last_stage = 11;
     private int tmp_stage;
     private int school;
-    private int state;
+    private int state; // 1 2 3 10=allClear
     private int h_x;
     private int h_y;
     private int h_idx;
@@ -520,6 +520,14 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         shapeRenderer.rect(hcenter_line.getX(), hcenter_line.getY(), hcenter_line.getWidth(), hcenter_line.getHeight());
         shapeRenderer.rect(hcenter_line.getX()+1, hcenter_line.getY()+1, hcenter_line.getWidth()-2, hcenter_line.getHeight()-2);
 
+        Rectangle top = new Rectangle(0, 0, SCREEN_WIDTH*SCALE, 10);
+        shapeRenderer.setColor(Color.LIME);
+        shapeRenderer.rect(top.getX(), top.getY(), top.getWidth(), top.getHeight());
+
+        Rectangle bot = new Rectangle(0, (SCREEN_HEIGHT*SCALE) - 10, SCREEN_WIDTH*SCALE, 10);
+        shapeRenderer.setColor(Color.CORAL);
+        shapeRenderer.rect(bot.getX(), bot.getY(), bot.getWidth(), bot.getHeight());
+
         shapeRenderer.end();
     }
 
@@ -796,15 +804,14 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
         int position_x = (int) (pos_x*MOBI_SCL);
         int position_y = (int) ((OLD_MOBI_H - pos_y)*MOBI_SCL - img_height + BOTTOM_SPACE); // Default TOP | LEFT
+        this.dbg("aaa yyy" + position_y);
 
         switch(anchor) {
             case 20: // TOP | LEFT ; 0x10 | 0x4
                 break;
             case 17:  // TOP | HCENTER ; 0x10 | 0x1; Remember horizontal center mean Y/2 anchor;
-                // use OLD_MOBI_W /2 or pos_x for anchor x; (MIDP pos_x already calculated);
-                // img_width already scaled to Droid;
-                position_x = (int) ( position_x - img_width/2); // MIDP: w/2 - img_width/2; ~ OLD_MOBI_W*MOBI_SCL/2
-                //position_y = (int) ( (OLD_MOBI_H - pos_y)*MOBI_SCL - img_height/2 + BOTTOM_SPACE);
+                // not use OLD_MOBI_W /2; (MIDP pos_x already calculated); // img_width already scaled to Droid;
+                position_x = (int) ( position_x - img_width/2); // HCENTER mean x/2 (middle of horizontal line)
                 break;
             case 3:  // VCENTER | HCENTER
                 // It's complex if centered by image (0,0) by image center not screen Geometry;
@@ -865,8 +872,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             case 20: // TOP | LEFT ; 0x10 | 0x4
                 break;
             case 17:  // TOP | HCENTER ; 0x10 | 0x1; Remember horizontal center mean X/2 anchor;
-                position_x = (int) ( (x * MOBI_SCL) - stringWidth/2); // nickfarrow custom
-                position_y = (int) ( (OLD_MOBI_H - y)*MOBI_SCL - stringHeight/2 + BOTTOM_SPACE); // 8 as 1/2 line height
+                position_x = (int) ( (x * MOBI_SCL) - stringWidth/2); // HCENTER mean in the middle of horizontal line;
+                // position_y = (int) ( (OLD_MOBI_H - y)*MOBI_SCL - stringHeight/2 + BOTTOM_SPACE); // 8 as 1/2 line height
                 break;
             case 3:  // VCENTER | HCENTER
                 // stringWidth() alternative; oh may be this is why AA use image stack for custom text;
@@ -981,8 +988,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     // FIXME anchor with RECTANGLE
     protected void drawUI() {
-        //batch.draw(snowWhiteBg, 0, (int)(50*SCALE), snowWhiteBg.getWidth()*SCALE, snowWhiteBg.getHeight()*SCALE);
-
         // It seem single image can have it's own event Listener such as: touchDown/Up; See bellow
         // https://github.com/BrentAureli/ControllerDemo/blob/master/core/src/com/brentaureli/overlaydemo/Controller.java
         // TODO use custom IMAGE addEventListener for more UI refine. Can image used as Texture ?
@@ -1034,7 +1039,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
 
         tmp_stage =  (tmp_stage <= 0) ? 1 : tmp_stage;
-        tmp_stage = (tmp_stage >= 4) ? 4 : tmp_stage;
+        tmp_stage = (tmp_stage > 4) ? 4 : tmp_stage;
         imgStage_num = new Texture("data/sprites/stage" + tmp_stage + ".png");
         imgStage_nums = new Texture[4]; // nickfarrow
         for (int i=0; i < 4; i++) {
@@ -1192,6 +1197,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         this.sam_logo = new Texture("data/sprites/sam_logo.png");
         this.http1 = new Texture("data/sprites/http1.png");
         this.http2 = new Texture("data/sprites/http2.png");
+        this.allClear = new Texture("data/sprites/allClear2.jpg");
     }
 
     // Careful with new Texture => only reassign to loaded texture
@@ -1213,6 +1219,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
         else if (paramInt == 6)
         {
+            this.tmp_stage = (this.tmp_stage > 4) ? 4 : this.tmp_stage; // NF fix, not sure it affect allClear screen;
             this.imgStage_num = imgStage_nums[this.tmp_stage-1]; // Fixme outofbound
         }
         else if (paramInt == 7)
@@ -1348,138 +1355,16 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     public void addScore(String paramString, int paramInt)
     {
-        /*
-        try
-        {
-            this.recordStore = RecordStore.openRecordStore(paramString, true);
-            ByteArrayOutputStream localByteArrayOutputStream;
-            DataOutputStream localDataOutputStream;
-            if (this.recordStore.getNumRecords() == 0)
-            {
-                localByteArrayOutputStream = new ByteArrayOutputStream();
-                localDataOutputStream = new DataOutputStream(localByteArrayOutputStream);
-                try
-                {
-                    if (paramInt == 0)
-                    {
-                        int i = this.saved_gold * 10000 + this.last_stage * 100 + this.mana;
-                        localDataOutputStream.writeInt(i);
-                    }
-                    else if (paramInt == 1)
-                    {
-                        localDataOutputStream.writeInt(this.speed);
-                    }
-                    byte[] arrayOfByte1 = localByteArrayOutputStream.toByteArray();
-                    this.recordStore.addRecord(arrayOfByte1, 0, arrayOfByte1.length);
-                }
-                catch (Exception localException2) {}
-            }
-            else
-            {
-                localByteArrayOutputStream = new ByteArrayOutputStream();
-                localDataOutputStream = new DataOutputStream(localByteArrayOutputStream);
-                try
-                {
-                    if (paramInt == 0)
-                    {
-                        int j = this.saved_gold * 10000 + this.last_stage * 100 + this.mana;
-                        localDataOutputStream.writeInt(j);
-                    }
-                    else if (paramInt == 1)
-                    {
-                        localDataOutputStream.writeInt(this.speed);
-                    }
-                    byte[] arrayOfByte2 = localByteArrayOutputStream.toByteArray();
-                    this.recordStore.setRecord(1, arrayOfByte2, 0, arrayOfByte2.length);
-                }
-                catch (Exception localException3) {}
-            }
-        }
-        catch (Exception localException1) {}finally
-        {
-            try
-            {
-                this.recordStore.closeRecordStore();
-            }
-            catch (Exception localException6) {}
-        }
-        */
     }
 
-    public void printScore(String paramString, int paramInt)
-    {
-        /*
-        try
-        {
-            this.recordStore = RecordStore.openRecordStore(paramString, true);
-            if (this.recordStore.getNumRecords() == 0)
-            {
-                if (paramInt == 0)
-                {
-                    this.last_stage = 31; // orig.11
-                    this.saved_gold = 100; // orig.0
-                    this.mana = 0;
-                }
-                else if (paramInt == 1)
-                {
-                    this.speed = 1; // orig.4
-                }
-            }
-            else {
-                try
-                {
-                    ByteArrayInputStream localByteArrayInputStream = new ByteArrayInputStream(this.recordStore.getRecord(1));
-                    DataInputStream localDataInputStream = new DataInputStream(localByteArrayInputStream);
-                    if (paramInt == 0)
-                    {
-                        int i = localDataInputStream.readInt();
-                        this.last_stage = (i % 10000 / 100);
-                        this.saved_gold = (i / 10000);
-                        this.mana = (i % 100);
-                    }
-                    else if (paramInt == 1)
-                    {
-                        this.speed = localDataInputStream.readInt();
-                    }
-                }
-                catch (Exception localException1) {}
-            }
-            if (this.speed == 5) {
-                this.game_speed = 8;
-            }
-            if (this.speed == 4) {
-                this.game_speed = 17;
-            }
-            if (this.speed == 3) {
-                this.game_speed = 24;
-            }
-            if (this.speed == 2) {
-                this.game_speed = 31;
-            }
-            if (this.speed == 1) {
-                this.game_speed = 38;
-            }
-        }
-        catch (Exception localException2) {}finally
-        {
-            try
-            {
-                this.recordStore.closeRecordStore();
-            }
-            catch (Exception localException5) {}
-        }
-
-        */
-    }
+    public void printScore(String paramString, int paramInt) {}
 
     public void loadImage(int paramInt)
     {
         this.adjustTextures(paramInt);
     }
 
-    public void destroyImage(int paramInt)
-    {
-    }
+    public void destroyImage(int paramInt) {}
 
     public void init_game(int paramInt)
     {
@@ -1517,110 +1402,120 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         this.gameOn = true;
     }
 
-    public void make_e_num(int paramInt1, int paramInt2)
+    // last_stage or rand supposed to be not greater than 4; as logic only check stage (=last%10); else ie. last_stage = 46 % 10 = 6 out of condition check.
+    // The orig code seem not a bug because of it have mechanism check it not = 45; (init_game call have checked it).
+    // But some how (I have modified many) it become 46 as last_stage (allClear n after). Or may be this is a bug in the past.
+    // I have experienced it on old phone too. => In programming aspect it should be checked. May be device limitted resource forced this ?
+    public void make_e_num(int last_stage_or_rand, int paramSchool)
     {
-        if (paramInt2 == 1)
+        if (paramSchool == 1)
         {
-            if (paramInt1 == 1)
+            if (last_stage_or_rand == 1)
             {
                 this.e_boss = 0;
                 this.e_num = 2;
             }
-            else if (paramInt1 == 2)
+            else if (last_stage_or_rand == 2)
             {
                 this.e_boss = 0;
                 this.e_num = 2;
             }
-            else if (paramInt1 == 3)
+            else if (last_stage_or_rand == 3)
             {
                 this.e_boss = 1;
                 this.e_num = 2;
             }
-            else if (paramInt1 == 4)
+            else if (last_stage_or_rand == 4)
             {
                 this.e_boss = 3;
                 this.e_num = 2;
             }
         }
-        else if (paramInt2 == 2)
+        else if (paramSchool == 2)
         {
-            if (paramInt1 == 1)
+            if (last_stage_or_rand == 1)
             {
                 this.e_boss = 0;
                 this.e_num = 2;
             }
-            else if (paramInt1 == 2)
+            else if (last_stage_or_rand == 2)
             {
                 this.e_boss = 0;
                 this.e_num = 3;
             }
-            else if (paramInt1 == 3)
+            else if (last_stage_or_rand == 3)
             {
                 this.e_boss = 2;
                 this.e_num = 2;
             }
-            else if (paramInt1 == 4)
+            else if (last_stage_or_rand == 4)
             {
                 this.e_boss = 3;
                 this.e_num = 3;
             }
         }
-        else if (paramInt2 == 3)
+        else if (paramSchool == 3)
         {
-            if (paramInt1 == 1)
+            if (last_stage_or_rand == 1)
             {
                 this.e_boss = 0;
                 this.e_num = 3;
             }
-            else if (paramInt1 == 2)
+            else if (last_stage_or_rand == 2)
             {
                 this.e_boss = 2;
                 this.e_num = 2;
             }
-            else if (paramInt1 == 3)
+            else if (last_stage_or_rand == 3)
             {
                 this.e_boss = 0;
                 this.e_num = 4;
             }
-            else if (paramInt1 == 4)
+            else if (last_stage_or_rand == 4)
             {
                 this.e_boss = 3;
                 this.e_num = 4;
             }
         }
-        else if (paramInt2 == 4) {
-            if (paramInt1 == 1)
+        else if (paramSchool == 4) {
+            if (last_stage_or_rand == 1)
             {
                 this.e_boss = 1;
                 this.e_num = 3;
             }
-            else if (paramInt1 == 2)
+            else if (last_stage_or_rand == 2)
             {
                 this.e_boss = 2;
                 this.e_num = 3;
             }
-            else if (paramInt1 == 3)
+            else if (last_stage_or_rand == 3)
             {
                 this.e_boss = 3;
                 this.e_num = 4;
             }
-            else if (paramInt1 == 4)
+            else if (last_stage_or_rand == 4)
             {
+                this.e_boss = 4;
+                this.e_num = 4;
+            } else {
                 this.e_boss = 4;
                 this.e_num = 4;
             }
         }
         this.e_t_num = this.e_num;
-        this.tmp_stage = paramInt1;
+        this.tmp_stage = last_stage_or_rand;
     }
 
     public void make_enemy(int paramInt)
     {
+        // this.dbg("aaa " + this.last_stage + "  school " + this.school + " state " + this.state + " ani_step " + this.ani_step);
         if (paramInt < 0) {
             make_e_num(get_random(2) + 2, this.school);
         } else {
+            this.last_stage = (this.last_stage > 45) ? 45 : this.last_stage; // fixme magic number; investigate state = 10 as allClear
             make_e_num(this.last_stage % 10, this.school);
         }
+
         this.e_x = new int[this.e_num];
         this.e_y = new int[this.e_num];
         this.e_hp = new int[this.e_num];
@@ -1699,7 +1594,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         int j;
         if (this.screen == 6) // RUNNING
         {
-            // drawImage2(paramGraphics, this.snowWhiteBg, 0, 0, 20);
+            // drawImage2(paramGraphics, this.snowWhiteBg, 0, 0, 20); // Use this require re-scale 1080 to fixed scale 1080/128
             batch.draw(this.snowWhiteBg, 0, 0+BOTTOM_SPACE);
             drawImage2(paramGraphics, this.ui, 0, 109, 20);
             drawImage2(paramGraphics, this.imgBack, 0, 0, 20);
@@ -1967,7 +1862,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             }
             if ((this.ani_step == 0) && (this.last_stage > 20))
             {
-                this.dbg("Northern boy challenged you!");
                 if (this.last_stage == 31) {
                     draw_text_box(paramGraphics, "Western Boys");
                 } else if (this.last_stage == 41) {
@@ -1976,6 +1870,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     draw_text_box(paramGraphics, "Southern Boys");
                 }
                 this.ani_step += 1;
+                this.sleepAbit(100); // TODO not work. render loop seem caused this. if freeze before show message.
             }
         }
         else if (this.screen == 31)
@@ -2313,11 +2208,12 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             drawImage2(batch, http1, 7, 77, 20); // http1.png
             drawImage2(batch, http2, 7, 103, 20); // http2.png
         }
-        else if (this.screen == 1000)
+        else if (this.screen == GameScreens.ALL_CLEAR_SCREEN) // 1000
         {
             // paramGraphics.setColor(16777215);
             fillRect(paramGraphics, 0, 25, 120, 85, 16777215);
-            drawImage2(paramGraphics, allClear, 64, 10, 0x10 | 0x1); // allClear.png
+            // drawImage2(paramGraphics, allClear, 64, 10, 0x10 | 0x1); // allClear.png
+            batch.draw(this.allClear, 0, 0+BOTTOM_SPACE);
         }
         else if (this.screen == -5)
         {
@@ -2341,11 +2237,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     }
 
     public void repaint() { // Override orig J2ME
-        // this.dbg("††† in repaint " + rnd.nextInt() + " screen =" + this.screen);
-        // this.paint(this.batch);
-//        if (this.screen == -2) {
-//            this.screen = GameScreens.RUNNING_SCREEN; // 3 - VILLAGE_SCREEN; 6 - running
-//        }
     }
 
     public void draw_text_box(SpriteBatch paramGraphics, String paramString)
@@ -2371,7 +2262,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             this.dbg("Null message");
             return;
         }
-        int i = this.message.length();
+        int i = this.message.length(); // orig MIDP have this line; no idea what it does; may be jar error.
         drawString(paramGraphics, this.message, 64, 53, 0x10 | 0x1, 0);
         this.message = "";
     }
@@ -2808,19 +2699,21 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     if (this.state != 10)
                     {
                         loadImage(2);
-                        this.sleepAbit(200);
+                        this.sleepAbit(100);
                         this.screen = 300;
-                        this.sleepAbit(200);
+                        this.sleepAbit(100);
                     }
                     else
                     {
-                        this.screen = 1000;
+                        this.screen = GameScreens.ALL_CLEAR_SCREEN; // 1000;
                     }
                     repaint();
                 }
             }
             else if (this.screen == 201)
             {
+                this.last_stage = (this.last_stage > 45) ? 45 : this.last_stage; // NF
+
                 this.ani_step = 0;
                 if (this.last_stage / 10 == this.school)
                 {
@@ -2832,11 +2725,12 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                     {
                         this.stage += 10;
                         this.stage = (this.stage - this.stage % 10 + 1);
+                        // May be this increment cause stage > 45 -> other error after allClear
                     }
                     else
                     {
                         this.stage = 45;
-                        this.state = 10;
+                        this.state = 10; // All clear
                     }
                     this.last_stage = this.stage;
 
@@ -3598,7 +3492,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     public void check_building(int paramInt1, int paramInt2)
     {
-        this.dbg("Check building " + paramInt1 + " " + paramInt2);
         if ((paramInt1 == 43) && (paramInt2 == 22))
         {
             this.m_mode = 0;
@@ -3653,7 +3546,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     // Init h_x/y 57, 46
     public int hero_move(int paramInt1, int paramInt2, int paramInt3)
     {
-        this.dbg("Int 1 2 " + paramInt1 + " " + paramInt2 + " " + paramInt3);
         if (paramInt3 == 0)
         {
             if ((paramInt2 == 46) && (paramInt1 >= 22) && (paramInt1 <= 92))
@@ -3802,7 +3694,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
      */
     public void keyPressed() // int paramInt J2ME simulate from virtual Droid/iOS keyboard
     {
-        // getGameAction(0); //
+        // getGameAction(0);
         int paramInt = this.key_code;
 
         int i;
@@ -3895,7 +3787,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 this.gameOn = false;
                 this.screen = 100;
                 repaint();
-                this.dbg("††† m_mode " + this.m_mode + " screen " + this.screen + " on " + this.gameOn);
+                // this.dbg("††† m_mode " + this.m_mode + " screen " + this.screen + " on " + this.gameOn);
             }
             else if ((paramInt == 51) && (this.game_state == 0) || isTouchedNum3()) // ITEM_MODE (NUM_3)
             {
@@ -4070,12 +3962,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             // GAME_ACTION_UP = 1; prev:8; messing Action vs Action2
             else if ((paramInt == 35) || (getGameAction(paramInt) == 8) || (paramInt == -7))   // GAME_ACTION_UP = 1; prev:8 ;
             {
-//                j = this.h_y - 8;
-//                if (hero_move(this.h_x, j, 1) > 0) {
-//                    this.h_y = j;
-//                }
-                Gdx.app.log("DEBUG", "††† mmode " + this.m_mode);
-
                 // m_mode = 0;
                 if ((this.m_mode == 0) || (this.m_mode == 1))
                 {
@@ -4086,6 +3972,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 else if ((this.m_mode >= 2) && (this.m_mode <= 5))
                 {
                     int k = -1;
+                    this.last_stage = (this.last_stage > 45) ? 45 : this.last_stage;
                     if ((this.last_stage / 10 - this.school == 0) && (this.last_stage != 45)) {
                         k = this.last_stage;
                     }
@@ -4358,7 +4245,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
         else if (this.screen == 1)
         {
-            this.dbg(" screen = 1 , paramInt=keycode= " + paramInt);
             if ((paramInt == 35) || (paramInt == -7))
             {
                 this.screen = -88; // NEW_GAME_MENU_SCREEN
@@ -4416,7 +4302,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
     }
 
-    // TODO make plasma, missile sound louder use tool like Audacity. But low volume my be processText good effect simulate explosion far away
+    // TODO make plasma, missile sound louder use tool like Audacity. But low volume may be good effect simulate explosion far away
     public void playSound(String paramString, int paramInt, boolean isMP3)
     {
         this.current_music = paramString; // Use for stop sound
@@ -4515,126 +4401,5 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         //this.m_mode = (paramInt - 48);
     }
 
-
     // Dump area
-    /**
-     private void loadTextures(int paramInt) { // Not used (old API)
-        this.dbg("load texture param = " + paramInt);
-
-        if (paramInt == 2) {
-            this.imgMM = new Texture("data/sprites/mm.png");
-            this.imgBk = new Texture("data/sprites/bk.png");
-            this.imgSl = new Texture("data/sprites/sl.png");
-            this.imgPl = new Texture("data/sprites/play.png");
-            this.imgCh = new Texture("data/sprites/check.png");
-        }
-        else
-        {
-            int i;
-            if (paramInt == 6) // GAME_ACTION_DOWN
-            {
-                this.imgHero = new Texture[5];
-                this.imgEnemy = new Texture[4];
-                this.imgItem = new Texture[9];
-                this.imgItem_hyo = new Texture[2];
-                this.imgItem_hyo[0] = new Texture("data/sprites/hyo0.png");
-                this.imgItem_hyo[1] = new Texture("data/sprites/hyo1.png");
-                for (i = 0; i < 5; i++) {
-                    this.imgHero[i] = new Texture("data/sprites/hero" + i + ".png");
-                }
-                if (get_random(2) == 0) {
-                    for (int j = 0; j < 4; j++) {
-                        this.imgEnemy[j] = new Texture("data/sprites/enemy0" + j + ".png");
-                    }
-                } else {
-                    for (int k = 0; k < 4; k++) {
-                        this.imgEnemy[k] = new Texture("data/sprites/enemy1" + k + ".png");
-                    }
-                }
-                for (int m = 0; m < 9; m++) {
-                    this.imgItem[m] = new Texture("data/sprites/item" + m + ".png");
-                }
-                //System.gc();
-                this.imgSnow_g = new Texture("data/sprites/snow_gauge.png");
-                this.imgPwd = new Texture("data/sprites/power.png");
-                this.imgShadow = new Texture("data/sprites/shadow0.png");
-                this.imgPok = new Texture("data/sprites/pok.png");
-                this.imgPPang = new Texture("data/sprites/bbang0.png");
-                this.imgPPang1 = new Texture("data/sprites/bbang1.png");
-                this.imgH_ppang = new Texture("data/sprites/h_bbang.png");
-                this.imgCh = new Texture("data/sprites/check.png");
-                this.imgAl = new Texture("data/sprites/al.png");
-                this.imgEffect = new Texture[2];
-                this.imgEffect[0] = new Texture("data/sprites/effect0.png");
-                this.imgEffect[1] = new Texture("data/sprites/effect1.png");
-            }
-            else if (paramInt == 100)
-            {
-                this.imgBack = new Texture("data/sprites/back" + this.school + ".png");
-            }
-            else if (paramInt == 7)
-            {
-                this.imgBoss = new Texture[4];
-                for (i = 0; i < 4; i++) {
-                    this.imgBoss[i] = new Texture("data/sprites/boss" + this.e_boss + i + ".png");
-                }
-            }
-            else if (paramInt == -6)
-            {
-                this.imgStage = new Texture[5];
-                for (i = 0; i < 5; i++) {
-                    this.imgStage[i] = new Texture("data/sprites/word-" + i + ".png");
-                }
-                this.imgStage_num = new Texture("data/sprites/stage" + this.tmp_stage + ".png");
-            }
-            else if (paramInt == 8) // EFFECT ?
-            {
-                this.imgSpecial = new Texture[3];
-                for (i = 0; i < 3; i++) {
-                    this.imgSpecial[i] = new Texture("data/sprites/special" + i + ".png");
-                }
-                this.gameOn = true;
-            }
-            else if (paramInt == 9)
-            {
-                this.imgSp = new Texture("data/sprites/sp" + this.special + ".png");
-            }
-            else if (paramInt == 3) // Screen 3 VILLAGE
-            {
-                this.imgVill = new Texture("data/sprites/village.png");
-                this.imgCh = new Texture("data/sprites/hero_icon.png"); // Yeah this one change img chk to hero
-                this.imgSchool = new Texture("data/sprites/school.png");
-            }
-            else if (paramInt == 31)
-            {
-                if (this.m_mode == 1) {
-                    this.imgShop = new Texture("data/sprites/shop0.png");
-                }
-                if (this.m_mode == 0) {
-                    this.imgShop = new Texture("data/sprites/shop1.png");
-                }
-            }
-            else if (paramInt == 200) // VICTORY ?
-            {
-                this.imgVictory = new Texture("data/sprites/victory.png");
-                this.imgV = new Texture("data/sprites/v.png");
-                this.imgHero_v = new Texture("data/sprites/hero-vic.png");
-            }
-            else if (paramInt == 65336)
-            {
-                this.imgLose = new Texture("data/sprites/lose.png");
-                this.imgHero_l = new Texture("data/sprites/hero-lose.png");
-            }
-            else if (paramInt == 1)
-            {
-                this.imgNum = new Texture[10];
-                for (i = 0; i < 10; i++) {
-                    this.imgNum[i] = new Texture("data/sprites/" + i + ".png");
-                }
-                this.imgLogo = new Texture("data/sprites/logo.png");
-            }
-        }
-    }
-
-     */
 }
