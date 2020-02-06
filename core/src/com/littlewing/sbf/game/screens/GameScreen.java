@@ -3,7 +3,6 @@ package com.littlewing.sbf.game.screens;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.InputProcessor;
 
-import java.util.Arrays;
 import java.util.Random;
 
 
@@ -28,7 +27,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 
 import com.littlewing.sbf.game.OverlapTester;
-import com.littlewing.sbf.game.J2ME_API_Port;
 
 /** TODO
  * - issues: game gesture, user input;
@@ -41,15 +39,10 @@ import com.littlewing.sbf.game.J2ME_API_Port;
 
 /**
  * Fixed position of button.
- * The original version is for fixed size screen.
- * only way for handle million device is if/else ?
  * https://qph.fs.quoracdn.net/main-qimg-4f8b79be77bb76e9103a8ee0e6c35f2b
  * viewport vs pixel
- * mi note 7 1080 x 2340
- * Mi note 7 real GDX resolution seem 2130 -> about 210 pixels have been reserved for top notch ?
- * 1200 x 1920 (Nexus 7) 600x960
- * 1440 x 2960 (S9) 360x740
- * S7 1440 x 2560 (old remember this guy when it can change Resolution setin) 360x640
+ * mi note 7 1080 x 2340; real GDX resolution seem 2130 -> about 210 pixels top notch ?
+ * 1200 x 1920 Nexus 7; 1440 x 2960 S9; S7 1440 x 2560
  */
 public class GameScreen extends DefaultScreen implements InputProcessor {
     private static final int DEFAULT_DEM = 12;
@@ -76,6 +69,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private Texture imgSl;
     private Texture imgPl;
     private Texture imgCh;
+    private Texture imgChSwap; // NF fix for swap back n ford
     private Texture imgHeroIcon; // nickfarrow addition fix
     private Texture[] imgNum;
     private Texture imgBack;
@@ -115,7 +109,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private Texture ui; // Customized
 
     // GDX added to fix J2ME
-
     private Texture txt1;
     private Texture txt2;
     private Texture txt4;
@@ -215,51 +208,34 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private int al;
     private int d_gauge;
 
-    private static int OLD_MOBI_H = 160;  // JavaME height = 160px; In Emulator it's a square 128x128 and have blue blank bottom.
+    // In Emulator it's a square 128x128 and have blue blank bottom.
     private static int OLD_MOBI_W = 128; // Original Java Phone resolution. Damn many orig png have 128x => it should be 128 width tho.
-    private static float MOBI_SCL = (float)Gdx.graphics.getWidth()/ OLD_MOBI_W; // FIXME 4.5 is not integer
-    // SGH T199 128x160 ; E250 128x160
-    // SGH M300 128x160 -> my scale 240 x 320 is wrong.
-    // float SCALE = (float)SCREEN_HEIGHT/1920;
-    float SCALE = (float)SCREEN_WIDTH/1080;
+    private static int OLD_MOBI_H = 160;  // JavaME height = 128 | 160px; Not affect internal draw.
 
+    // SGH T199 128x160 ; E250 128x160
+    private static float MIDP_SCL = (float)Gdx.graphics.getWidth()/ OLD_MOBI_W; // mostly 1080 / 128
     private static float SCALED_IMG_RATIO = 9; // Scaled png from original one.
+
+    float SCALE_1080 = (float) GDX_WIDTH / 1080; // (float)GDX_HEIGHT/1920;
 
     OrthographicCamera camera;
     SpriteBatch batch;
     Texture fireBtnTexture;
     Texture snowWhiteBg;
 
-    // Ratio 3:4 ~ 9:12 So with ratio 9:16 we lost (not use) 4/16 = 1/4 of height.
-    // Ie. 1920 we will cut 1/4 = 480px to keep ratio 3:4 1080:1440.
-    // Bottom space used for fireBtn, so top should space only 240px
-    // TODO calculate scaled 128x160 to 1080x1350 ? Other space leave blank for ads or button.
-    // For future work, support screen horizontal mode.
-    private static int SCREEN_WIDTH = Gdx.graphics.getWidth();
-    private static int SCREEN_HEIGHT = Gdx.graphics.getHeight();
-    // private static int SCREEN_HEIGHT = 1920;
+    // Ratio 3:4 ~ 9:12 So with ratio 9:16 we have blank = 4/16
+    // 128x160 <=> 1080x1350
+    private static int GDX_WIDTH = Gdx.graphics.getWidth();
+    private static int GDX_HEIGHT = Gdx.graphics.getHeight();
 
     // Debug
-    int MIDP_H_SCALED = (int) (SCREEN_WIDTH / OLD_MOBI_W * 160);
+    int MIDP_H_SCALED = (int) (GDX_WIDTH / OLD_MOBI_W * 160);
     int EXCEEDED_H = Gdx.graphics.getHeight() - MIDP_H_SCALED;
 
-    private static int BOTTOM_SPACE = (int)(SCREEN_HEIGHT/8); // May be change for fit touch button
+    private static int BOTTOM_SPACE = (int)(GDX_HEIGHT /8); // May be change for fit touch button
 
-    // Use rectangle until figure out how to work with BoundingBox multi input.
-    Rectangle upBtnRect = new Rectangle((20+(200/3))*SCALE, (20+(400/3))*SCALE, 132*SCALE, 70*SCALE+ 50); // + 150 Jan-2
-    Rectangle downBtnRect = new Rectangle((20+(200/3))*SCALE, 20*SCALE, 72*SCALE, 70*SCALE);
-
-    Rectangle leftBtnRect = new Rectangle(20*SCALE, (20+(200/6))*SCALE, 70*SCALE, 140*SCALE);
-    Rectangle rightBtnRect = new Rectangle((20+(400/3))*SCALE, (20+(200/6))*SCALE, 2*70*SCALE, 140*SCALE);
-
-    Rectangle optionBtnRect = new Rectangle(SCREEN_WIDTH/2+150*SCALE, SCREEN_HEIGHT/8, SCREEN_WIDTH/2-180*SCALE, 70*SCALE);
-
-    Rectangle speedUpBtnRect = new Rectangle(SCREEN_WIDTH-(275+200)*SCALE, 20*SCALE + 0*100*SCALE + 20, 200*SCALE, 100*SCALE);
-    Rectangle speedDownBtnRect = new Rectangle(SCREEN_WIDTH-(275+400)*SCALE, 20*SCALE + 100*SCALE + 20, 200*SCALE, 100*SCALE);
-
-    Rectangle leftMenuBtn = new Rectangle(10*SCALE, 250*SCALE, 200*SCALE, 100*SCALE);
-    // SCREEN_HEIGHT - (140 +menu_right_h)
-    Rectangle rightMenuBtn = new Rectangle(SCREEN_WIDTH-(275+200)*SCALE, 250*SCALE, 200*SCALE, 100*SCALE);
+    Rectangle upBtnRect, downBtnRect, leftBtnRect, rightBtnRect, optionBtnRect, speedUpBtnRect, speedDownBtnRect;
+    Rectangle leftMenuBtn, rightMenuBtn;
 
     private int game_action = DUMP_ACTION_STATE;
 
@@ -282,7 +258,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     // TouchStatus should be use Enum
 
     private ShapeRenderer shapeRenderer;
-    private Rectangle rectangle;
 
     Preferences prefs = Gdx.app.getPreferences("gamestate");
     private static final String PREF_VIBRATION      = "vibration";
@@ -304,14 +279,12 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     private Texture imgMenuLeft;
     private Texture imgMenuRight;
-    // Match with Rectangle:
     // downBtnRect, leftBtnRect, optionBtnRect, speedUpBtnRect, leftMenuBtn
 
     BitmapFont font;
     GlyphLayout layout;
     private Music music;
-    private Music music_opening = Gdx.audio.newMusic(Gdx.files.internal("data/audio/night.wav"));
-    // private Music music_donald_christmas = Gdx.audio.newMusic(Gdx.files.internal("data/audio/Donald_Christmas.mp3"));
+    private Music music_opening = Gdx.audio.newMusic(Gdx.files.internal("data/audio/night.wav")); // Donald_Christmas.mp3
     Viewport viewport;
 
     private int shitty = 0; // debug flag
@@ -329,7 +302,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         this.item_price[7] = 12;
         this.item_slot[0] = 3;
         this.item_slot[1] = 5;
-        // this.stage = this.last_stage;
         this.last_stage = getGameStage();
         this.last_stage = (this.last_stage <= 0) ? 32 : this.last_stage;
         this.stage = this.last_stage;
@@ -385,7 +357,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
         touchPoint.set(Gdx.input.getX(),Gdx.input.getY(), 0);
 
-        // Gdx.app.log("DEBUG", "touch " + touchPoint.x + " y "+ (SCREEN_HEIGHT-touchPoint.y) + " key_code "+ this.key_code + " scrn "+ this.screen);
+        // Gdx.app.log("DEBUG", "touch " + touchPoint.x + " y "+ (GDX_HEIGHT-touchPoint.y) + " key_code "+ this.key_code + " scrn "+ this.screen);
         game_action = getGameAction(pointer); // pointer
 
         if(isTouchedSpeedUp()) { // smaller value, shorter sleep
@@ -416,7 +388,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-
         return false;
     }
 
@@ -438,7 +409,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     @Override
     public void show() {
         shapeRenderer = new ShapeRenderer();
-        this.rectangle = new Rectangle(0,0,100,100);
     }
 
     @Override
@@ -446,8 +416,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         // Gdx.gl20.glClearColor(0, 0, 0, 1);
         // Gdx.gl20.glClearColor(255f/255f, 255f/255f, 255f/255f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        camera.position.x = SCREEN_WIDTH/2;
-        camera.position.y = SCREEN_HEIGHT/2;
+        camera.position.x = GDX_WIDTH /2;
+        camera.position.y = GDX_HEIGHT /2;
         camera.update();
 
         batch.enableBlending();
@@ -463,10 +433,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
         int lineWidth = 24;
         Color debug = new Color();
-        shapeRenderer.begin(ShapeType.Line);
+        shapeRenderer.begin(ShapeType.Line); // Filled
         shapeRenderer.setColor(Color.BLUE);
-        shapeRenderer.rect(rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getHeight());
-        shapeRenderer.rectLine(new Vector2(rectangle.getX(), rectangle.getWidth()),new Vector2(rectangle.getY(), rectangle.getHeight()),lineWidth);
 
         shapeRenderer.setColor(Color.BLACK);
         shapeRenderer.rect(upBtnRect.getX(), upBtnRect.getY(), upBtnRect.getWidth(), upBtnRect.getHeight());
@@ -479,7 +447,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 //        shapeRenderer.rect(rightBtnRect.getX(), rightBtnRect.getY(), rightBtnRect.getWidth(), rightBtnRect.getHeight());
 
 
-//        Rectangle okBound2    = new Rectangle(SCREEN_WIDTH-(50+fireBtnTexture.getWidth())*SCALE,                                     (int)(50*SCALE), fireBtnTexture.getWidth()*SCALE, fireBtnTexture.getHeight()*SCALE);
+//        Rectangle okBound2    = new Rectangle(GDX_WIDTH-(50+fireBtnTexture.getWidth())*SCALE_1080,                                     (int)(50*SCALE_1080), fireBtnTexture.getWidth()*SCALE_1080, fireBtnTexture.getHeight()*SCALE_1080);
 //        shapeRenderer.setColor(Color.VIOLET);
 //        shapeRenderer.rect(okBound2.getX(), okBound2.getY(), okBound2.getWidth(), okBound2.getHeight());
 
@@ -487,7 +455,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         int fire_w = fireBtnTexture.getWidth();
         int speed_up_h = imgSpeedUp.getHeight();
 
-//        Rectangle testNum32 = new Rectangle(SCREEN_WIDTH-(50+ fire_w + fire_w/2 + imgKeyNum3.getWidth())*SCALE, (40 + speed_up_h)*SCALE, imgKeyNum3.getWidth()*SCALE, imgKeyNum3.getHeight()*SCALE);
+//        Rectangle testNum32 = new Rectangle(GDX_WIDTH-(50+ fire_w + fire_w/2 + imgKeyNum3.getWidth())*SCALE_1080, (40 + speed_up_h)*SCALE_1080, imgKeyNum3.getWidth()*SCALE_1080, imgKeyNum3.getHeight()*SCALE_1080);
 //        shapeRenderer.setColor(Color.YELLOW);
 //        shapeRenderer.rect(testNum32.getX(), testNum32.getY(), testNum32.getWidth(), testNum32.getHeight());
 //        shapeRenderer.rect(testNum32.getX()-1, testNum32.getY()-1, testNum32.getWidth()+2, testNum32.getHeight()+2);
@@ -496,7 +464,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         shapeRenderer.rect(speedUpBtnRect.getX(), speedUpBtnRect.getY(), speedUpBtnRect.getWidth(), speedUpBtnRect.getHeight());
         shapeRenderer.rect(speedDownBtnRect.getX(), speedDownBtnRect.getY(), speedDownBtnRect.getWidth(), speedDownBtnRect.getHeight());
 
-
 //        shapeRenderer.setColor(Color.GREEN);
 //        shapeRenderer.rect(leftMenuBtn.getX(), leftMenuBtn.getY(), leftMenuBtn.getWidth(), leftMenuBtn.getHeight());
 //        shapeRenderer.rect(rightMenuBtn.getX(), rightMenuBtn.getY(), rightMenuBtn.getWidth(), rightMenuBtn.getHeight());
@@ -504,14 +471,20 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         // TODO draw some debug bound rect: 128x160 scale rect, center point... for debug
         // some cordination of ie. select hight light Rect vs shop position which is right.
 
-        Rectangle bound = new Rectangle(0, BOTTOM_SPACE*SCALE, SCREEN_WIDTH*SCALE, SCREEN_HEIGHT*SCALE);
-//        Rectangle center = new Rectangle(SCREEN_WIDTH/2*SCALE-5, (SCREEN_HEIGHT-BOTTOM_SPACE)/2*SCALE-5, 10, 10);
-        Rectangle vcenter_line = new Rectangle(SCREEN_WIDTH/2*SCALE-5, BOTTOM_SPACE*SCALE, 10, SCREEN_HEIGHT*SCALE);
-        Rectangle hcenter_line = new Rectangle(0, (SCREEN_HEIGHT+BOTTOM_SPACE)/2*SCALE-5, SCREEN_WIDTH*SCALE, 10);
+        Rectangle bound = new Rectangle(0, BOTTOM_SPACE* SCALE_1080, GDX_WIDTH * SCALE_1080, GDX_HEIGHT * SCALE_1080);
+        Rectangle bound2 = new Rectangle(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+//        Rectangle center = new Rectangle(GDX_WIDTH/2*SCALE_1080-5, (GDX_HEIGHT-BOTTOM_SPACE)/2*SCALE_1080-5, 10, 10);
+        Rectangle vcenter_line = new Rectangle(GDX_WIDTH /2* SCALE_1080 -5, BOTTOM_SPACE* SCALE_1080, 10, GDX_HEIGHT * SCALE_1080);
+        Rectangle hcenter_line = new Rectangle(0, (GDX_HEIGHT +BOTTOM_SPACE)/2* SCALE_1080 -5, GDX_WIDTH * SCALE_1080, 10);
 
         shapeRenderer.setColor(Color.CORAL);
-        shapeRenderer.rect(bound.getX(), bound.getY(), bound.getWidth(), bound.getHeight());
-        shapeRenderer.rect(bound.getX()+1, bound.getY()+1, bound.getWidth()-2, bound.getHeight()-2);
+//        shapeRenderer.rect(bound.getX(), bound.getY(), bound.getWidth(), bound.getHeight());
+//        shapeRenderer.rect(bound.getX()+1, bound.getY()+1, bound.getWidth()-2, bound.getHeight()-2);
+
+        shapeRenderer.setColor(Color.PINK);
+        shapeRenderer.rect(bound2.getX(), bound2.getY(), bound2.getWidth(), bound2.getHeight());
+        shapeRenderer.rect(bound2.getX()+1, bound2.getY()+1, bound2.getWidth()-2, bound2.getHeight()-2);
+
         shapeRenderer.setColor(Color.FOREST);
         shapeRenderer.rect(vcenter_line.getX(), vcenter_line.getY(), vcenter_line.getWidth(), vcenter_line.getHeight());
         shapeRenderer.rect(vcenter_line.getX()+1, vcenter_line.getY()+1, vcenter_line.getWidth()-2, vcenter_line.getHeight()-2);
@@ -520,11 +493,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         shapeRenderer.rect(hcenter_line.getX(), hcenter_line.getY(), hcenter_line.getWidth(), hcenter_line.getHeight());
         shapeRenderer.rect(hcenter_line.getX()+1, hcenter_line.getY()+1, hcenter_line.getWidth()-2, hcenter_line.getHeight()-2);
 
-        Rectangle top = new Rectangle(0, 0, SCREEN_WIDTH*SCALE, 10);
+        Rectangle top = new Rectangle(50, 0, GDX_WIDTH * SCALE_1080 -100, 10);
         shapeRenderer.setColor(Color.LIME);
         shapeRenderer.rect(top.getX(), top.getY(), top.getWidth(), top.getHeight());
 
-        Rectangle bot = new Rectangle(0, (SCREEN_HEIGHT*SCALE) - 10, SCREEN_WIDTH*SCALE, 10);
+        Rectangle bot = new Rectangle(50, (GDX_HEIGHT * SCALE_1080) - 10, GDX_WIDTH * SCALE_1080 -100, 10);
         shapeRenderer.setColor(Color.CORAL);
         shapeRenderer.rect(bot.getX(), bot.getY(), bot.getWidth(), bot.getHeight());
 
@@ -549,24 +522,24 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         batch = new SpriteBatch();
 
         //Create camera
-        float aspectRatio = (float) SCREEN_WIDTH / (float) SCREEN_HEIGHT;
-
         camera = new OrthographicCamera();
-        // This seem take no effect on 16:9 multi-screen size 1280; 1920; or 2560px But on not 16:9, ie. 4:3 iPad this may take effect.
-        int VP_WIDTH = 1080;
-        int VP_HEIGHT = 1920;
-        camera.setToOrtho(false, SCREEN_WIDTH, SCREEN_HEIGHT);
-        viewport = new FitViewport(VP_WIDTH, VP_HEIGHT, camera); // TODO investigate is this shit make effect ?
-        viewport.apply();
+        camera.setToOrtho(false, GDX_WIDTH, GDX_HEIGHT);
+//        int VP_WIDTH = 1080;
+//        int VP_HEIGHT = 1920;
+        // This seem take no effect on 16:9 (
+        // ViewPort make effect; (show custom bound) on ie. 1080 x 2160 screen.
+//        viewport = new FitViewport(GDX_WIDTH, GDX_WIDTH, camera); // TODO investigate is this shit make effect ?
+//        viewport.apply();
 
-        camera.position.x = SCREEN_WIDTH/2;
-        camera.position.y = SCREEN_HEIGHT/2;
-        camera.position.set(camera.viewportWidth/2,camera.viewportHeight/2,0);
+//        camera.position.x = GDX_WIDTH /2;
+//        camera.position.y = GDX_WIDTH /2;
+//        camera.position.set(camera.viewportWidth/2,camera.viewportHeight/2,0);
         camera.update();
 
         Gdx.input.setInputProcessor(this); // TODO use an InputProcessor object
 
-        loadTextures();
+        this.loadTextures();
+        this.initGamePad();
 
         font = new BitmapFont();
         font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
@@ -576,61 +549,61 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     }
 
     public void resize(int width, int height) {
-        viewport.update(width,height);
-        camera.position.set(camera.viewportWidth/2,camera.viewportHeight/2,0);
+//        viewport.update(width,height);
+//        camera.position.set(camera.viewportWidth/2,camera.viewportHeight/2,0);
 
         // Gdx.gl20.glClearColor(0, 180f/255f, 221f/255f, 1); // Samsung blue orig.
-        Gdx.gl20.glClearColor(109f/255f, 207f/255f, 246f/255f, 1); // SKY
+//        Gdx.gl20.glClearColor(109f/255f, 207f/255f, 246f/255f, 1); // SKY
         // Gdx.gl20.glClearColor(255f/255f, 255f/255f, 255f/255f, 1); // WHITE
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+//        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     }
 
     // Oh damn notch, bottom space
     protected boolean isTouchedUp() {
         this.key_code = -1;
-        return OverlapTester.pointInRectangle(upBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
+        return OverlapTester.pointInRectangle(upBtnRect, touchPoint.x, (GDX_HEIGHT -touchPoint.y) );
     }
     protected boolean isTouchedDown() {
         this.key_code = -2;
-        return OverlapTester.pointInRectangle(downBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
+        return OverlapTester.pointInRectangle(downBtnRect, touchPoint.x, (GDX_HEIGHT -touchPoint.y) );
     }
     protected boolean isTouchedLeft() {
         this.key_code = -3;
-        return OverlapTester.pointInRectangle(leftBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
+        return OverlapTester.pointInRectangle(leftBtnRect, touchPoint.x, (GDX_HEIGHT -touchPoint.y) );
     }
     protected boolean isTouchedRight() {
         this.key_code = -4;
-        return OverlapTester.pointInRectangle(rightBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
+        return OverlapTester.pointInRectangle(rightBtnRect, touchPoint.x, (GDX_HEIGHT -touchPoint.y) );
     }
     protected boolean isTouchedOption() {
-        return OverlapTester.pointInRectangle(optionBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
+        return OverlapTester.pointInRectangle(optionBtnRect, touchPoint.x, (GDX_HEIGHT -touchPoint.y) );
     }
     protected boolean isTouchedOK() {
         this.key_code = KEY_OK;
-        Rectangle textureBounds = new Rectangle(SCREEN_WIDTH-(fireBtnTexture.getWidth()+50)*SCALE, SCREEN_HEIGHT-(50+fireBtnTexture.getHeight())*SCALE, fireBtnTexture.getWidth()*SCALE,fireBtnTexture.getHeight()*SCALE);
+        Rectangle textureBounds = new Rectangle(GDX_WIDTH -(fireBtnTexture.getWidth()+50)* SCALE_1080, GDX_HEIGHT -(50+fireBtnTexture.getHeight())* SCALE_1080, fireBtnTexture.getWidth()* SCALE_1080,fireBtnTexture.getHeight()* SCALE_1080);
         return textureBounds.contains(touchPoint.x, touchPoint.y);
     }
 
     protected boolean isTouchedNum3() {
-        Rectangle textureBounds=new Rectangle(SCREEN_WIDTH-(fireBtnTexture.getWidth()+50+imgKeyNum3.getWidth()+(int)fireBtnTexture.getWidth()/2)*SCALE, SCREEN_HEIGHT-(40+imgSpeedUp.getHeight()+imgKeyNum3.getHeight())*SCALE, imgKeyNum3.getWidth()*SCALE,imgKeyNum3.getHeight()*SCALE);
+        Rectangle textureBounds=new Rectangle(GDX_WIDTH -(fireBtnTexture.getWidth()+50+imgKeyNum3.getWidth()+(int)fireBtnTexture.getWidth()/2)* SCALE_1080, GDX_HEIGHT -(40+imgSpeedUp.getHeight()+imgKeyNum3.getHeight())* SCALE_1080, imgKeyNum3.getWidth()* SCALE_1080,imgKeyNum3.getHeight()* SCALE_1080);
         return textureBounds.contains(touchPoint.x, touchPoint.y);
     }
     protected boolean isTouchedMenuLeft() {
         // Gdx.app.log("DEBUG Clip", "x: " + leftMenuBtn.x + " y " + leftMenuBtn.y + " w " + leftMenuBtn.getWidth() + " h " + leftMenuBtn.getHeight());
         this.key_code = KEY_LEFT_MENU;
-        return OverlapTester.pointInRectangle(leftMenuBtn, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
+        return OverlapTester.pointInRectangle(leftMenuBtn, touchPoint.x, (GDX_HEIGHT -touchPoint.y) );
     }
     protected boolean isTouchedMenuRight() {
         // Gdx.app.log("DEBUG Clip", "x: " + rightMenuBtn.x + " y " + rightMenuBtn.y + " w " + rightMenuBtn.getWidth() + " h " + rightMenuBtn.getHeight());
         this.key_code = KEY_RIGHT_MENU;
-        return OverlapTester.pointInRectangle(rightMenuBtn, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
+        return OverlapTester.pointInRectangle(rightMenuBtn, touchPoint.x, (GDX_HEIGHT -touchPoint.y) );
     }
 
     protected boolean isTouchedSpeedUp() {
-        return OverlapTester.pointInRectangle(speedUpBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
+        return OverlapTester.pointInRectangle(speedUpBtnRect, touchPoint.x, (GDX_HEIGHT -touchPoint.y) );
     }
     protected boolean isTouchedSpeedDown() {
-        return OverlapTester.pointInRectangle(speedDownBtnRect, touchPoint.x, (SCREEN_HEIGHT-touchPoint.y) );
+        return OverlapTester.pointInRectangle(speedDownBtnRect, touchPoint.x, (GDX_HEIGHT -touchPoint.y) );
     }
 
     protected Preferences getPrefs() {
@@ -756,42 +729,25 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     }
 
     /**
-     *
-     * @param paramGraphics
-     * @param x
-     * @param y
-     * @param width
-     * @param height
+     * @param x, y
+     * @param width, height
      * @param color interger (color in int ie. 16777215)
      */
     public void fillRect(SpriteBatch paramGraphics, int x, int y, int width, int height, int color) {
         color = this.getEnumColor(color); // Simpled implement version of color
 
         // Hard code default width x height of color img: 12x12 px
-        float scaleY = (float) (height*MOBI_SCL / 12);
-        float scaleX = (float) (width*MOBI_SCL / 12);
+        float scaleY = (float) (height* MIDP_SCL / 12);
+        float scaleX = (float) (width* MIDP_SCL / 12);
         // (Texture, float x, float destroy_n_e, float originX, float originY, float width, float height, float scaleX, float scaleY, float rotation, int srcX, int srcY, int srcWidth, int srcHeight, boolean flipX, boolean flipY)
-        int pos_x = (int) (MOBI_SCL*x);
-        // TODO add func to map int color to simpled version of color
-        int pos_y = (int) ((OLD_MOBI_H - y)*MOBI_SCL - imgColor[color].getHeight()*scaleY + BOTTOM_SPACE);
+        int pos_x = (int) (MIDP_SCL *x);
+        int pos_y = (int) ((OLD_MOBI_H - y)* MIDP_SCL - imgColor[color].getHeight()*scaleY + BOTTOM_SPACE);
 
-        //batch.draw(imgColor[color], pos_x, pos_y, 0, 0, imgColor[color].getWidth(), imgColor[color].getHeight(), scaleX, scaleY, 0, 0, 0, (int)(imgColor[color].getWidth()*scaleX), (int)(imgColor[color].getHeight()*scaleY), false, false);
         paramGraphics.draw(imgColor[color], pos_x, pos_y, 0, 0, imgColor[5].getWidth(), imgColor[5].getHeight(), scaleX, scaleY, 0, 0, 0, (int)(imgColor[5].getWidth()*scaleX), (int)(imgColor[5].getHeight()*scaleY), false, false);
     }
 
-    /**
-     *
-     * @param paramGraphics
-     * @param pos_x positon x (240x320 J2ME geometry)
-     * @param pos_y positon y
-     * @param anchor
-     */
-
-    // If there are any chance to debug J2ME (Eclipse) try debug anchor value mean.
-    // AA use quite many anchor call; It seem ok but not always.
     // anchor 20 may be TOP|LEFT = 16+4 ? = 0x11 | 0x4
     // Graphics.HCENTER: 1 Graphics.VCENTER: 2; LEFT: 4; RIGHT: 8; TOP: 16; BOTTOM: 32; BASELINE: 64; SOLID: 0; DOTTED: 1 dupli ?
-
     // http://www.it.uc3m.es/florina/docencia/j2me/midp/docs/api/javax/microedition/lcdui/Graphics.html#VCENTER
     // https://docs.oracle.com/javame/config/cldc/ref-impl/midp2.0/jsr118/javax/microedition/lcdui/Graphics.html#BASELINE
     public void drawImage2(SpriteBatch paramGraphics, Texture image, int pos_x, int pos_y, int anchor)
@@ -801,36 +757,35 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             return;
         }
 
-        int img_height = (int)(image.getHeight()*SCALE); // SCALE per 1080
-        int img_width = (int)(image.getWidth()*SCALE); // SCALE per 1080
+        int img_height = (int)(image.getHeight());
+        int img_width = (int)(image.getWidth());
 
-        int position_x = (int) (pos_x*MOBI_SCL);
-        int position_y = (int) ((OLD_MOBI_H - pos_y)*MOBI_SCL - img_height + BOTTOM_SPACE); // Default TOP | LEFT
-        this.dbg("aaa yyy" + position_y);
+        int position_x = (int) (pos_x* MIDP_SCL);
+        int position_y = (int) ((OLD_MOBI_H - pos_y)* MIDP_SCL - img_height + BOTTOM_SPACE); // Default TOP | LEFT
 
         switch(anchor) {
             case 20: // TOP | LEFT ; 0x10 | 0x4
                 break;
             case 17:  // TOP | HCENTER ; 0x10 | 0x1; Remember horizontal center mean Y/2 anchor;
                 // not use OLD_MOBI_W /2; (MIDP pos_x already calculated); // img_width already scaled to Droid;
-                position_x = (int) ( position_x - img_width/2); // HCENTER mean x/2 (middle of horizontal line)
+                position_x = (int) ( position_x - img_width/2 ); // HCENTER mean x/2 (middle of horizontal line)
                 break;
             case 3:  // VCENTER | HCENTER
                 // It's complex if centered by image (0,0) by image center not screen Geometry;
                 // MIDP: h/2 + height/2 => Droid: h -(h/2 +height/2) = h/2 - height/2;
                 position_x = (int) (position_x - img_width/2); // MIDP: w/2 - x/2 (width/2), h/2 + y/2 (height/2);
-                position_y = (int) ( (OLD_MOBI_H - pos_y)*MOBI_SCL - img_height/2 + BOTTOM_SPACE);
+                position_y = (int) ( (OLD_MOBI_H - pos_y)* MIDP_SCL - img_height/2 + BOTTOM_SPACE);
                 break;
             default:
                 break;
         }
 
-        // batch.draw(image, (int)(pos_x*MOBI_SCL), position_y, image.getWidth()*SCALE, image.getHeight()*SCALE); // draw no scale
+        // batch.draw(image, (int)(pos_x*MIDP_SCL), position_y, image.getWidth()*SCALE_1080, image.getHeight()*SCALE_1080); // draw no scale
 
         // Draw Image with scale param, can anchor to 1080x1920 work without / with minimal change in geometry ?
-        float scaleX = (float) (MOBI_SCL / SCALED_IMG_RATIO); // 1080 / 128 / 9
-        float scaleY = (float) (MOBI_SCL / SCALED_IMG_RATIO);
-        paramGraphics.draw(image, (int)(position_x*SCALE), position_y*SCALE, 0, 0, image.getWidth(), image.getHeight(), scaleX, scaleY, 0, 0, 0, (int)(image.getWidth()), (int)(image.getHeight()), false, false);
+        float scaleX = (float) (MIDP_SCL / SCALED_IMG_RATIO); // 1080 / 128 / 9
+        float scaleY = (float) (MIDP_SCL / SCALED_IMG_RATIO);
+        paramGraphics.draw(image, (int)(position_x), position_y, 0, 0, image.getWidth(), image.getHeight(), scaleX, scaleY, 0, 0, 0, (int)(image.getWidth()), (int)(image.getHeight()), false, false);
     }
 
     public void drawImage(SpriteBatch paramGraphics)
@@ -866,21 +821,21 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         int stringHeight = (int) layout.height;
         // this.dbg("String width " + stringWidth);
 
-        // int position_x = (int) ( (x*MOBI_SCL) - stringWidth/2);
-        int position_x = (int) (x * MOBI_SCL); // It seem x have already calculated.
-        int position_y = (int) ((OLD_MOBI_H -y)*MOBI_SCL + BOTTOM_SPACE);
+        // int position_x = (int) ( (x*MIDP_SCL) - stringWidth/2);
+        int position_x = (int) (x * MIDP_SCL); // It seem x have already calculated.
+        int position_y = (int) ((OLD_MOBI_H -y)* MIDP_SCL + BOTTOM_SPACE);
 
         switch(anchor) {
             case 20: // TOP | LEFT ; 0x10 | 0x4
                 break;
             case 17:  // TOP | HCENTER ; 0x10 | 0x1; Remember horizontal center mean X/2 anchor;
-                position_x = (int) ( (x * MOBI_SCL) - stringWidth/2); // HCENTER mean in the middle of horizontal line;
-                // position_y = (int) ( (OLD_MOBI_H - y)*MOBI_SCL - stringHeight/2 + BOTTOM_SPACE); // 8 as 1/2 line height
+                position_x = (int) ( (x * MIDP_SCL) - stringWidth/2); // HCENTER mean in the middle of horizontal line;
+                // position_y = (int) ( (OLD_MOBI_H - y)*MIDP_SCL - stringHeight/2 + BOTTOM_SPACE); // 8 as 1/2 line height
                 break;
             case 3:  // VCENTER | HCENTER
                 // stringWidth() alternative; oh may be this is why AA use image stack for custom text;
                 position_x = (int) (position_x - stringWidth/2); // MIDP: w/2 - x/2 (width/2), h/2 + y/2 (height/2);
-                position_y = (int) ( (OLD_MOBI_H - y)*MOBI_SCL - stringHeight/2 + BOTTOM_SPACE); // 8 as 1/2 line height
+                position_y = (int) ( (OLD_MOBI_H - y)* MIDP_SCL - stringHeight/2 + BOTTOM_SPACE); // 8 as 1/2 line height
                 break;
             default:
                 break;
@@ -900,18 +855,18 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
 
         int stringLength = paramString.length() * 10; // fixme char width = 15px
-        int position_x = (int) ( (x * MOBI_SCL) - stringLength/2 );
-        int position_y = (int) ( (OLD_MOBI_H - y)*MOBI_SCL + BOTTOM_SPACE );
+        int position_x = (int) ( (x * MIDP_SCL) - stringLength/2 );
+        int position_y = (int) ( (OLD_MOBI_H - y)* MIDP_SCL + BOTTOM_SPACE );
 
         switch(anchor) {
             case 20: // TOP | LEFT ; 0x10 | 0x4
                 break;
             case 17:  // TOP | HCENTER ; 0x10 | 0x1; Remember horizontal center mean X/2 anchor;
-                position_x = (int) ( position_x - stringLength/2); // MIDP: w/2 - img_width/2; ~ OLD_MOBI_W*MOBI_SCL/2
+                position_x = (int) ( position_x - stringLength/2); // MIDP: w/2 - img_width/2; ~ OLD_MOBI_W*MIDP_SCL/2
                 break;
             case 3:  // VCENTER | HCENTER
                 position_x = (int) (position_x - stringLength/2); // MIDP: w/2 - x/2 (width/2), h/2 + y/2 (height/2);
-                position_y = (int) ( (OLD_MOBI_H - y)*MOBI_SCL - 8 + BOTTOM_SPACE);
+                position_y = (int) ( (OLD_MOBI_H - y)* MIDP_SCL - 8 + BOTTOM_SPACE);
                 break;
             default:
                 break;
@@ -919,7 +874,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
         font.setColor(Color.WHITE);
 
-        font.draw(paramGraphics, paramString, position_x, position_y); // SCALE ?
+        font.draw(paramGraphics, paramString, position_x, position_y); // SCALE_1080 ?
     }
 
     /*
@@ -935,7 +890,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         if(isTouchedUp()) {
             Gdx.input.vibrate(15);
             this.key_code = -1;
-            this.dbg("††† up ↑-↑-↑-" + upBtnRect.getX() + "," + upBtnRect.getWidth() + " " + upBtnRect.getY() + ","+(SCREEN_HEIGHT-upBtnRect.getHeight()) + " +" + upBtnRect.getHeight()  +  " key= " + this.key_code + " action= " + game_action + " after " + GAME_ACTION_UP + " " + touchPoint.x + " y " + touchPoint.y);
+            this.dbg("††† up ↑-↑-↑-" + upBtnRect.getX() + "," + upBtnRect.getWidth() + " " + upBtnRect.getY() + ","+(GDX_HEIGHT -upBtnRect.getHeight()) + " +" + upBtnRect.getHeight()  +  " key= " + this.key_code + " action= " + game_action + " after " + GAME_ACTION_UP + " " + touchPoint.x + " y " + touchPoint.y);
             this.game_action = GAME_ACTION_UP;
             return GAME_ACTION_UP;
         }
@@ -1004,19 +959,19 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         int speed_up_h = imgSpeedUp.getHeight();
         int speed_down_w = imgSpeedDown.getWidth();
 
-        batch.draw(fireBtnTexture, SCREEN_WIDTH-(50+fireBtnTexture.getWidth())*SCALE, (int)(50*SCALE), fireBtnTexture.getWidth()*SCALE, fireBtnTexture.getHeight()*SCALE);
-        batch.draw(imgKeyNum3, SCREEN_WIDTH-(50+ fire_w + fire_w/2 + imgKeyNum3.getWidth())*SCALE, (40 + speed_up_h)*SCALE, imgKeyNum3.getWidth()*SCALE, imgKeyNum3.getHeight()*SCALE);
+        batch.draw(fireBtnTexture, GDX_WIDTH -(50+fireBtnTexture.getWidth())* SCALE_1080, (int)(50* SCALE_1080), fireBtnTexture.getWidth()* SCALE_1080, fireBtnTexture.getHeight()* SCALE_1080);
+        batch.draw(imgKeyNum3, GDX_WIDTH -(50+ fire_w + fire_w/2 + imgKeyNum3.getWidth())* SCALE_1080, (40 + speed_up_h)* SCALE_1080, imgKeyNum3.getWidth()* SCALE_1080, imgKeyNum3.getHeight()* SCALE_1080);
 
-        batch.draw(touch_pad, 20*SCALE, 20*SCALE, touch_pad.getWidth()*SCALE, touch_pad.getHeight()*SCALE);
-        batch.draw(touch_pad_knob, (20+touch_pad.getWidth()/2-touch_pad_knob.getWidth()/2)*SCALE, (20+touch_pad.getHeight()/2-touch_pad_knob.getHeight()/2)*SCALE, touch_pad_knob.getWidth()*SCALE, touch_pad_knob.getHeight()*SCALE);
+        batch.draw(touch_pad, 20* SCALE_1080, 20* SCALE_1080, touch_pad.getWidth()* SCALE_1080, touch_pad.getHeight()* SCALE_1080);
+        batch.draw(touch_pad_knob, (20+touch_pad.getWidth()/2-touch_pad_knob.getWidth()/2)* SCALE_1080, (20+touch_pad.getHeight()/2-touch_pad_knob.getHeight()/2)* SCALE_1080, touch_pad_knob.getWidth()* SCALE_1080, touch_pad_knob.getHeight()* SCALE_1080);
 
-        batch.draw(imgSpeedUp, SCREEN_WIDTH-(50+fire_w  + fire_w/2 + speed_up_w)*SCALE, 20*SCALE, speed_up_w*SCALE, imgSpeedUp.getHeight()*SCALE);
-        batch.draw(imgSpeedDown, SCREEN_WIDTH-(50+fire_w + fire_w/2 + 2*speed_down_w)*SCALE, 20*SCALE, speed_down_w*SCALE, imgSpeedDown.getHeight()*SCALE);
+        batch.draw(imgSpeedUp, GDX_WIDTH -(50+fire_w  + fire_w/2 + speed_up_w)* SCALE_1080, 20* SCALE_1080, speed_up_w* SCALE_1080, imgSpeedUp.getHeight()* SCALE_1080);
+        batch.draw(imgSpeedDown, GDX_WIDTH -(50+fire_w + fire_w/2 + 2*speed_down_w)* SCALE_1080, 20* SCALE_1080, speed_down_w* SCALE_1080, imgSpeedDown.getHeight()* SCALE_1080);
 
-//        batch.draw(imgMenuLeft, SCREEN_WIDTH-(50+fire_w + fire_w/2)*SCALE, 20*SCALE + 100*SCALE +20, menu_left_w*SCALE, menu_left_h*SCALE);
-        batch.draw(imgMenuLeft, 20, (140 + menu_right_h)*SCALE +20, menu_left_w*SCALE, menu_left_h*SCALE);
-//        batch.draw(imgMenuRight, SCREEN_WIDTH-(50+fire_w + fire_w/2 + menu_left_w)*SCALE, 20*SCALE + 100*SCALE +20, menu_right_w*SCALE, menu_right_h*SCALE);
-        batch.draw(imgMenuRight, SCREEN_WIDTH-(50+fire_w + fire_w/2 + menu_left_w)*SCALE, (140 +menu_right_h)*SCALE +20, menu_right_w*SCALE, menu_right_h*SCALE);
+//        batch.draw(imgMenuLeft, GDX_WIDTH-(50+fire_w + fire_w/2)*SCALE_1080, 20*SCALE_1080 + 100*SCALE_1080 +20, menu_left_w*SCALE_1080, menu_left_h*SCALE_1080);
+        batch.draw(imgMenuLeft, 20, (140 + menu_right_h)* SCALE_1080 +20, menu_left_w* SCALE_1080, menu_left_h* SCALE_1080);
+//        batch.draw(imgMenuRight, GDX_WIDTH-(50+fire_w + fire_w/2 + menu_left_w)*SCALE_1080, 20*SCALE_1080 + 100*SCALE_1080 +20, menu_right_w*SCALE_1080, menu_right_h*SCALE_1080);
+        batch.draw(imgMenuRight, GDX_WIDTH -(50+fire_w + fire_w/2 + menu_left_w)* SCALE_1080, (140 +menu_right_h)* SCALE_1080 +20, menu_right_w* SCALE_1080, menu_right_h* SCALE_1080);
 
     }
 
@@ -1024,7 +979,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private void loadTextures() {
         fireBtnTexture = new Texture("data/gui/fire.png");
         // Yeah convert Imagick suck, 1kb 1080x1920 may be alpha shit make it black.
-        snowWhiteBg = new Texture("data/sprites/white_background.png");
+        snowWhiteBg = new Texture("data/sprites/white_background2.png");
 
         this.imgBacks = new Texture[4];
         for (int i = 0; i < 4; i++) {
@@ -1081,6 +1036,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         this.imgSl = new Texture("data/sprites/sl.png");
         this.imgPl = new Texture("data/sprites/play.png");
         this.imgCh = new Texture("data/sprites/check.png");
+        this.imgChSwap = new Texture("data/sprites/check.png");
         this.imgHeroIcon = new Texture("data/sprites/hero_icon.png"); // nickfarrow
 
         // 6
@@ -1113,7 +1069,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         this.imgPPang = new Texture("data/sprites/bbang0.png");
         this.imgPPang1 = new Texture("data/sprites/bbang1.png");
         this.imgH_ppang = new Texture("data/sprites/h_bbang.png");
-        this.imgCh = new Texture("data/sprites/check.png");
+        // this.imgCh = new Texture("data/sprites/check.png");
         this.imgAl = new Texture("data/sprites/al.png");
         this.imgEffect = new Texture[2];
         this.imgEffect[0] = new Texture("data/sprites/effect0.png");
@@ -1165,7 +1121,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
         // 3
         this.imgVill = new Texture("data/sprites/village.png");
-        this.imgCh = new Texture("data/sprites/check.png");
+        // this.imgCh = new Texture("data/sprites/check.png");
         this.imgSchool = new Texture("data/sprites/school.png");
         this.title = new Texture("data/sprites/title.png");
         this.txt1 = new Texture("data/sprites/txt1.png"); // TODO make original clean white text as orig. Scalled too blur.
@@ -1270,7 +1226,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     private void showDeviceInfos() {
         if (shitty == 0) {
             shitty++;
-            this.dbg("††† MOBI_SCL " + MOBI_SCL + " scr width " + SCREEN_WIDTH + " screen height " + SCREEN_HEIGHT);
+            this.dbg("††† MIDP_SCL " + MIDP_SCL + " scr width " + GDX_WIDTH + " screen height " + GDX_HEIGHT);
         }
     }
 
@@ -1350,6 +1306,24 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             Thread.sleep(time);
         }
         catch (Exception localException1) {}
+    }
+
+    private void initGamePad() {
+        // Use rectangle until figure out how to work with BoundingBox multi input.
+        this.upBtnRect = new Rectangle((20+(200/3))* SCALE_1080, (20+(400/3))* SCALE_1080, 132* SCALE_1080, 70* SCALE_1080 + 50); // + 150 Jan-2
+        this.downBtnRect = new Rectangle((20+(200/3))* SCALE_1080, 20* SCALE_1080, 72* SCALE_1080, 70* SCALE_1080);
+
+        this.leftBtnRect = new Rectangle(20* SCALE_1080, (20+(200/6))* SCALE_1080, 70* SCALE_1080, 140* SCALE_1080);
+        this.rightBtnRect = new Rectangle((20+(400/3))* SCALE_1080, (20+(200/6))* SCALE_1080, 2*70* SCALE_1080, 140* SCALE_1080);
+
+        this.optionBtnRect = new Rectangle(GDX_WIDTH /2+150* SCALE_1080, GDX_HEIGHT /8, GDX_WIDTH /2-180* SCALE_1080, 70* SCALE_1080);
+
+        this.speedUpBtnRect = new Rectangle(GDX_WIDTH -(275+200)* SCALE_1080, 20* SCALE_1080 + 0*100* SCALE_1080 + 20, 200* SCALE_1080, 100* SCALE_1080);
+        this.speedDownBtnRect = new Rectangle(GDX_WIDTH -(275+400)* SCALE_1080, 20* SCALE_1080 + 100* SCALE_1080 + 20, 200* SCALE_1080, 100* SCALE_1080);
+
+        this.leftMenuBtn = new Rectangle(10* SCALE_1080, 250* SCALE_1080, 200* SCALE_1080, 100* SCALE_1080);
+        // GDX_HEIGHT - (140 +menu_right_h)
+        this.rightMenuBtn = new Rectangle(GDX_WIDTH -(275+200)* SCALE_1080, 250* SCALE_1080, 200* SCALE_1080, 100* SCALE_1080);
     }
 
     // end Android GDX
@@ -1597,7 +1571,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         if (this.screen == 6) // RUNNING
         {
             // drawImage2(paramGraphics, this.snowWhiteBg, 0, 0, 20); // Use this require re-scale 1080 to fixed scale 1080/128
-            batch.draw(this.snowWhiteBg, 0, 0+BOTTOM_SPACE);
+            batch.draw(this.snowWhiteBg, 0, 0+BOTTOM_SPACE+400); // fixme scale
             drawImage2(paramGraphics, this.ui, 0, 109, 20);
             drawImage2(paramGraphics, this.imgBack, 0, 0, 20);
             // paramGraphics.setColor(16777215);
@@ -1907,6 +1881,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             // paramGraphics.setColor(0);
             drawRect(paramGraphics, 0, 19, 127, 90, 0);
             drawRect(paramGraphics, 0, 21, 127, 86, 0);
+            this.imgCh = this.imgChSwap; // nickfarrow fix
             drawImage2(paramGraphics, this.imgCh, 3, this.m_mode * 14 + 18, 20);
             drawString(paramGraphics, "Resume", 15, 28, 20, 0);
             drawString(paramGraphics, "MainMenu", 15, 42, 20, 0);
@@ -1925,8 +1900,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 // paramGraphics.setColor(255);
                 drawString(paramGraphics, "OFF", 93, 56, 20, 255);
             }
-            // paramGraphics.setColor(0); // 0 = black ? It's ok if on white bg;
-            // But there r something wrong if both menu selected sametime (highlighted)?
+            // paramGraphics.setColor(0); // 0 = black; [Items Mode] orig is black.
+            // TODO fix freeze on Instruction choosed.
             drawString(paramGraphics, "Instructions", 15, 70, 20, 0);
             drawString(paramGraphics, "Quit", 15, 84, 20, 0);
         }
@@ -2207,10 +2182,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             fillRect(paramGraphics, 0, 0, 128, 22, 25054);
             fillRect(paramGraphics, 0, 71, 128, 84, 25054);
 
-            // TODO make drawCenter() or draw(Position = TL, BR, Center, allign ...)
             drawImage2(batch, present, 64, 5, 0x10 | 0x1); // present.png // 83 x 11;
-            // orig sam_logo x:y 64:28 => seem 64 is center anchor x (128/2); HCENTER (horizontal);
-            drawImage2(batch, sam_logo, 64, 28, 0x10 | 0x1); // sam_logo.png // 96 x 33; 128 WIDTH
+            drawImage2(batch, sam_logo, 64, 28, 0x10 | 0x1); // sam_logo.png // 96 x 33; bg white so this width < 128 not matter.
             drawImage2(batch, http1, 7, 77, 20); // http1.png
             drawImage2(batch, http2, 7, 103, 20); // http2.png
         }
