@@ -471,11 +471,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         // TODO draw some debug bound rect: 128x160 scale rect, center point... for debug
         // some cordination of ie. select hight light Rect vs shop position which is right.
 
-        Rectangle bound = new Rectangle(0, BOTTOM_SPACE* SCALE_1080, GDX_WIDTH * SCALE_1080, GDX_HEIGHT * SCALE_1080);
+        Rectangle bound = new Rectangle(0, BOTTOM_SPACE, GDX_WIDTH, GDX_HEIGHT);
         Rectangle bound2 = new Rectangle(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 //        Rectangle center = new Rectangle(GDX_WIDTH/2*SCALE_1080-5, (GDX_HEIGHT-BOTTOM_SPACE)/2*SCALE_1080-5, 10, 10);
-        Rectangle vcenter_line = new Rectangle(GDX_WIDTH /2* SCALE_1080 -5, BOTTOM_SPACE* SCALE_1080, 10, GDX_HEIGHT * SCALE_1080);
-        Rectangle hcenter_line = new Rectangle(0, (GDX_HEIGHT +BOTTOM_SPACE)/2* SCALE_1080 -5, GDX_WIDTH * SCALE_1080, 10);
+        Rectangle vcenter_line = new Rectangle(GDX_WIDTH /2* SCALE_1080 -5, BOTTOM_SPACE, 10, GDX_HEIGHT-BOTTOM_SPACE - 15);
+        Rectangle hcenter_line = new Rectangle(0, (GDX_HEIGHT +BOTTOM_SPACE)/2 -5, GDX_WIDTH, 10);
 
         shapeRenderer.setColor(Color.CORAL);
 //        shapeRenderer.rect(bound.getX(), bound.getY(), bound.getWidth(), bound.getHeight());
@@ -493,11 +493,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         shapeRenderer.rect(hcenter_line.getX(), hcenter_line.getY(), hcenter_line.getWidth(), hcenter_line.getHeight());
         shapeRenderer.rect(hcenter_line.getX()+1, hcenter_line.getY()+1, hcenter_line.getWidth()-2, hcenter_line.getHeight()-2);
 
-        Rectangle top = new Rectangle(50, 0, GDX_WIDTH * SCALE_1080 -100, 10);
+        Rectangle top = new Rectangle(50, 0, GDX_WIDTH -100, 10);
         shapeRenderer.setColor(Color.LIME);
         shapeRenderer.rect(top.getX(), top.getY(), top.getWidth(), top.getHeight());
 
-        Rectangle bot = new Rectangle(50, (GDX_HEIGHT * SCALE_1080) - 10, GDX_WIDTH * SCALE_1080 -100, 10);
+        Rectangle bot = new Rectangle(50, (GDX_HEIGHT) - 10, GDX_WIDTH -100, 10); // SCALE_1080
         shapeRenderer.setColor(Color.CORAL);
         shapeRenderer.rect(bot.getX(), bot.getY(), bot.getWidth(), bot.getHeight());
 
@@ -757,8 +757,8 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             return;
         }
 
-        int img_height = (int)(image.getHeight());
-        int img_width = (int)(image.getWidth());
+        int img_height = (int)(image.getHeight() / 9 * MIDP_SCL); // img_128 scaled to x9; so it map to 1080 scale should be: img_height / 9 * 1080 / 128 = img_height / 9 * MIDP_SCL (~8.43)
+        int img_width = (int)(image.getWidth() / 9 * MIDP_SCL);
 
         int position_x = (int) (pos_x* MIDP_SCL);
         int position_y = (int) ((OLD_MOBI_H - pos_y)* MIDP_SCL - img_height + BOTTOM_SPACE); // Default TOP | LEFT
@@ -785,6 +785,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         // Draw Image with scale param, can anchor to 1080x1920 work without / with minimal change in geometry ?
         float scaleX = (float) (MIDP_SCL / SCALED_IMG_RATIO); // 1080 / 128 / 9
         float scaleY = (float) (MIDP_SCL / SCALED_IMG_RATIO);
+
+        if (pos_x == this.h_x) {
+            //this.dbg("aaa pos x y "+ position_x + " " + position_y);
+        }
         paramGraphics.draw(image, (int)(position_x), position_y, 0, 0, image.getWidth(), image.getHeight(), scaleX, scaleY, 0, 0, 0, (int)(image.getWidth()), (int)(image.getHeight()), false, false);
     }
 
@@ -811,7 +815,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     public void drawString(SpriteBatch paramGraphics, String paramString, int x, int y, int anchor, int color)
     {
-        if(paramString == null) { // FIXME
+        if(paramString == null) {
             return;
         }
 
@@ -819,11 +823,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         layout.setText(font, paramString);
         int stringWidth = (int) layout.width; // contains the width of the current set text
         int stringHeight = (int) layout.height;
-        // this.dbg("String width " + stringWidth);
 
-        // int position_x = (int) ( (x*MIDP_SCL) - stringWidth/2);
         int position_x = (int) (x * MIDP_SCL); // It seem x have already calculated.
-        int position_y = (int) ((OLD_MOBI_H -y)* MIDP_SCL + BOTTOM_SPACE);
+        int position_y = (int) ((OLD_MOBI_H -y)* MIDP_SCL + BOTTOM_SPACE) - stringHeight/2;
 
         switch(anchor) {
             case 20: // TOP | LEFT ; 0x10 | 0x4
@@ -835,7 +837,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             case 3:  // VCENTER | HCENTER
                 // stringWidth() alternative; oh may be this is why AA use image stack for custom text;
                 position_x = (int) (position_x - stringWidth/2); // MIDP: w/2 - x/2 (width/2), h/2 + y/2 (height/2);
-                position_y = (int) ( (OLD_MOBI_H - y)* MIDP_SCL - stringHeight/2 + BOTTOM_SPACE); // 8 as 1/2 line height
+                position_y = (int) ( (OLD_MOBI_H - y)* MIDP_SCL - stringHeight/2 + BOTTOM_SPACE); // not use -stringHeight/2 since it too hight above;
                 break;
             default:
                 break;
@@ -844,37 +846,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         Color colorGDX = this.getGDXtColor(color);
         font.setColor(colorGDX);
 
-        font.draw(paramGraphics, paramString, (int)position_x, position_y);
-    }
-
-    // paramInt3 seem anchor not color
-    public void drawString(SpriteBatch paramGraphics, String paramString, int x, int y, int anchor)
-    {
-        if(paramString == null) { // FIXME
-            return;
-        }
-
-        int stringLength = paramString.length() * 10; // fixme char width = 15px
-        int position_x = (int) ( (x * MIDP_SCL) - stringLength/2 );
-        int position_y = (int) ( (OLD_MOBI_H - y)* MIDP_SCL + BOTTOM_SPACE );
-
-        switch(anchor) {
-            case 20: // TOP | LEFT ; 0x10 | 0x4
-                break;
-            case 17:  // TOP | HCENTER ; 0x10 | 0x1; Remember horizontal center mean X/2 anchor;
-                position_x = (int) ( position_x - stringLength/2); // MIDP: w/2 - img_width/2; ~ OLD_MOBI_W*MIDP_SCL/2
-                break;
-            case 3:  // VCENTER | HCENTER
-                position_x = (int) (position_x - stringLength/2); // MIDP: w/2 - x/2 (width/2), h/2 + y/2 (height/2);
-                position_y = (int) ( (OLD_MOBI_H - y)* MIDP_SCL - 8 + BOTTOM_SPACE);
-                break;
-            default:
-                break;
-        }
-
-        font.setColor(Color.WHITE);
-
-        font.draw(paramGraphics, paramString, position_x, position_y); // SCALE_1080 ?
+        font.draw(paramGraphics, paramString, position_x * SCALE_1080, position_y * SCALE_1080);
     }
 
     /*
@@ -1114,9 +1086,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
         // 9
         this.imgSp = new Texture("data/sprites/sp" + this.special + ".png");
-        this.imgSps = new Texture[3];
-        for (i=0; i < 3; i++) {
-            this.imgSps[i] = new Texture("data/sprites/sp" + (i+1) + ".png");
+        this.imgSps = new Texture[4]; // 4 instead of 3 for index match; so sp0 and sp1 are same.
+        for (i=0; i < 4; i++) {
+            this.imgSps[i] = new Texture("data/sprites/sp" + i + ".png");
         }
 
         // 3
@@ -1155,17 +1127,15 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         this.sam_logo = new Texture("data/sprites/sam_logo.png");
         this.http1 = new Texture("data/sprites/http1.png");
         this.http2 = new Texture("data/sprites/http2.png");
-        this.allClear = new Texture("data/sprites/allClear2.jpg");
+        this.allClear = new Texture("data/sprites/allClear.jpg");
     }
 
     // Careful with new Texture => only reassign to loaded texture
     private void adjustTextures(int paramInt) { // nickfarrow -> for update/reload textures based on game state
         if (paramInt == -6) {
-
         }
         else if (paramInt == -2)
         {
-
         }
         else if (paramInt == 1)
         {}
@@ -1197,7 +1167,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
         else if (paramInt == 9)
         {
-            this.special = (this.special > 2) ? 2: this.special; // sp 1 2 3 but array index = 0 1 2
+            this.special = (this.special > 3) ? 3: this.special; // sp 1 2 3 but array index = 0 1 2
             this.imgSp = this.imgSps[this.special];
         }
         else if (paramInt == 31)  // SHOP_SCREEN = 31
@@ -1575,7 +1545,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             drawImage2(paramGraphics, this.ui, 0, 109, 20);
             drawImage2(paramGraphics, this.imgBack, 0, 0, 20);
             // paramGraphics.setColor(16777215);
-            // fillRect(paramGraphics, 0, 25, 128, 84, 16777215);
+            fillRect(paramGraphics, 0, 25, 128, 84, 16777215);
             drawImage2(paramGraphics, this.imgHero[this.h_idx], this.h_x * 5, 83, 0x10 | 0x1); // = 17 tho. Graphics.TOP | HCENTER
             if (this.ppang_time > 0)
             {
@@ -1818,6 +1788,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 // paramGraphics.setColor(15132390);
                 fillRect(paramGraphics, 17, 44, 6, 5, 15132390);
             }
+            this.dbg(" hx hy " + this.h_x + " " + this.h_y);
             drawImage2(paramGraphics, this.imgCh, this.h_x, this.h_y, 20);
             if (this.m_mode != -1)
             {
@@ -1855,7 +1826,9 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
         else if (this.screen == 31)
         {
+            drawImage2(paramGraphics, this.imgVill, 0, 0, 20);
             drawImage2(paramGraphics, this.imgShop, 24, 20, 20);
+            drawImage2(paramGraphics, this.imgSl, 68, 115, 20);
             // paramGraphics.setColor(16777062);
             // This double draw seem for bold; buy / exit select.
             drawRect(paramGraphics, 27, this.s_item * 13 + 30, 29, 10, 16777062);
@@ -2177,7 +2150,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         else if (this.screen == -2) // SamSung Funclub
         {
             // paramGraphics.setColor(16777215);
-            fillRect(paramGraphics, 0, 0, 128, 135, 16777215);
+            fillRect(paramGraphics, 0, 0, 128, 135, 16777215); // fix me it seem white color have alpha or smth make it black/blank.
             // paramGraphics.setColor(25054);
             fillRect(paramGraphics, 0, 0, 128, 22, 25054);
             fillRect(paramGraphics, 0, 71, 128, 84, 25054);
@@ -2261,7 +2234,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         else
         {
             // paramGraphics.setColor(6974058);
-            this.dbg(" del != -1 " + this.del );
             fillRect(paramGraphics, this.del * 12 + 37, 111*0, 8, 8, 6974058);
             this.del = -1;
         }
