@@ -19,9 +19,9 @@ android {
     defaultConfig {
         applicationId "com.littlewing.sbf.app"
         minSdkVersion 19
-        targetSdkVersion 26
-        versionCode 3
-        versionName "1.2a"
+        targetSdkVersion 28
+        versionCode 6
+        versionName "1.2b"
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -36,12 +36,14 @@ task copyAndroidNatives() {
     file("libs/armeabi/").mkdirs();
     file("libs/armeabi-v7a/").mkdirs();
     file("libs/x86/").mkdirs();
+    file("libs/x86_64/").mkdirs();
 
     configurations.natives.files.each { jar ->
         def outputDir = null
         if(jar.name.endsWith("natives-armeabi-v7a.jar")) outputDir = file("libs/armeabi-v7a")
         if(jar.name.endsWith("natives-armeabi.jar")) outputDir = file("libs/armeabi")
         if(jar.name.endsWith("natives-x86.jar")) outputDir = file("libs/x86")
+        if(jar.name.endsWith("natives-x86_64.jar")) outputDir = file("libs/x86_64")
         if(outputDir != null) {
             copy {
                 from zipTree(jar)
