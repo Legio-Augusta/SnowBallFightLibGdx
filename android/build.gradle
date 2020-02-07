@@ -20,7 +20,7 @@ android {
         applicationId "com.littlewing.sbf.app"
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 6
+        versionCode 9
         versionName "1.2b"
     }
     compileOptions {
@@ -36,6 +36,7 @@ task copyAndroidNatives() {
     file("libs/armeabi/").mkdirs();
     file("libs/armeabi-v7a/").mkdirs();
     file("libs/x86/").mkdirs();
+    file("libs/arm64-v8a/").mkdirs()
     file("libs/x86_64/").mkdirs();
 
     configurations.natives.files.each { jar ->
@@ -43,6 +44,7 @@ task copyAndroidNatives() {
         if(jar.name.endsWith("natives-armeabi-v7a.jar")) outputDir = file("libs/armeabi-v7a")
         if(jar.name.endsWith("natives-armeabi.jar")) outputDir = file("libs/armeabi")
         if(jar.name.endsWith("natives-x86.jar")) outputDir = file("libs/x86")
+        if (jar.name.endsWith("natives-arm64-v8a.jar")) outputDir = file("libs/arm64-v8a")
         if(jar.name.endsWith("natives-x86_64.jar")) outputDir = file("libs/x86_64")
         if(outputDir != null) {
             copy {
@@ -54,10 +56,6 @@ task copyAndroidNatives() {
     }
 }
 
-task run(type: Exec) {
-    def adb = "$System.env.ANDROID_HOME/platform-tools/adb"
-    commandLine "$adb", 'shell', 'am', 'start', '-n', 'de.swagner.paxbritannica.android/AndroidLauncher'
-}
 
 // sets up the Android Idea project, using the old Ant based build.
 idea {
