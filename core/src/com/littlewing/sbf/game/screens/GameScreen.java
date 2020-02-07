@@ -234,9 +234,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     private static int BOTTOM_SPACE = (int)(GDX_HEIGHT /8); // May be change for fit touch button
 
-    Rectangle upBtnRect, downBtnRect, leftBtnRect, rightBtnRect, optionBtnRect, speedUpBtnRect, speedDownBtnRect;
-    Rectangle leftMenuBtn, rightMenuBtn;
-
     private int game_action = DUMP_ACTION_STATE;
 
     // Careful with key_code, it's different from Mobile brands, manufacturers
@@ -279,7 +276,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     private Texture imgMenuLeft;
     private Texture imgMenuRight;
-    // downBtnRect, leftBtnRect, optionBtnRect, speedUpBtnRect, leftMenuBtn
 
     BitmapFont font;
     GlyphLayout layout;
@@ -361,7 +357,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         game_action = getGameAction(pointer); // pointer
 
         if(isTouchedSpeedUp()) { // smaller value, shorter sleep
-            this.dbg(" touch up ↓↑ ↓ " + this.game_speed);
+            // this.dbg(" touch up ↓↑ ↓ " + this.game_speed);
             if(game_speed >= 12) {
                 Gdx.input.vibrate(5);
                 game_speed -= 3; // Base on shitty redmi note 7
@@ -369,7 +365,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             setGameSpeed(game_speed);
         }
         if(isTouchedSpeedDown()) {
-            this.dbg(" touch up down ↓↑ ↓ " + this.game_speed);
             if(game_speed <= 128) {
                 Gdx.input.vibrate(5);
                 game_speed += 3;
@@ -413,93 +408,24 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
 
     @Override
     public void render(float delta) {
-        // Gdx.gl20.glClearColor(0, 0, 0, 1);
         // Gdx.gl20.glClearColor(255f/255f, 255f/255f, 255f/255f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        camera.position.x = GDX_WIDTH /2;
-        camera.position.y = GDX_HEIGHT /2;
-        camera.update();
+//        camera.position.x = GDX_WIDTH /2;
+//        camera.position.y = GDX_HEIGHT /2;
+//        camera.update();
 
         batch.enableBlending();
         batch.begin();
 
         run();
-
         this.playOpeningMusic();
-
-        // drawTouchPad();
         drawUI();
+
         batch.end();
 
-        int lineWidth = 24;
-        Color debug = new Color();
+        // Shape render seem use y-down system coordination; -- Y-DOWN ↓-↓-↓-↓ ↓-↓-↓-↓ --
         shapeRenderer.begin(ShapeType.Line); // Filled
-        shapeRenderer.setColor(Color.BLUE);
-
-        shapeRenderer.setColor(Color.BLACK);
-        shapeRenderer.rect(upBtnRect.getX(), upBtnRect.getY(), upBtnRect.getWidth(), upBtnRect.getHeight());
-        shapeRenderer.setColor(Color.GRAY);
-        shapeRenderer.rect(downBtnRect.getX(), downBtnRect.getY(), downBtnRect.getWidth(), downBtnRect.getHeight());
-
-//        shapeRenderer.setColor(Color.RED);
-//        shapeRenderer.rect(leftBtnRect.getX(), leftBtnRect.getY(), leftBtnRect.getWidth(), leftBtnRect.getHeight());
-//        shapeRenderer.setColor(Color.ORANGE);
-//        shapeRenderer.rect(rightBtnRect.getX(), rightBtnRect.getY(), rightBtnRect.getWidth(), rightBtnRect.getHeight());
-
-
-//        Rectangle okBound2    = new Rectangle(GDX_WIDTH-(50+fireBtnTexture.getWidth())*SCALE_1080,                                     (int)(50*SCALE_1080), fireBtnTexture.getWidth()*SCALE_1080, fireBtnTexture.getHeight()*SCALE_1080);
-//        shapeRenderer.setColor(Color.VIOLET);
-//        shapeRenderer.rect(okBound2.getX(), okBound2.getY(), okBound2.getWidth(), okBound2.getHeight());
-
-        // DKGRAY, LTGRAY, MAGENTA, GREEN, YELLOW
-        int fire_w = fireBtnTexture.getWidth();
-        int speed_up_h = imgSpeedUp.getHeight();
-
-//        Rectangle testNum32 = new Rectangle(GDX_WIDTH-(50+ fire_w + fire_w/2 + imgKeyNum3.getWidth())*SCALE_1080, (40 + speed_up_h)*SCALE_1080, imgKeyNum3.getWidth()*SCALE_1080, imgKeyNum3.getHeight()*SCALE_1080);
-//        shapeRenderer.setColor(Color.YELLOW);
-//        shapeRenderer.rect(testNum32.getX(), testNum32.getY(), testNum32.getWidth(), testNum32.getHeight());
-//        shapeRenderer.rect(testNum32.getX()-1, testNum32.getY()-1, testNum32.getWidth()+2, testNum32.getHeight()+2);
-
-        shapeRenderer.setColor(Color.MAGENTA);
-        shapeRenderer.rect(speedUpBtnRect.getX(), speedUpBtnRect.getY(), speedUpBtnRect.getWidth(), speedUpBtnRect.getHeight());
-        shapeRenderer.rect(speedDownBtnRect.getX(), speedDownBtnRect.getY(), speedDownBtnRect.getWidth(), speedDownBtnRect.getHeight());
-
-//        shapeRenderer.setColor(Color.GREEN);
-//        shapeRenderer.rect(leftMenuBtn.getX(), leftMenuBtn.getY(), leftMenuBtn.getWidth(), leftMenuBtn.getHeight());
-//        shapeRenderer.rect(rightMenuBtn.getX(), rightMenuBtn.getY(), rightMenuBtn.getWidth(), rightMenuBtn.getHeight());
-
-        // TODO draw some debug bound rect: 128x160 scale rect, center point... for debug
-        // some cordination of ie. select hight light Rect vs shop position which is right.
-
-        Rectangle bound = new Rectangle(0, BOTTOM_SPACE, GDX_WIDTH, GDX_HEIGHT);
-        Rectangle bound2 = new Rectangle(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-//        Rectangle center = new Rectangle(GDX_WIDTH/2*SCALE_1080-5, (GDX_HEIGHT-BOTTOM_SPACE)/2*SCALE_1080-5, 10, 10);
-        Rectangle vcenter_line = new Rectangle(GDX_WIDTH /2* SCALE_1080 -5, BOTTOM_SPACE, 10, GDX_HEIGHT-BOTTOM_SPACE - 15);
-        Rectangle hcenter_line = new Rectangle(0, (GDX_HEIGHT +BOTTOM_SPACE)/2 -5, GDX_WIDTH, 10);
-
-        shapeRenderer.setColor(Color.CORAL);
-//        shapeRenderer.rect(bound.getX(), bound.getY(), bound.getWidth(), bound.getHeight());
-//        shapeRenderer.rect(bound.getX()+1, bound.getY()+1, bound.getWidth()-2, bound.getHeight()-2);
-
-        shapeRenderer.setColor(Color.PINK);
-        shapeRenderer.rect(bound2.getX(), bound2.getY(), bound2.getWidth(), bound2.getHeight());
-        shapeRenderer.rect(bound2.getX()+1, bound2.getY()+1, bound2.getWidth()-2, bound2.getHeight()-2);
-
-        shapeRenderer.setColor(Color.FOREST);
-        shapeRenderer.rect(vcenter_line.getX(), vcenter_line.getY(), vcenter_line.getWidth(), vcenter_line.getHeight());
-        shapeRenderer.rect(vcenter_line.getX()+1, vcenter_line.getY()+1, vcenter_line.getWidth()-2, vcenter_line.getHeight()-2);
-
-        shapeRenderer.setColor(Color.SALMON);
-        shapeRenderer.rect(hcenter_line.getX(), hcenter_line.getY(), hcenter_line.getWidth(), hcenter_line.getHeight());
-        shapeRenderer.rect(hcenter_line.getX()+1, hcenter_line.getY()+1, hcenter_line.getWidth()-2, hcenter_line.getHeight()-2);
-
-        Rectangle top = new Rectangle(50, 0, GDX_WIDTH -100, 10);
-        shapeRenderer.setColor(Color.LIME);
-        shapeRenderer.rect(top.getX(), top.getY(), top.getWidth(), top.getHeight());
-
-        Rectangle bot = new Rectangle(50, (GDX_HEIGHT) - 10, GDX_WIDTH -100, 10); // SCALE_1080
-        shapeRenderer.setColor(Color.CORAL);
-        shapeRenderer.rect(bot.getX(), bot.getY(), bot.getWidth(), bot.getHeight());
+        this.drawDebugLineAndRectangle();
 
         shapeRenderer.end();
     }
@@ -521,25 +447,25 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     public void create () {
         batch = new SpriteBatch();
 
-        //Create camera
         camera = new OrthographicCamera();
         camera.setToOrtho(false, GDX_WIDTH, GDX_HEIGHT);
 //        int VP_WIDTH = 1080;
 //        int VP_HEIGHT = 1920;
-        // This seem take no effect on 16:9 (
-        // ViewPort make effect; (show custom bound) on ie. 1080 x 2160 screen.
-//        viewport = new FitViewport(GDX_WIDTH, GDX_WIDTH, camera); // TODO investigate is this shit make effect ?
+        // This seem take no effect on 16:9; With other ie. 1080 x 2160 screen it bound scaled to fit.
+        // TODO investigate use this base rectangle to fit game on custom screen ratio (ie. not 16:9)
+//        viewport = new FitViewport(GDX_WIDTH, GDX_WIDTH, camera);
 //        viewport.apply();
 
 //        camera.position.x = GDX_WIDTH /2;
 //        camera.position.y = GDX_WIDTH /2;
-//        camera.position.set(camera.viewportWidth/2,camera.viewportHeight/2,0);
+//        camera.position.set(camera.viewportWidth/2, camera.viewportHeight/2, 0);
         camera.update();
 
         Gdx.input.setInputProcessor(this); // TODO use an InputProcessor object
 
-        this.loadTextures();
-        this.initGamePad();
+        this.loadTextures(); // Init texture, gamepad ...
+        this.initGamePadButtonSize(); // Only after game pad texture have initialized;
+        this.initGamePadRect();
 
         font = new BitmapFont();
         font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
@@ -549,16 +475,17 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     }
 
     public void resize(int width, int height) {
-//        viewport.update(width,height);
-//        camera.position.set(camera.viewportWidth/2,camera.viewportHeight/2,0);
+//        viewport.update(width, height);
+//        camera.position.set(camera.viewportWidth/2, camera.viewportHeight/2, 0);
 
-        // Gdx.gl20.glClearColor(0, 180f/255f, 221f/255f, 1); // Samsung blue orig.
+//        Gdx.gl20.glClearColor(0, 180f/255f, 221f/255f, 1); // Samsung blue orig.
 //        Gdx.gl20.glClearColor(109f/255f, 207f/255f, 246f/255f, 1); // SKY
-        // Gdx.gl20.glClearColor(255f/255f, 255f/255f, 255f/255f, 1); // WHITE
-//        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+//        Gdx.gl20.glClearColor(255f/255f, 255f/255f, 255f/255f, 1); // WHITE
+        Gdx.gl20.glClearColor(233f/255f, 244f/255f, 244f/255f, 1); // WHITE
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     }
 
-    // Oh damn notch, bottom space
+    // Careful with notch, bottom space; TODO more smooth/rounded edge on button for less mistake touch.
     protected boolean isTouchedUp() {
         this.key_code = -1;
         return OverlapTester.pointInRectangle(upBtnRect, touchPoint.x, (GDX_HEIGHT -touchPoint.y) );
@@ -575,18 +502,15 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         this.key_code = -4;
         return OverlapTester.pointInRectangle(rightBtnRect, touchPoint.x, (GDX_HEIGHT -touchPoint.y) );
     }
-    protected boolean isTouchedOption() {
-        return OverlapTester.pointInRectangle(optionBtnRect, touchPoint.x, (GDX_HEIGHT -touchPoint.y) );
-    }
+
     protected boolean isTouchedOK() {
         this.key_code = KEY_OK;
-        Rectangle textureBounds = new Rectangle(GDX_WIDTH -(fireBtnTexture.getWidth()+50)* SCALE_1080, GDX_HEIGHT -(50+fireBtnTexture.getHeight())* SCALE_1080, fireBtnTexture.getWidth()* SCALE_1080,fireBtnTexture.getHeight()* SCALE_1080);
+        Rectangle textureBounds = new Rectangle(GDX_WIDTH - fire_w-WIDTH_GAP, GDX_HEIGHT - fire_h-WIDTH_GAP, fire_w, fire_h);
         return textureBounds.contains(touchPoint.x, touchPoint.y);
     }
 
     protected boolean isTouchedNum3() {
-        Rectangle textureBounds=new Rectangle(GDX_WIDTH -(fireBtnTexture.getWidth()+50+imgKeyNum3.getWidth()+(int)fireBtnTexture.getWidth()/2)* SCALE_1080, GDX_HEIGHT -(40+imgSpeedUp.getHeight()+imgKeyNum3.getHeight())* SCALE_1080, imgKeyNum3.getWidth()* SCALE_1080,imgKeyNum3.getHeight()* SCALE_1080);
-        return textureBounds.contains(touchPoint.x, touchPoint.y);
+        return OverlapTester.pointInRectangle(optionBtnRect, touchPoint.x, GDX_HEIGHT -touchPoint.y);
     }
     protected boolean isTouchedMenuLeft() {
         // Gdx.app.log("DEBUG Clip", "x: " + leftMenuBtn.x + " y " + leftMenuBtn.y + " w " + leftMenuBtn.getWidth() + " h " + leftMenuBtn.getHeight());
@@ -604,6 +528,156 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     }
     protected boolean isTouchedSpeedDown() {
         return OverlapTester.pointInRectangle(speedDownBtnRect, touchPoint.x, (GDX_HEIGHT -touchPoint.y) );
+    }
+
+    Rectangle upBtnRect, downBtnRect, leftBtnRect, rightBtnRect, optionBtnRect, speedUpBtnRect, speedDownBtnRect, leftMenuBtn, rightMenuBtn;
+    private int fire_w, fire_h;
+    private int menu_left_w, menu_left_h;
+    private int menu_right_w, menu_right_h;
+
+    private int speed_up_w, speed_up_h;
+    private int speed_down_w, speed_down_h;
+    private int key3_w, key3_h;
+
+    private int GPAnchorY;
+    private int BOTTOM_GAP; // 50 height
+    private int WIDTH_GAP;  // 50
+    private int SMALL_GAP;  // 30 width gap
+    private int BUTTON_H;   // based on image 200x100 png
+
+    private void initGamePadButtonSize() {
+        fire_w       = (int) (fireBtnTexture.getWidth() * SCALE_1080);
+        fire_h       = (int) (fireBtnTexture.getHeight() * SCALE_1080);
+        menu_left_w  = (int) (imgMenuLeft.getWidth() * SCALE_1080);
+        menu_left_h  = (int) (imgMenuLeft.getHeight() * SCALE_1080);
+        menu_right_w = (int) (imgMenuRight.getWidth() * SCALE_1080);
+        menu_right_h = (int) (imgMenuRight.getHeight() * SCALE_1080);
+
+        speed_up_w   = (int) (imgSpeedUp.getWidth() * SCALE_1080);
+        speed_up_h   = (int) (imgSpeedUp.getHeight() * SCALE_1080);
+        speed_down_w = (int) (imgSpeedDown.getWidth() * SCALE_1080);
+        speed_down_h = (int) (imgSpeedDown.getHeight() * SCALE_1080);
+        key3_w       = (int) (imgKeyNum3.getWidth() * SCALE_1080);
+        key3_h       = (int) (imgKeyNum3.getHeight() * SCALE_1080);
+
+        GPAnchorY  = (int) (450 *SCALE_1080); // gamePadAnchorY
+        BOTTOM_GAP = (int) (50  *SCALE_1080);
+        WIDTH_GAP  = (int) (50  *SCALE_1080);
+        SMALL_GAP  = (int) (30  *SCALE_1080);
+        BUTTON_H   = (int) (100 *SCALE_1080);
+    }
+
+    // For debug button position, touch area to button etc.
+    private void drawDebugLineAndRectangle() {
+        shapeRenderer.setColor(Color.BLUE);
+        shapeRenderer.rect(leftMenuBtn.getX(), leftMenuBtn.getY(), leftMenuBtn.getWidth(), leftMenuBtn.getHeight());
+        shapeRenderer.rect(leftMenuBtn.getX()+5, leftMenuBtn.getY()+5, leftMenuBtn.getWidth()-10, leftMenuBtn.getHeight()-10);
+        shapeRenderer.rect(rightMenuBtn.getX(), rightMenuBtn.getY(), rightMenuBtn.getWidth(), rightMenuBtn.getHeight());
+        shapeRenderer.rect(rightMenuBtn.getX()+5, rightMenuBtn.getY()+5, rightMenuBtn.getWidth()-10, rightMenuBtn.getHeight()-10);
+
+        shapeRenderer.setColor(Color.BLUE);
+        shapeRenderer.rect(upBtnRect.getX(), upBtnRect.getY(), upBtnRect.getWidth(), upBtnRect.getHeight());
+        shapeRenderer.rect(upBtnRect.getX()+5, upBtnRect.getY()+5, upBtnRect.getWidth()-10, upBtnRect.getHeight()-10);
+        shapeRenderer.setColor(Color.DARK_GRAY); // FIREBRICK
+        shapeRenderer.rect(downBtnRect.getX(), downBtnRect.getY(), downBtnRect.getWidth(), downBtnRect.getHeight());
+        shapeRenderer.rect(downBtnRect.getX()+5, downBtnRect.getY()+5, downBtnRect.getWidth()-10, downBtnRect.getHeight()-10);
+
+        shapeRenderer.rect(rightBtnRect.getX(), rightBtnRect.getY(), rightBtnRect.getWidth(), rightBtnRect.getHeight());
+        shapeRenderer.rect(rightBtnRect.getX()+5, rightBtnRect.getY()+5, rightBtnRect.getWidth()-10, rightBtnRect.getHeight()-10);
+        shapeRenderer.rect(leftBtnRect.getX(), leftBtnRect.getY(), leftBtnRect.getWidth(), leftBtnRect.getHeight());
+        shapeRenderer.rect(leftBtnRect.getX()+5, leftBtnRect.getY()+5, leftBtnRect.getWidth()-10, leftBtnRect.getHeight()-10);
+
+        shapeRenderer.setColor(Color.YELLOW);
+        shapeRenderer.rect(optionBtnRect.getX(), optionBtnRect.getY(), optionBtnRect.getWidth(), optionBtnRect.getHeight());
+        shapeRenderer.rect(optionBtnRect.getX()+5, optionBtnRect.getY()+5, optionBtnRect.getWidth()-10, optionBtnRect.getHeight()-10);
+
+        shapeRenderer.setColor(Color.BLACK);
+        shapeRenderer.rect(speedUpBtnRect.getX(), speedUpBtnRect.getY(), speedUpBtnRect.getWidth(), speedUpBtnRect.getHeight());
+        shapeRenderer.rect(speedUpBtnRect.getX()+5, speedUpBtnRect.getY()+5, speedUpBtnRect.getWidth()-10, speedUpBtnRect.getHeight()-10);
+
+        shapeRenderer.rect(speedDownBtnRect.getX(), speedDownBtnRect.getY(), speedDownBtnRect.getWidth(), speedDownBtnRect.getHeight());
+        shapeRenderer.rect(speedDownBtnRect.getX()+5, speedDownBtnRect.getY()+5, speedDownBtnRect.getWidth()-10, speedDownBtnRect.getHeight()-10);
+
+
+        ///  Debug bound  ///
+        /*
+        Rectangle bound = new Rectangle(0, BOTTOM_SPACE, GDX_WIDTH, GDX_HEIGHT);
+        Rectangle bound2 = new Rectangle(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+        Rectangle vcenter_line = new Rectangle(GDX_WIDTH /2* SCALE_1080 -5, BOTTOM_SPACE, 10, GDX_HEIGHT-BOTTOM_SPACE - 15);
+        Rectangle hcenter_line = new Rectangle(0, (GDX_HEIGHT +BOTTOM_SPACE)/2 -5, GDX_WIDTH, 10);
+
+        shapeRenderer.setColor(Color.CORAL);
+        shapeRenderer.rect(bound2.getX(), bound2.getY(), bound2.getWidth(), bound2.getHeight());
+        shapeRenderer.rect(bound2.getX()+5, bound2.getY()+5, bound2.getWidth()-10, bound2.getHeight()-10);
+
+        shapeRenderer.setColor(Color.FOREST);
+        shapeRenderer.rect(vcenter_line.getX(), vcenter_line.getY(), vcenter_line.getWidth(), vcenter_line.getHeight());
+        shapeRenderer.rect(vcenter_line.getX()+1, vcenter_line.getY()+1, vcenter_line.getWidth()-10, vcenter_line.getHeight()-10);
+
+        shapeRenderer.setColor(Color.SALMON);
+        shapeRenderer.rect(hcenter_line.getX(), hcenter_line.getY(), hcenter_line.getWidth(), hcenter_line.getHeight());
+        shapeRenderer.rect(hcenter_line.getX()+5, hcenter_line.getY()+5, hcenter_line.getWidth()-10, hcenter_line.getHeight()-10);
+
+        Rectangle top = new Rectangle(50, 0, GDX_WIDTH -100, 10);
+        shapeRenderer.setColor(Color.LIME);
+        shapeRenderer.rect(top.getX(), top.getY(), top.getWidth(), top.getHeight());
+
+        Rectangle bot = new Rectangle(50, (GDX_HEIGHT) - 10, GDX_WIDTH -100, 10); // SCALE_1080
+        shapeRenderer.setColor(Color.CORAL);
+        shapeRenderer.rect(bot.getX(), bot.getY(), bot.getWidth(), bot.getHeight());
+        */
+    }
+
+    // Bottom = GDX_H / 8; Screen (old) = 128x160 but 32px height is not used, so we have more 32px * scale ~ 270px on 1920 screen;
+    // Total on 1920 we have 240 + 270px; Use (0, 500) as anchor for Gamepad;
+    // GDX draw y-up system; so texture/img seem to be BOTTOM | LEFT anchor relative with image rectangle;
+    // Button image are based on 200x100 and 200x200 for gamePad (up down left right);
+    protected void drawUI() {
+        // Anchor to bottom of 128x128(160) with some gap;
+        batch.draw(imgMenuLeft, SMALL_GAP, GPAnchorY - menu_left_h, menu_left_w, menu_left_h);
+        batch.draw(imgMenuRight, GDX_WIDTH - menu_right_w - SMALL_GAP, GPAnchorY - menu_left_h, menu_right_w, menu_right_h);
+
+        // TODO use custom IMAGE addEventListener for more UI refine. Can image used as Texture ?
+        batch.draw(fireBtnTexture, GDX_WIDTH - WIDTH_GAP-fire_w, BOTTOM_GAP, fire_w, fire_h);
+        batch.draw(imgKeyNum3, GDX_WIDTH/2 - key3_w/2, GPAnchorY/2, key3_w, key3_h);
+
+        batch.draw(touch_pad, WIDTH_GAP, BOTTOM_GAP, touch_pad.getWidth()* SCALE_1080, touch_pad.getHeight()* SCALE_1080);
+        batch.draw(touch_pad_knob, WIDTH_GAP + (touch_pad.getWidth()/2-touch_pad_knob.getWidth()/2)*SCALE_1080, BOTTOM_GAP + (touch_pad.getHeight()/2-touch_pad_knob.getHeight()/2)*SCALE_1080, touch_pad_knob.getWidth()* SCALE_1080, touch_pad_knob.getHeight()* SCALE_1080);
+
+        batch.draw(imgSpeedUp,   GDX_WIDTH/2, BUTTON_H/2+BOTTOM_GAP, speed_up_w, speed_up_h);
+        batch.draw(imgSpeedDown, GDX_WIDTH/2 -speed_down_w, BUTTON_H/2+BOTTOM_GAP, speed_down_w, speed_down_h);
+    }
+
+    // y-up/down coordination careful; TOP | LEFT; when draw
+    private void initGamePadRect() {
+        // Use rectangle until figure out how to work with BoundingBox multi input.
+        // Control pad; TODO make rounded rect or circle for more smooth 4 button pad, avoid mistake touch.
+        int touchpad_w = (int) (touch_pad.getWidth()* SCALE_1080);
+        int touchpad_h = (int) (touch_pad.getHeight()* SCALE_1080);
+        int touchBtn_w = (int) (48 * SCALE_1080); // Fixed in image png; 50-2 for reduce conflict/mistake button touch;
+        int touchBtn_h = (int) (90 * SCALE_1080); // Fixed in image png;
+        int touchUpDown_w = (int) (82 * SCALE_1080); // Fixed in image png;
+        int touchUpDown_h = (int) (48 * SCALE_1080); // Fixed in image png;
+
+        // * or key left
+        this.leftMenuBtn = new Rectangle(SMALL_GAP, GPAnchorY - menu_left_h, menu_left_w, menu_left_h);
+        // # or key right
+        this.rightMenuBtn = new Rectangle(GDX_WIDTH - menu_right_w - SMALL_GAP, GPAnchorY - menu_left_h, menu_right_w, menu_right_h);
+
+        // gap for easier touch inside;
+        this.upBtnRect    = new Rectangle(WIDTH_GAP + touchBtn_w +10, BOTTOM_GAP + touchpad_h-touchUpDown_h, touchUpDown_w, touchBtn_h);
+        this.downBtnRect  = new Rectangle(WIDTH_GAP + touchBtn_w +10, 10, touchUpDown_w, BOTTOM_GAP + touchUpDown_h -10);
+
+        // Anchor with downBtn height, y
+        this.leftBtnRect  = new Rectangle(20, BOTTOM_GAP + touchUpDown_h +10, touchBtn_w*3/2, touchBtn_h);
+        // Anchor relative with touchpad Krob
+        this.rightBtnRect = new Rectangle(WIDTH_GAP + touchpad_w -touchBtn_w, BOTTOM_GAP + touchUpDown_h +10, touchBtn_w*3/2, touchBtn_h);
+
+        // use special or key num3
+        this.optionBtnRect    = new Rectangle(GDX_WIDTH/2 - key3_w/2, GPAnchorY/2, key3_w, key3_h);
+        this.speedUpBtnRect   = new Rectangle(GDX_WIDTH/2, BUTTON_H/2+BOTTOM_GAP, speed_up_w, speed_up_h);
+        this.speedDownBtnRect = new Rectangle(GDX_WIDTH/2 -speed_down_w, BUTTON_H/2+BOTTOM_GAP, speed_down_w, speed_down_h);
     }
 
     protected Preferences getPrefs() {
@@ -746,10 +820,11 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         paramGraphics.draw(imgColor[color], pos_x, pos_y, 0, 0, imgColor[5].getWidth(), imgColor[5].getHeight(), scaleX, scaleY, 0, 0, 0, (int)(imgColor[5].getWidth()*scaleX), (int)(imgColor[5].getHeight()*scaleY), false, false);
     }
 
-    // anchor 20 may be TOP|LEFT = 16+4 ? = 0x11 | 0x4
-    // Graphics.HCENTER: 1 Graphics.VCENTER: 2; LEFT: 4; RIGHT: 8; TOP: 16; BOTTOM: 32; BASELINE: 64; SOLID: 0; DOTTED: 1 dupli ?
+    // anchor 20 ~ TOP|LEFT = 16+4 ? = 0x11 | 0x4
+    // Graphics.HCENTER: 1 Graphics.VCENTER: 2; LEFT: 4; RIGHT: 8; TOP: 16; BOTTOM: 32; BASELINE: 64; SOLID: 0; DOTTED: 1
     // http://www.it.uc3m.es/florina/docencia/j2me/midp/docs/api/javax/microedition/lcdui/Graphics.html#VCENTER
     // https://docs.oracle.com/javame/config/cldc/ref-impl/midp2.0/jsr118/javax/microedition/lcdui/Graphics.html#BASELINE
+    // GDX (or OpenGL ?) use y-up system; MIDP and Droid use y-down;
     public void drawImage2(SpriteBatch paramGraphics, Texture image, int pos_x, int pos_y, int anchor)
     {
         if (image == null) {
@@ -761,6 +836,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         int img_width = (int)(image.getWidth() / 9 * MIDP_SCL);
 
         int position_x = (int) (pos_x* MIDP_SCL);
+        // pos y swapped to y-up system; draw it for understand. y_new.max = 160 * SCL + BOT; y_new.min = BOT (GDX_H/8);
         int position_y = (int) ((OLD_MOBI_H - pos_y)* MIDP_SCL - img_height + BOTTOM_SPACE); // Default TOP | LEFT
 
         switch(anchor) {
@@ -780,15 +856,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 break;
         }
 
-        // batch.draw(image, (int)(pos_x*MIDP_SCL), position_y, image.getWidth()*SCALE_1080, image.getHeight()*SCALE_1080); // draw no scale
-
-        // Draw Image with scale param, can anchor to 1080x1920 work without / with minimal change in geometry ?
+        // Draw Image with scale fix resulted by original png scaled to x9 and midp 128->GDX_Width
         float scaleX = (float) (MIDP_SCL / SCALED_IMG_RATIO); // 1080 / 128 / 9
         float scaleY = (float) (MIDP_SCL / SCALED_IMG_RATIO);
 
-        if (pos_x == this.h_x) {
-            //this.dbg("aaa pos x y "+ position_x + " " + position_y);
-        }
         paramGraphics.draw(image, (int)(position_x), position_y, 0, 0, image.getWidth(), image.getHeight(), scaleX, scaleY, 0, 0, 0, (int)(image.getWidth()), (int)(image.getHeight()), false, false);
     }
 
@@ -832,12 +903,12 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 break;
             case 17:  // TOP | HCENTER ; 0x10 | 0x1; Remember horizontal center mean X/2 anchor;
                 position_x = (int) ( (x * MIDP_SCL) - stringWidth/2); // HCENTER mean in the middle of horizontal line;
-                // position_y = (int) ( (OLD_MOBI_H - y)*MIDP_SCL - stringHeight/2 + BOTTOM_SPACE); // 8 as 1/2 line height
+                // position_y = (int) ( (OLD_MOBI_H - y)*MIDP_SCL - stringHeight/2 + BOTTOM_SPACE);
                 break;
             case 3:  // VCENTER | HCENTER
                 // stringWidth() alternative; oh may be this is why AA use image stack for custom text;
                 position_x = (int) (position_x - stringWidth/2); // MIDP: w/2 - x/2 (width/2), h/2 + y/2 (height/2);
-                position_y = (int) ( (OLD_MOBI_H - y)* MIDP_SCL - stringHeight/2 + BOTTOM_SPACE); // not use -stringHeight/2 since it too hight above;
+                position_y = (int) ( (OLD_MOBI_H - y)* MIDP_SCL - stringHeight/2 + BOTTOM_SPACE);
                 break;
             default:
                 break;
@@ -846,7 +917,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         Color colorGDX = this.getGDXtColor(color);
         font.setColor(colorGDX);
 
-        font.draw(paramGraphics, paramString, position_x * SCALE_1080, position_y * SCALE_1080);
+        font.draw(paramGraphics, paramString, position_x, position_y);
     }
 
     /*
@@ -860,91 +931,55 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
     // TODO messed with key press stack ? or cache/release mechanism.
     public int getGameAction(int pointer) { // int pointer
         if(isTouchedUp()) {
-            Gdx.input.vibrate(15);
+            Gdx.input.vibrate(5);
             this.key_code = -1;
-            this.dbg("††† up ↑-↑-↑-" + upBtnRect.getX() + "," + upBtnRect.getWidth() + " " + upBtnRect.getY() + ","+(GDX_HEIGHT -upBtnRect.getHeight()) + " +" + upBtnRect.getHeight()  +  " key= " + this.key_code + " action= " + game_action + " after " + GAME_ACTION_UP + " " + touchPoint.x + " y " + touchPoint.y);
+            // up ↑-↑-↑-↑
             this.game_action = GAME_ACTION_UP;
             return GAME_ACTION_UP;
         }
         if(isTouchedDown()) { // Careful with game state, ie. item_mode = 0
-            Gdx.input.vibrate(15);
+            Gdx.input.vibrate(5); // TODO fix xiaomi not work
             this.key_code = -2;
-            this.dbg("††† down ↓-↓-↓-↓" + touchPoint.x + " y " + touchPoint.y);
+            // this.dbg("††† down ↓-↓-↓-↓" + touchPoint.x + " y " + touchPoint.y);
             this.game_action = GAME_ACTION_DOWN;
             return GAME_ACTION_DOWN;
         }
         if(isTouchedLeft() && Gdx.input.isTouched()) {
-            Gdx.input.vibrate(15);
+            Gdx.input.vibrate(5);
             this.key_code = -3;
-            this.dbg("††† << ---"  + touchPoint.x + " y " + touchPoint.y);
+            // this.dbg("††† << ---"  + touchPoint.x + " y " + touchPoint.y);
             this.game_action = GAME_ACTION_LEFT;
             return GAME_ACTION_LEFT;
         }
         if(isTouchedRight()) {
             this.key_code = -4;
-            Gdx.input.vibrate(15);
-            this.dbg("††† >> ---" + touchPoint.x + " y " + touchPoint.y);
+            Gdx.input.vibrate(5);
+            // this.dbg("††† >> ---" + touchPoint.x + " y " + touchPoint.y);
             this.game_action = GAME_ACTION_RIGHT;
             return GAME_ACTION_RIGHT;
         }
         if (isTouchedMenuLeft()) {
             this.key_code = KEY_LEFT_MENU;
-            Gdx.input.vibrate(15);
-            this.dbg("††† Menu L ---" + touchPoint.x + " y " + touchPoint.y);
+            Gdx.input.vibrate(5);
             this.game_action = 0;
             return 0;
         }
-        // TODO show or represent SELECT #; OPTIONS # for user
         if (isTouchedMenuRight()) {
             this.key_code = KEY_RIGHT_MENU;
-            Gdx.input.vibrate(15);
-            this.dbg("††† Menu R ---" + touchPoint.x + " y " + touchPoint.y);
+            Gdx.input.vibrate(5);
             this.game_action = 0;
             return 0;
         }
 
         if(isTouchedOK()) {
             this.key_code = KEY_OK; // -5
-            Gdx.input.vibrate(15);
-            // this.dbg("††† OK ---" + touchPoint.x + " y " + touchPoint.y);
+            Gdx.input.vibrate(5);
             this.game_action = GAME_ACTION_OK;
             return GAME_ACTION_OK;
         }
 
         this.game_action = DUMP_ACTION_STATE;
         return DUMP_ACTION_STATE; // 0
-    }
-
-    // FIXME anchor with RECTANGLE
-    protected void drawUI() {
-        // It seem single image can have it's own event Listener such as: touchDown/Up; See bellow
-        // https://github.com/BrentAureli/ControllerDemo/blob/master/core/src/com/brentaureli/overlaydemo/Controller.java
-        // TODO use custom IMAGE addEventListener for more UI refine. Can image used as Texture ?
-        int fire_w = fireBtnTexture.getWidth();
-        int fire_h = fireBtnTexture.getHeight();
-        int menu_left_w = imgMenuLeft.getWidth();
-        int menu_left_h = imgMenuLeft.getHeight();
-        int menu_right_w = imgMenuRight.getWidth();
-        int menu_right_h = imgMenuRight.getHeight();
-
-        int speed_up_w = imgSpeedUp.getWidth();
-        int speed_up_h = imgSpeedUp.getHeight();
-        int speed_down_w = imgSpeedDown.getWidth();
-
-        batch.draw(fireBtnTexture, GDX_WIDTH -(50+fireBtnTexture.getWidth())* SCALE_1080, (int)(50* SCALE_1080), fireBtnTexture.getWidth()* SCALE_1080, fireBtnTexture.getHeight()* SCALE_1080);
-        batch.draw(imgKeyNum3, GDX_WIDTH -(50+ fire_w + fire_w/2 + imgKeyNum3.getWidth())* SCALE_1080, (40 + speed_up_h)* SCALE_1080, imgKeyNum3.getWidth()* SCALE_1080, imgKeyNum3.getHeight()* SCALE_1080);
-
-        batch.draw(touch_pad, 20* SCALE_1080, 20* SCALE_1080, touch_pad.getWidth()* SCALE_1080, touch_pad.getHeight()* SCALE_1080);
-        batch.draw(touch_pad_knob, (20+touch_pad.getWidth()/2-touch_pad_knob.getWidth()/2)* SCALE_1080, (20+touch_pad.getHeight()/2-touch_pad_knob.getHeight()/2)* SCALE_1080, touch_pad_knob.getWidth()* SCALE_1080, touch_pad_knob.getHeight()* SCALE_1080);
-
-        batch.draw(imgSpeedUp, GDX_WIDTH -(50+fire_w  + fire_w/2 + speed_up_w)* SCALE_1080, 20* SCALE_1080, speed_up_w* SCALE_1080, imgSpeedUp.getHeight()* SCALE_1080);
-        batch.draw(imgSpeedDown, GDX_WIDTH -(50+fire_w + fire_w/2 + 2*speed_down_w)* SCALE_1080, 20* SCALE_1080, speed_down_w* SCALE_1080, imgSpeedDown.getHeight()* SCALE_1080);
-
-//        batch.draw(imgMenuLeft, GDX_WIDTH-(50+fire_w + fire_w/2)*SCALE_1080, 20*SCALE_1080 + 100*SCALE_1080 +20, menu_left_w*SCALE_1080, menu_left_h*SCALE_1080);
-        batch.draw(imgMenuLeft, 20, (140 + menu_right_h)* SCALE_1080 +20, menu_left_w* SCALE_1080, menu_left_h* SCALE_1080);
-//        batch.draw(imgMenuRight, GDX_WIDTH-(50+fire_w + fire_w/2 + menu_left_w)*SCALE_1080, 20*SCALE_1080 + 100*SCALE_1080 +20, menu_right_w*SCALE_1080, menu_right_h*SCALE_1080);
-        batch.draw(imgMenuRight, GDX_WIDTH -(50+fire_w + fire_w/2 + menu_left_w)* SCALE_1080, (140 +menu_right_h)* SCALE_1080 +20, menu_right_w* SCALE_1080, menu_right_h* SCALE_1080);
-
     }
 
     // TODO use texture region; Optimize reuse stuff, object;
@@ -995,7 +1030,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         imgSpeedUp = new Texture("data/gui/speed_up.png");
         imgSpeedDown = new Texture("data/gui/speed_down.png");
         touch_pad = new Texture("data/gui/touchBackground.png");
-        touch_pad_knob = new Texture("data/gui/touchKnob.png");
+        touch_pad_knob = new Texture("data/gui/touchKnob_sm.png"); // TODO make gamepad moving as other common game.
 
         imgMenuLeft = new Texture("data/gui/left_btn.png");
         imgMenuRight = new Texture("data/gui/right_btn.png");
@@ -1276,24 +1311,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
             Thread.sleep(time);
         }
         catch (Exception localException1) {}
-    }
-
-    private void initGamePad() {
-        // Use rectangle until figure out how to work with BoundingBox multi input.
-        this.upBtnRect = new Rectangle((20+(200/3))* SCALE_1080, (20+(400/3))* SCALE_1080, 132* SCALE_1080, 70* SCALE_1080 + 50); // + 150 Jan-2
-        this.downBtnRect = new Rectangle((20+(200/3))* SCALE_1080, 20* SCALE_1080, 72* SCALE_1080, 70* SCALE_1080);
-
-        this.leftBtnRect = new Rectangle(20* SCALE_1080, (20+(200/6))* SCALE_1080, 70* SCALE_1080, 140* SCALE_1080);
-        this.rightBtnRect = new Rectangle((20+(400/3))* SCALE_1080, (20+(200/6))* SCALE_1080, 2*70* SCALE_1080, 140* SCALE_1080);
-
-        this.optionBtnRect = new Rectangle(GDX_WIDTH /2+150* SCALE_1080, GDX_HEIGHT /8, GDX_WIDTH /2-180* SCALE_1080, 70* SCALE_1080);
-
-        this.speedUpBtnRect = new Rectangle(GDX_WIDTH -(275+200)* SCALE_1080, 20* SCALE_1080 + 0*100* SCALE_1080 + 20, 200* SCALE_1080, 100* SCALE_1080);
-        this.speedDownBtnRect = new Rectangle(GDX_WIDTH -(275+400)* SCALE_1080, 20* SCALE_1080 + 100* SCALE_1080 + 20, 200* SCALE_1080, 100* SCALE_1080);
-
-        this.leftMenuBtn = new Rectangle(10* SCALE_1080, 250* SCALE_1080, 200* SCALE_1080, 100* SCALE_1080);
-        // GDX_HEIGHT - (140 +menu_right_h)
-        this.rightMenuBtn = new Rectangle(GDX_WIDTH -(275+200)* SCALE_1080, 250* SCALE_1080, 200* SCALE_1080, 100* SCALE_1080);
     }
 
     // end Android GDX
@@ -1788,7 +1805,6 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
                 // paramGraphics.setColor(15132390);
                 fillRect(paramGraphics, 17, 44, 6, 5, 15132390);
             }
-            this.dbg(" hx hy " + this.h_x + " " + this.h_y);
             drawImage2(paramGraphics, this.imgCh, this.h_x, this.h_y, 20);
             if (this.m_mode != -1)
             {
@@ -4107,7 +4123,7 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         }
         else if (this.screen == -5) // MANUAL
         {
-            // this.screen = 100;
+            this.screen = 100;
             repaint();
         }
         else if (this.screen == -88)  // NEW_GAME_MENU_SCREEN
