@@ -396,7 +396,10 @@ public class GameScreen extends DefaultScreen implements InputProcessor {
         return false;
     }
 
-    @Override
+    public boolean scrolled(float amountX, float amountY) {
+        return false;
+    }
+
     public boolean scrolled(int amount) {
         return false;
     }
